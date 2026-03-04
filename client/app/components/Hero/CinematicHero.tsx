@@ -59,7 +59,7 @@ export function CinematicHero({ onSlideChange }: { onSlideChange?: (color: strin
     const currentItem = HERO_ITEMS[currentIndex];
 
     return (
-        <div className="relative w-[100vw] ml-[calc(-50vw+50%)] h-[85vh] md:h-[90vh] overflow-hidden mb-8 group bg-dark-1000 -mt-32 pt-32">
+        <div className="relative w-[100vw] ml-[calc(-50vw+50%)] h-[85vh] md:h-[90vh] overflow-hidden mb-8 group bg-dark-1000">
             {/* Background Image with Transition */}
             {HERO_ITEMS.map((item, index) => (
                 <div
@@ -79,7 +79,7 @@ export function CinematicHero({ onSlideChange }: { onSlideChange?: (color: strin
             ))}
 
             {/* Content Container - Centered to max-width so it aligns with page content while background is edge-to-edge */}
-            <div className="absolute inset-0 w-full max-w-[1920px] mx-auto pointer-events-none pt-32">
+            <div className="absolute inset-0 w-full max-w-[1920px] mx-auto pointer-events-none">
                 <div className="absolute bottom-12 md:bottom-24 left-4 md:left-8 p-0 w-full max-w-3xl z-10 flex flex-col items-start gap-5 pointer-events-auto pl-4 lg:pl-0 xl:ml-8">
                     <div className="flex items-center gap-3 animate-fade-in">
                         {/* Nexus: Glass pill overlays */}
