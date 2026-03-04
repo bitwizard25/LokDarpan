@@ -47,11 +47,28 @@ export function Header({ user }: HeaderProps) {
                 className={`w-full max-w-7xl transition-all duration-500 pointer-events-auto rounded-full border border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)] bg-black/40 backdrop-blur-lg px-4 py-3 md:px-6`}
             >
                 <div className="flex items-center justify-between gap-4">
-                    {/* Brand Logo - Subtle Minimalist Text (Matching Reference Image) */}
+                    {/* Brand Logo - Flat Luminous SVG */}
                     <Link to="/" className="flex items-center group shrink-0 transition-opacity">
-                        <span className="text-[10px] md:text-xs font-display font-medium tracking-[0.2em] text-white/50 group-hover:text-white/80 transition-colors uppercase">
-                            Lokdarpan
-                        </span>
+                        <div className="flex items-center gap-1 select-none">
+                            {/* LOK */}
+                            <span className="text-white font-extrabold tracking-[0.2em] text-sm md:text-xl font-sans group-hover:text-white/80 transition-colors">
+                                LOK
+                            </span>
+
+                            {/* The 'D' with the Play Button inside */}
+                            <div className="relative flex items-center justify-center">
+                                <span className="text-white font-extrabold tracking-[0.2em] text-sm md:text-xl font-sans group-hover:text-white/80 transition-colors">
+                                    D
+                                </span>
+                                {/* Tiny Play Triangle cutting out of the D */}
+                                <div className="absolute left-[30%] w-0 h-0 border-t-[3px] md:border-t-[4px] border-t-transparent border-l-[4px] md:border-l-[6px] border-l-[#0A0A0B] border-b-[3px] md:border-b-[4px] border-b-transparent"></div>
+                            </div>
+
+                            {/* ARPAN */}
+                            <span className="text-white font-extrabold tracking-[0.2em] text-sm md:text-xl font-sans group-hover:text-white/80 transition-colors">
+                                ARPAN
+                            </span>
+                        </div>
                     </Link>
 
                     {/* Floating Search Bar */}

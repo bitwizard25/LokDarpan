@@ -91,11 +91,29 @@ export default function Signup() {
             <div className="spotlight-bg" />
 
             <div className="w-full max-w-md z-10 px-4 animate-fade-in">
+                {/* Brand Header - Flat Luminous SVG */}
                 <div className="text-center mb-8">
                     <Link to="/" className="inline-flex items-center justify-center group transition-opacity">
-                        <span className="text-xl font-display font-medium tracking-[0.2em] text-white/50 group-hover:text-white/80 transition-colors uppercase">
-                            Lokdarpan
-                        </span>
+                        <div className="flex items-center gap-1 select-none">
+                            {/* LOK */}
+                            <span className="text-white font-extrabold tracking-[0.2em] text-xl font-sans group-hover:text-white/80 transition-colors">
+                                LOK
+                            </span>
+
+                            {/* The 'D' with the Play Button inside */}
+                            <div className="relative flex items-center justify-center">
+                                <span className="text-white font-extrabold tracking-[0.2em] text-xl font-sans group-hover:text-white/80 transition-colors">
+                                    D
+                                </span>
+                                {/* Tiny Play Triangle cutting out of the D */}
+                                <div className="absolute left-[30%] w-0 h-0 border-t-[4px] border-t-transparent border-l-[6px] border-l-[#0A0A0B] border-b-[4px] border-b-transparent"></div>
+                            </div>
+
+                            {/* ARPAN */}
+                            <span className="text-white font-extrabold tracking-[0.2em] text-xl font-sans group-hover:text-white/80 transition-colors">
+                                ARPAN
+                            </span>
+                        </div>
                     </Link>
                 </div>
 

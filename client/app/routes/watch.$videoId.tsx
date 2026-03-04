@@ -10,6 +10,7 @@ export default function WatchExperience() {
     const [isAIOpen, setIsAIOpen] = useState(false);
     const [isTheaterMode, setIsTheaterMode] = useState(false);
     const videoRef = useRef<HTMLVideoElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     // Fade out controls after 2.5s of inactivity
@@ -40,6 +41,17 @@ export default function WatchExperience() {
         }
     };
 
+    const handleFullscreen = () => {
+        if (!containerRef.current) return;
+        if (!document.fullscreenElement) {
+            containerRef.current.requestFullscreen().catch(err => {
+                console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+            });
+        } else {
+            document.exitFullscreen();
+        }
+    };
+
     return (
         <div className="min-h-screen bg-dark-950 w-full relative overflow-x-hidden pt-16 md:pt-24 pb-20">
             {/* Ambient Background for Cinematic Glow */}
@@ -55,10 +67,13 @@ export default function WatchExperience() {
                 `}
             >
                 {/* 1. The Video Container (The "Floating Canvas") */}
-                <div className={`w-full aspect-video relative transition-all duration-700 bg-black flex shadow-[0_20px_60px_-15px_rgba(0,0,0,0.8)] mx-auto
+                <div
+                    ref={containerRef}
+                    className={`w-full aspect-video relative transition-all duration-700 bg-black flex mx-auto
                     ${isTheaterMode
-                        ? 'rounded-[3rem] overflow-hidden shadow-[0_0_100px_rgba(59,130,246,0.3)] ring-1 ring-white/10'
-                        : 'rounded-none md:rounded-3xl overflow-hidden ring-1 ring-white/5'}
+                            ? 'rounded-[3rem] overflow-hidden shadow-[0_0_100px_rgba(59,130,246,0.3)] ring-1 ring-white/10'
+                            : document.fullscreenElement ? 'rounded-none' : 'rounded-none md:rounded-3xl overflow-hidden ring-1 ring-white/5 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.8)]'
+                        }
                 `}>
 
                     {/* Actual Video Element */}
@@ -77,7 +92,7 @@ export default function WatchExperience() {
 
                     {/* Top Controls */}
                     <div className={`absolute top-0 left-0 right-0 p-4 md:p-8 flex justify-between items-start transition-all duration-300 ease-out z-20 ${controlsVisible || isAIOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-4 relative z-10 w-24">
                             <Link
                                 to="/"
                                 className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/10 hover:scale-105 active:scale-95 transition-all shadow-glow-sm"
@@ -88,7 +103,31 @@ export default function WatchExperience() {
                             </Link>
                         </div>
 
-                        <div className="flex items-center gap-4">
+                        {/* Center Logo - Flat Luminous SVG */}
+                        <div className="absolute inset-x-0 top-0 pt-6 md:pt-10 flex justify-center pointer-events-none z-0">
+                            <Link to="/" className="flex items-center gap-1 select-none pointer-events-auto group transition-opacity">
+                                {/* LOK */}
+                                <span className="text-white font-extrabold tracking-[0.2em] text-sm md:text-lg font-sans drop-shadow-md group-hover:text-white/80 transition-colors">
+                                    LOK
+                                </span>
+
+                                {/* The 'D' with the Play Button inside */}
+                                <div className="relative flex items-center justify-center drop-shadow-md">
+                                    <span className="text-white font-extrabold tracking-[0.2em] text-sm md:text-lg font-sans group-hover:text-white/80 transition-colors">
+                                        D
+                                    </span>
+                                    {/* Tiny Play Triangle cutting out of the D */}
+                                    <div className="absolute left-[30%] w-0 h-0 border-t-[3px] border-t-transparent border-l-[4px] border-l-[#0A0A0B] border-b-[3px] border-b-transparent"></div>
+                                </div>
+
+                                {/* ARPAN */}
+                                <span className="text-white font-extrabold tracking-[0.2em] text-sm md:text-lg font-sans drop-shadow-md group-hover:text-white/80 transition-colors">
+                                    ARPAN
+                                </span>
+                            </Link>
+                        </div>
+
+                        <div className="flex items-center gap-4 relative z-10 w-24 justify-end">
                             {!isTheaterMode && (
                                 <button
                                     onClick={() => setIsTheaterMode(true)}
@@ -135,7 +174,7 @@ export default function WatchExperience() {
                                 </svg>
                             </button>
 
-                            <button className="text-white/80 hover:text-white transition-colors outline-none shrink-0 hover:scale-110 active:scale-90">
+                            <button onClick={handleFullscreen} className="text-white/80 hover:text-white transition-colors outline-none shrink-0 hover:scale-110 active:scale-90">
                                 <svg className="w-5 h-5 md:w-6 md:h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" /></svg>
                             </button>
                         </div>
