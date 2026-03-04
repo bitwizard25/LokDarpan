@@ -79,8 +79,8 @@ export function CinematicHero({ onSlideChange }: { onSlideChange?: (color: strin
             ))}
 
             {/* Content Container - Centered to max-width so it aligns with page content while background is edge-to-edge */}
-            <div className="absolute inset-0 w-full max-w-[1920px] mx-auto pointer-events-none">
-                <div className="absolute bottom-16 md:bottom-32 left-4 md:left-8 p-0 w-full max-w-3xl z-10 flex flex-col items-start gap-5 pointer-events-auto pl-4 lg:pl-0 xl:ml-8">
+            <div className="absolute inset-0 w-full max-w-[1920px] mx-auto pointer-events-none pt-32">
+                <div className="absolute bottom-12 md:bottom-24 left-4 md:left-8 p-0 w-full max-w-3xl z-10 flex flex-col items-start gap-5 pointer-events-auto pl-4 lg:pl-0 xl:ml-8">
                     <div className="flex items-center gap-3 animate-fade-in">
                         {/* Nexus: Glass pill overlays */}
                         <div className="px-4 py-1.5 bg-dark-900/40 backdrop-blur-md text-white text-xs font-bold uppercase tracking-wider rounded-full border border-white/20 shadow-minimal">
