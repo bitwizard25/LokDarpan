@@ -3,12 +3,12 @@ import { useParams, Link } from "@remix-run/react";
 import { ChameleonCanvas } from "~/components/UI/ChameleonCanvas";
 import { AIPanel } from "~/components/AIAssistant/AIPanel";
 import { TheaterLobby } from "~/components/TheaterLobby/TheaterLobby";
+import { useAppStore } from "~/store/useAppStore";
 
 export default function WatchExperience() {
     const { videoId } = useParams();
     const [controlsVisible, setControlsVisible] = useState(true);
-    const [isAIOpen, setIsAIOpen] = useState(false);
-    const [isTheaterMode, setIsTheaterMode] = useState(false);
+    const { isAIOpen, setAIOpen: setIsAIOpen, isTheaterMode, setTheaterMode: setIsTheaterMode } = useAppStore();
     const videoRef = useRef<HTMLVideoElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -235,15 +235,12 @@ export default function WatchExperience() {
                 </div>
             </div>
 
-            {/* 4. The Agentic AI "Deep Dive" Sidebar */}
+            {/* AI Assistant Side Panel */}
             <AIPanel
                 isOpen={isAIOpen}
                 onClose={() => setIsAIOpen(false)}
                 onSeek={handleAISeek}
             />
-
-            {/* Theater Lobby Overlay */}
-            {isTheaterMode && <TheaterLobby onClose={() => setIsTheaterMode(false)} />}
         </div>
     );
 }

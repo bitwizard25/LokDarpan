@@ -1,6 +1,7 @@
 import { Link, Form, useSubmit } from "@remix-run/react";
 import { useState, useEffect } from "react";
 import { TheaterLobby } from "~/components/TheaterLobby/TheaterLobby";
+import { useAppStore } from "~/store/useAppStore";
 
 interface HeaderProps {
     user?: {
@@ -12,7 +13,7 @@ interface HeaderProps {
 export function Header({ user }: HeaderProps) {
     const [scrolled, setScrolled] = useState(false);
     const [searchFocused, setSearchFocused] = useState(false);
-    const [showTheater, setShowTheater] = useState(false);
+    const { isTheaterMode, setTheaterMode } = useAppStore();
     const [lastScrollY, setLastScrollY] = useState(0);
     const [isHidden, setIsHidden] = useState(false);
 
@@ -121,7 +122,7 @@ export function Header({ user }: HeaderProps) {
                             {/* Ambient Pulse Glow Behind Button */}
                             <div className="absolute inset-0 bg-primary-500/20 blur-md rounded-full animate-pulse group-hover:bg-primary-500/40 transition-colors duration-500"></div>
                             <button
-                                onClick={() => setShowTheater(true)}
+                                onClick={() => setTheaterMode(true)}
                                 className="relative w-10 h-10 md:w-auto md:px-4 md:py-2 rounded-full border border-primary-500/30 hover:border-primary-500/80 bg-primary-500/20 flex items-center justify-center gap-2 text-primary-400 hover:text-white transition-all active:scale-95"
                             >
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -149,7 +150,7 @@ export function Header({ user }: HeaderProps) {
                     </div>
                 </div>
             </div>
-            {showTheater && <TheaterLobby onClose={() => setShowTheater(false)} />}
+            {isTheaterMode && <TheaterLobby onClose={() => setTheaterMode(false)} />}
         </header>
     );
 }
