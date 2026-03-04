@@ -3,6 +3,7 @@ import { useParams, Link } from "@remix-run/react";
 import { ChameleonCanvas } from "~/components/UI/ChameleonCanvas";
 import { AIPanel } from "~/components/AIAssistant/AIPanel";
 import { AvatarStack } from "~/components/TheaterLobby/AvatarStack";
+import { SemanticScrubber } from "~/components/VideoPlayer/SemanticScrubber";
 import { useAppStore } from "~/store/useAppStore";
 
 export default function WatchExperience() {
@@ -153,16 +154,7 @@ export default function WatchExperience() {
                             <svg className="w-8 h-8 md:w-10 md:h-10 fill-current drop-shadow-md" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
                         </button>
 
-                        <div className="flex items-center gap-3 w-full flex-1">
-                            <span className="text-white/90 text-[10px] md:text-xs font-bold font-mono tracking-wider tabular-nums shrink-0">04:20</span>
-                            {/* Glass Timeline */}
-                            <div className="w-full relative h-1.5 md:h-2 rounded-full bg-white/10 backdrop-blur-sm cursor-pointer group/timeline flex flex-1 items-center">
-                                <div className="absolute left-0 h-full w-1/3 bg-primary-500 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.5)] transition-all">
-                                    <div className="absolute right-0 top-1/2 -mt-2 -mr-2 w-4 h-4 bg-white rounded-full shadow-minimal opacity-0 group-hover/timeline:opacity-100 transition-opacity transform scale-0 group-hover/timeline:scale-100" />
-                                </div>
-                            </div>
-                            <span className="text-white/50 text-[10px] md:text-xs font-bold font-mono tracking-wider tabular-nums shrink-0">12:00</span>
-                        </div>
+                        <SemanticScrubber videoRef={videoRef} />
 
                         <div className="flex items-center gap-3 shrink-0">
                             {/* AI Trigger (Sparkle) */}

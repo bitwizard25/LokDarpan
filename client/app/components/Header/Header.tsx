@@ -1,4 +1,4 @@
-import { Link, Form, useSubmit } from "@remix-run/react";
+import { Link, Form, useSubmit, useLocation } from "@remix-run/react";
 import { useState, useEffect } from "react";
 import { TheaterLobby } from "~/components/TheaterLobby/TheaterLobby";
 import { useAppStore } from "~/store/useAppStore";
@@ -16,6 +16,8 @@ export function Header({ user }: HeaderProps) {
     const { isTheaterMode, setTheaterMode, isTheaterLobbyOpen, setTheaterLobbyOpen } = useAppStore();
     const [lastScrollY, setLastScrollY] = useState(0);
     const [isHidden, setIsHidden] = useState(false);
+    const location = useLocation();
+    const isWatchPage = location.pathname.startsWith('/watch');
 
     useEffect(() => {
         const handleScroll = () => {
@@ -117,23 +119,25 @@ export function Header({ user }: HeaderProps) {
                             </svg>
                         </button>
 
-                        {/* Theater Mode */}
-                        <div className="relative group">
-                            {/* Ambient Pulse Glow Behind Button */}
-                            <div className="absolute inset-0 bg-primary-500/20 blur-md rounded-full animate-pulse group-hover:bg-primary-500/40 transition-colors duration-500"></div>
-                            <button
-                                onClick={() => {
-                                    setTheaterMode(true);
-                                    setTheaterLobbyOpen(true);
-                                }}
-                                className="relative w-10 h-10 md:w-auto md:px-4 md:py-2 rounded-full border border-primary-500/30 hover:border-primary-500/80 bg-primary-500/20 flex items-center justify-center gap-2 text-primary-400 hover:text-white transition-all active:scale-95"
-                            >
-                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                </svg>
-                                <span className="hidden md:inline font-bold text-sm tracking-wide drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]">Theater</span>
-                            </button>
-                        </div>
+                        {/* Theater Mode - Only on Watch Pages */}
+                        {isWatchPage && (
+                            <div className="relative group">
+                                {/* Ambient Pulse Glow Behind Button */}
+                                <div className="absolute inset-0 bg-primary-500/20 blur-md rounded-full animate-pulse group-hover:bg-primary-500/40 transition-colors duration-500"></div>
+                                <button
+                                    onClick={() => {
+                                        setTheaterMode(true);
+                                        setTheaterLobbyOpen(true);
+                                    }}
+                                    className="relative w-10 h-10 md:w-auto md:px-4 md:py-2 rounded-full border border-primary-500/30 hover:border-primary-500/80 bg-primary-500/20 flex items-center justify-center gap-2 text-primary-400 hover:text-white transition-all active:scale-95"
+                                >
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                    </svg>
+                                    <span className="hidden md:inline font-bold text-sm tracking-wide drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]">Theater</span>
+                                </button>
+                            </div>
+                        )}
 
                         {/* User Profile */}
                         {user ? (
@@ -153,10 +157,10 @@ export function Header({ user }: HeaderProps) {
                     </div>
                 </div>
             </div>
-            {isTheaterLobbyOpen && <TheaterLobby
+            {isWatchPage && isTheaterLobbyOpen && <TheaterLobby
                 onClose={() => {
                     setTheaterLobbyOpen(false);
-                    if (!isTheaterMode) setTheaterMode(false); // If they didn't officially join, cancel
+                    if (!isTheaterMode) setTheaterMode(false);
                 }}
                 onEnter={() => setTheaterLobbyOpen(false)}
             />}
