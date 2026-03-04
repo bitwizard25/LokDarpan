@@ -41,23 +41,25 @@ export default function WatchExperience() {
     };
 
     return (
-        <div className="relative w-full h-screen bg-black overflow-hidden select-none">
-            {/* Ambient Background for Theater transition */}
-            <ChameleonCanvas ambientColor="rgba(59, 130, 246, 0.1)" intensity={isTheaterMode ? 'low' : 'medium'} />
+        <div className="min-h-screen bg-dark-950 w-full relative overflow-x-hidden pt-16 md:pt-24 pb-20">
+            {/* Ambient Background for Cinematic Glow */}
+            <div className={`absolute inset-0 h-[80vh] pointer-events-none transition-opacity duration-1000 ${isTheaterMode ? 'opacity-30' : 'opacity-100'}`}>
+                <ChameleonCanvas ambientColor="rgba(59, 130, 246, 0.15)" intensity={isTheaterMode ? 'low' : 'high'} />
+            </div>
 
             {/* Immersive Video Player Container. Adapts to AI panel and Theater Mode */}
             <div
-                className={`absolute inset-0 flex items-center justify-center transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] z-10 ${isTheaterMode
-                        ? 'p-12 md:p-24 scale-[0.85] origin-top'
-                        : isAIOpen
-                            ? 'p-0 md:py-6 md:pl-6 md:pr-[424px]' // 400px panel + 24px padding = 424px
-                            : 'p-0 md:p-6'
-                    }`}
+                className={`relative w-full transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] z-10 mx-auto
+                    ${isAIOpen ? 'md:w-[70%] md:mr-auto md:ml-4 lg:ml-8' : 'max-w-7xl'}
+                    ${isTheaterMode ? 'scale-[0.85] origin-top' : 'md:px-6 lg:px-8'}
+                `}
             >
-                <div className={`w-full h-full relative transition-all duration-700 bg-dark-950 flex shadow-2xl ${isTheaterMode
+                {/* 1. The Video Container (The "Floating Canvas") */}
+                <div className={`w-full aspect-video relative transition-all duration-700 bg-black flex shadow-[0_20px_60px_-15px_rgba(0,0,0,0.8)] mx-auto
+                    ${isTheaterMode
                         ? 'rounded-[3rem] overflow-hidden shadow-[0_0_100px_rgba(59,130,246,0.3)] ring-1 ring-white/10'
-                        : 'rounded-none md:rounded-3xl overflow-hidden ring-1 ring-white/5'
-                    }`}>
+                        : 'rounded-none md:rounded-3xl overflow-hidden ring-1 ring-white/5'}
+                `}>
 
                     {/* Actual Video Element */}
                     <video
@@ -70,90 +72,138 @@ export default function WatchExperience() {
                         muted
                     />
 
-                    {/* Gradient Overlay for the top only (to make back button legible) */}
+                    {/* Gradient Overlay for the top only (to make header legible) */}
                     <div className={`absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-black/80 to-transparent transition-opacity duration-300 pointer-events-none ${controlsVisible || isAIOpen ? 'opacity-100' : 'opacity-0'}`} />
 
                     {/* Top Controls */}
-                    <div className={`absolute top-0 left-0 right-0 p-6 md:p-8 flex justify-between items-start transition-all duration-300 ease-out ${controlsVisible || isAIOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
+                    <div className={`absolute top-0 left-0 right-0 p-4 md:p-8 flex justify-between items-start transition-all duration-300 ease-out z-20 ${controlsVisible || isAIOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
                         <div className="flex items-center gap-4">
                             <Link
                                 to="/"
-                                className="w-12 h-12 rounded-full glass-panel flex items-center justify-center text-white hover:bg-white/10 hover:scale-105 active:scale-95 transition-all shadow-glow-sm"
+                                className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/10 hover:scale-105 active:scale-95 transition-all shadow-glow-sm"
                             >
-                                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+                                <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" />
                                 </svg>
                             </Link>
-                            <div className="hidden md:block">
-                                <h1 className="text-xl font-bold text-white drop-shadow-md">The Immersive Cinema</h1>
-                                <p className="text-white/70 text-sm">Nexus Channel</p>
-                            </div>
                         </div>
 
                         <div className="flex items-center gap-4">
                             {!isTheaterMode && (
                                 <button
                                     onClick={() => setIsTheaterMode(true)}
-                                    className="px-6 py-2.5 rounded-full glass-panel flex items-center gap-2 text-white font-bold hover:bg-white/10 hover:shadow-glow-subtle transition-all active:scale-95"
+                                    className="px-4 py-2 md:px-6 md:py-2.5 rounded-full bg-black/40 backdrop-blur-md flex items-center gap-2 text-white font-bold hover:bg-white/10 hover:shadow-glow-subtle transition-all active:scale-95 text-xs md:text-sm"
                                 >
-                                    <svg className="w-5 h-5 text-accent-400 group-hover:animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                    <svg className="w-4 h-4 md:w-5 md:h-5 text-accent-400 group-hover:animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                     </svg>
-                                    Watch Together
+                                    <span className="hidden md:inline">Theater</span>
                                 </button>
                             )}
                         </div>
                     </div>
 
+                    {/* 2. The Auto-Hiding Glass Controls */}
                     {/* Bottom Floating Control Pill */}
-                    <div className={`absolute bottom-6 left-4 right-4 md:left-1/2 md:-translate-x-1/2 md:w-[80%] max-w-4xl rounded-3xl md:rounded-full bg-white/5 border border-white/10 backdrop-blur-md px-4 md:px-8 py-4 flex flex-col md:flex-row items-center gap-4 transition-all duration-300 ease-out shadow-2xl z-20 ${controlsVisible || isAIOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
+                    <div className={`absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] md:w-[70%] max-w-3xl rounded-full bg-white/5 border border-white/10 backdrop-blur-lg px-4 md:px-6 py-3 flex items-center gap-4 md:gap-6 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] shadow-[0_10px_40px_rgba(0,0,0,0.5)] z-20 ${controlsVisible || isAIOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
 
-                        <div className="flex items-center gap-4 w-full md:w-auto shrink-0 justify-between md:justify-start">
-                            <button className="text-white hover:text-primary-400 hover:scale-110 active:scale-95 transition-all outline-none">
-                                <svg className="w-8 h-8 md:w-10 md:h-10 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
-                            </button>
-                            <span className="text-white/90 text-xs font-bold font-mono tracking-wider tabular-nums">04:20 / 12:00</span>
-                        </div>
+                        <button className="text-white hover:text-primary-400 hover:scale-110 active:scale-90 transition-all outline-none shrink-0 group">
+                            <svg className="w-8 h-8 md:w-10 md:h-10 fill-current drop-shadow-md" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                        </button>
 
-                        {/* Glass Timeline */}
-                        <div className="w-full flex-1 relative h-2 md:h-2.5 rounded-full bg-white/10 backdrop-blur-sm cursor-pointer group flex items-center">
-                            <div className="absolute left-0 h-full w-1/3 bg-primary-500 rounded-full shadow-glow-subtle transition-all">
-                                <div className="absolute right-0 top-1/2 -mt-2.5 -mr-2.5 w-5 h-5 bg-white rounded-full shadow-minimal opacity-0 group-hover:opacity-100 transition-opacity transform scale-0 group-hover:scale-100" />
+                        <div className="flex items-center gap-3 w-full flex-1">
+                            <span className="text-white/90 text-[10px] md:text-xs font-bold font-mono tracking-wider tabular-nums shrink-0">04:20</span>
+                            {/* Glass Timeline */}
+                            <div className="w-full relative h-1.5 md:h-2 rounded-full bg-white/10 backdrop-blur-sm cursor-pointer group/timeline flex flex-1 items-center">
+                                <div className="absolute left-0 h-full w-1/3 bg-primary-500 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.5)] transition-all">
+                                    <div className="absolute right-0 top-1/2 -mt-2 -mr-2 w-4 h-4 bg-white rounded-full shadow-minimal opacity-0 group-hover/timeline:opacity-100 transition-opacity transform scale-0 group-hover/timeline:scale-100" />
+                                </div>
                             </div>
+                            <span className="text-white/50 text-[10px] md:text-xs font-bold font-mono tracking-wider tabular-nums shrink-0">12:00</span>
                         </div>
 
-                        <div className="flex items-center gap-4 w-full md:w-auto justify-end shrink-0">
-                            <button className="text-white/80 hover:text-white transition-colors outline-none shrink-0 hidden md:block">
-                                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" /></svg>
-                            </button>
-
-                            {/* AI Trigger */}
+                        <div className="flex items-center gap-3 shrink-0">
+                            {/* AI Trigger (Sparkle) */}
                             <button
                                 onClick={() => setIsAIOpen(!isAIOpen)}
-                                className={`flex items-center justify-center gap-2 px-4 py-2 rounded-full transition-all outline-none border ${isAIOpen ? 'bg-accent-500/20 text-accent-400 border-accent-500/50 shadow-glow-sm' : 'bg-white/5 text-white/90 border-transparent hover:bg-white/10 hover:text-accent-400 hover:border-accent-500/30'} active:scale-95`}
+                                className={`w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full transition-all outline-none border ${isAIOpen ? 'bg-accent-500/20 text-accent-400 border-accent-500/50 shadow-glow-sm scale-110' : 'bg-transparent text-white/90 border-transparent hover:bg-white/10 hover:text-accent-400 hover:scale-110'} active:scale-90 relative`}
+                                title="Deep Dive AI"
                             >
-                                <svg className={`w-5 h-5 ${isAIOpen ? 'animate-pulse' : ''}`} fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+                                <div className={`absolute inset-0 rounded-full bg-accent-500/20 blur-md transition-opacity duration-300 ${isAIOpen ? 'opacity-100' : 'opacity-0'}`}></div>
+                                <svg className={`w-5 h-5 md:w-6 md:h-6 relative z-10 ${isAIOpen ? 'animate-pulse' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                                 </svg>
-                                <span className="font-bold text-sm tracking-wide hidden md:block">Nexus AI</span>
                             </button>
 
-                            <button className="text-white/80 hover:text-white transition-colors outline-none shrink-0">
-                                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" /></svg>
+                            <button className="text-white/80 hover:text-white transition-colors outline-none shrink-0 hover:scale-110 active:scale-90">
+                                <svg className="w-5 h-5 md:w-6 md:h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" /></svg>
                             </button>
                         </div>
                     </div>
                 </div>
+
+                {/* 3. The Metadata & Kinetic Actions (Below the Player) */}
+                <div className={`mt-6 md:mt-8 px-4 md:px-0 transition-opacity duration-500 ${isTheaterMode ? 'opacity-0 h-0 overflow-hidden' : 'opacity-100'}`}>
+                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
+                        <div className="flex-1 min-w-0">
+                            <h1 className="font-display font-extrabold text-2xl md:text-3xl text-white mb-3 tracking-tight">Tears of Steel: The Blender Foundation Epic</h1>
+
+                            <div className="flex items-center gap-4">
+                                <Link to="/channel/blender" className="w-12 h-12 rounded-full bg-dark-800 border border-white/10 overflow-hidden hover:ring-2 hover:ring-primary-500/50 transition-all shrink-0">
+                                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200" alt="Creator" className="w-full h-full object-cover" />
+                                </Link>
+                                <div>
+                                    <Link to="/channel/blender">
+                                        <h3 className="font-medium text-white/90 text-lg hover:text-white transition-colors">Blender Studio</h3>
+                                    </Link>
+                                    <p className="text-sm font-medium text-white/70">1.2M subscribers</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Action Pill (Sleek frosted glass) */}
+                        <div className="flex items-center bg-white/5 backdrop-blur-xl border border-white/10 rounded-full p-1 shadow-glow-sm shrink-0 mt-4 md:mt-0 self-start w-full md:w-auto overflow-x-auto scrollbar-hide">
+                            <button className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-full hover:bg-white/10 transition-all active:scale-90 hover:scale-[1.05] text-white font-medium group">
+                                <svg className="w-5 h-5 group-hover:text-primary-400 group-hover:scale-110 transition-all drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+                                </svg>
+                                12K
+                            </button>
+                            <div className="w-px h-6 bg-white/10 mx-1"></div>
+                            <button className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-full hover:bg-white/10 transition-all active:scale-90 hover:scale-[1.05] text-white font-medium group">
+                                <svg className="w-5 h-5 group-hover:text-accent-400 group-hover:scale-110 transition-all drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                                </svg>
+                                Share
+                            </button>
+                            <div className="w-px h-6 bg-white/10 mx-1"></div>
+                            <button className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-full hover:bg-white/10 transition-all active:scale-90 hover:scale-[1.05] text-white font-medium group text-nowrap">
+                                <svg className="w-5 h-5 group-hover:text-primary-400 group-hover:scale-110 transition-all drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                                </svg>
+                                Save
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Description - Simplified for minimal clutter */}
+                    <div className="mt-6 bg-white/5 backdrop-blur-sm border border-white/5 rounded-2xl p-4 md:p-6 text-sm text-white/80 leading-relaxed max-w-4xl hover:bg-white/10 transition-colors cursor-pointer">
+                        <p className="line-clamp-2">
+                            Tears of Steel was realized with crowd-funding by users of the open source 3D creation tool Blender. Target was to improve and test a complete open and free pipeline for visual effects in film.
+                        </p>
+                        <span className="font-medium text-white mt-2 block hover:underline">Show more</span>
+                    </div>
+                </div>
             </div>
 
-            {/* AI Assistant Side Panel */}
+            {/* 4. The Agentic AI "Deep Dive" Sidebar */}
             <AIPanel
                 isOpen={isAIOpen}
                 onClose={() => setIsAIOpen(false)}
                 onSeek={handleAISeek}
             />
 
-            {/* Theater Lobby Overlay (If activated) */}
+            {/* Theater Lobby Overlay */}
             {isTheaterMode && <TheaterLobby onClose={() => setIsTheaterMode(false)} />}
         </div>
     );

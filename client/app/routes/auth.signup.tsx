@@ -92,8 +92,10 @@ export default function Signup() {
 
             <div className="w-full max-w-md z-10 px-4 animate-fade-in">
                 <div className="text-center mb-8">
-                    <Link to="/" className="inline-flex items-center justify-center group hover:opacity-80 transition-opacity">
-                        <img src="/lokdarpan.png" alt="LokDarpan" className="h-10 w-auto object-contain" />
+                    <Link to="/" className="inline-flex items-center justify-center group transition-opacity">
+                        <span className="text-xl font-display font-medium tracking-[0.2em] text-white/50 group-hover:text-white/80 transition-colors uppercase">
+                            Lokdarpan
+                        </span>
                     </Link>
                 </div>
 

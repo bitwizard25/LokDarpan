@@ -67,8 +67,10 @@ export default function Login() {
 
                 {/* Brand Header */}
                 <div className="text-center mb-10">
-                    <Link to="/" className="inline-flex items-center justify-center group hover:opacity-80 transition-opacity">
-                        <img src="/lokdarpan.png" alt="LokDarpan" className="h-10 w-auto object-contain" />
+                    <Link to="/" className="inline-flex items-center justify-center group transition-opacity">
+                        <span className="text-xl font-display font-medium tracking-[0.2em] text-white/50 group-hover:text-white/80 transition-colors uppercase">
+                            Lokdarpan
+                        </span>
                     </Link>
                 </div>
 

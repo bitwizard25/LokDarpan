@@ -9,7 +9,7 @@ export interface SmartHoverTooltipProps {
 export function SmartHoverTooltip({ title, summaryBullets, isVisible }: SmartHoverTooltipProps) {
     return (
         <div
-            className={`absolute z-50 left-1/2 -ml-36 bottom-[105%] w-72 bg-dark-900/80 backdrop-blur-2xl p-5 border border-white/10 rounded-2xl shadow-minimal-hover pointer-events-none transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] origin-bottom ${isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2'}`}
+            className={`absolute z-50 left-1/2 -ml-36 bottom-[105%] w-72 bg-black/40 backdrop-blur-xl p-5 border border-white/10 rounded-2xl shadow-glow-sm pointer-events-none transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] origin-bottom ${isVisible ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-2'}`}
         >
             <div className="flex items-center gap-2 mb-3">
                 <div className="w-5 h-5 rounded-full bg-primary-500/20 flex items-center justify-center">

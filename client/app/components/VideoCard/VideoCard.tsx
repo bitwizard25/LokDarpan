@@ -95,12 +95,12 @@ export function VideoCard({
 
                     <div className="flex-1 min-w-0">
                         <Link to={`/watch/${id}`}>
-                            <h3 className={`font-display font-bold text-white leading-tight group-hover:text-primary-400 transition-colors ${featured ? 'text-2xl mb-3' : 'text-base mb-1 line-clamp-2'}`}>
+                            <h3 className={`font-display font-extrabold text-white leading-tight group-hover:text-primary-400 transition-colors ${featured ? 'text-2xl mb-3' : 'text-base mb-1 line-clamp-2'}`}>
                                 {title}
                             </h3>
                         </Link>
 
-                        <div className="flex items-center gap-2 text-dark-400 text-sm mb-2">
+                        <div className="flex items-center gap-2 text-white/60 font-light text-sm mb-2">
                             <Link to={`/channel/${channelName}`} className="hover:text-white transition-colors">{channelName}</Link>
                             <span>•</span>
                             <span>{formatViews(views)}</span>
