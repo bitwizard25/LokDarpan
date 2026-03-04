@@ -18,24 +18,24 @@ export const meta: MetaFunction = () => {
 
 // Mock Data Enriched with Ambient Colors
 const trendingVideos = [
-    { _id: "t1", title: "Cyberpunk Cityscapes", thumbnailUrl: "https://picsum.photos/seed/cyber/640/360", channelName: "NeonVibes", channelAvatar: "N", views: 88000, duration: 420, isLive: false, ambient: "rgba(236, 72, 153, 0.15)", aiSummary: ["Complete breakdown of neon composition", "Best practices for night renders", "Free assets included"] },
-    { _id: "t2", title: "Lofi Beats to Code To", thumbnailUrl: "https://picsum.photos/seed/lofi/640/360", channelName: "ChillHop", channelAvatar: "C", views: 12000, duration: 3600, isLive: true, ambient: "rgba(167, 139, 250, 0.15)", aiSummary: ["Continuous focus mix", "Curated for deep work", "No distracting vocals"] },
-    { _id: "t3", title: "React 19 Features Explained", thumbnailUrl: "https://picsum.photos/seed/react/640/360", channelName: "DevDaily", channelAvatar: "D", views: 45000, duration: 890, isLive: false, ambient: "rgba(96, 165, 250, 0.15)", aiSummary: ["Compiler optimizations decoded", "New hook APIs", "Migration guide strategies"] },
-    { _id: "t4", title: "Meditation for Focus", thumbnailUrl: "https://picsum.photos/seed/meditate/640/360", channelName: "Mindful", channelAvatar: "M", views: 23000, duration: 600, isLive: false, ambient: "rgba(52, 211, 153, 0.15)", aiSummary: ["10-minute guided session", "Box breathing technique", "Perfect for mid-day resets"] },
+    { _id: "t1", title: "The Future of Digital Art", thumbnailUrl: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=640&auto=format&fit=crop", channelName: "NeonVibes", channelAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop", views: 88000, duration: 420, isLive: false, ambient: "rgba(236, 72, 153, 0.15)", aiSummary: ["Complete breakdown of neon composition", "Best practices for night renders", "Free assets included"] },
+    { _id: "t2", title: "Building a Next.js App from Scratch", thumbnailUrl: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=640&auto=format&fit=crop", channelName: "DevDaily", channelAvatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=150&auto=format&fit=crop", views: 120000, duration: 3600, isLive: true, ambient: "rgba(167, 139, 250, 0.15)", aiSummary: ["Continuous focus mix", "Curated for deep work", "No distracting vocals"] },
+    { _id: "t3", title: "React 19 Features Explained", thumbnailUrl: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=640&auto=format&fit=crop", channelName: "TechWeekly", channelAvatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop", views: 45000, duration: 890, isLive: false, ambient: "rgba(96, 165, 250, 0.15)", aiSummary: ["Compiler optimizations decoded", "New hook APIs", "Migration guide strategies"] },
+    { _id: "t4", title: "Cinematic Lighting for Small Studios", thumbnailUrl: "https://images.unsplash.com/photo-1559136555-e660502afce4?q=80&w=640&auto=format&fit=crop", channelName: "CreatorHQ", channelAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop", views: 23000, duration: 600, isLive: false, ambient: "rgba(52, 211, 153, 0.15)", aiSummary: ["10-minute guided session", "Box breathing technique", "Perfect for mid-day resets"] },
 ];
 
 const techVideos = [
-    { _id: "t5", title: "Building SaaS in 24 Hours", thumbnailUrl: "https://picsum.photos/seed/saas/640/360", channelName: "IndieHacker", channelAvatar: "I", views: 67000, duration: 1500, isLive: false, ambient: "rgba(245, 158, 11, 0.15)" },
-    { _id: "t6", title: "Abstract Art Tutorial", thumbnailUrl: "https://picsum.photos/seed/art/640/360", channelName: "CreativeFlow", channelAvatar: "C", views: 12000, duration: 900, isLive: false, ambient: "rgba(244, 63, 94, 0.15)" },
-    { _id: "t7", title: "Van Life: 1 Year Later", thumbnailUrl: "https://picsum.photos/seed/van/640/360", channelName: "NomadLife", channelAvatar: "N", views: 156000, duration: 1250, isLive: false, ambient: "rgba(16, 185, 129, 0.15)" },
-    { _id: "t8", title: "Zero Waste Kitchen Switch", thumbnailUrl: "https://picsum.photos/seed/green/640/360", channelName: "EcoWarrior", channelAvatar: "E", views: 34000, duration: 540, isLive: false, ambient: "rgba(132, 204, 22, 0.15)" },
+    { _id: "t5", title: "Mastering Glassmorphism in TailwindCSS", thumbnailUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=640&auto=format&fit=crop", channelName: "IndieHacker", channelAvatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=150&auto=format&fit=crop", views: 67000, duration: 1500, isLive: false, ambient: "rgba(245, 158, 11, 0.15)" },
+    { _id: "t6", title: "Designing with Framer Motion Elements", thumbnailUrl: "https://images.unsplash.com/photo-1561070791-2526d30994b5?q=80&w=640&auto=format&fit=crop", channelName: "CreativeFlow", channelAvatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=150&auto=format&fit=crop", views: 12000, duration: 900, isLive: false, ambient: "rgba(244, 63, 94, 0.15)" },
+    { _id: "t7", title: "Why the Default UI Paradigm is Dead", thumbnailUrl: "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=640&auto=format&fit=crop", channelName: "DesignInsight", channelAvatar: "https://images.unsplash.com/photo-1527980965255-d3b416303d12?q=80&w=150&auto=format&fit=crop", views: 156000, duration: 1250, isLive: false, ambient: "rgba(16, 185, 129, 0.15)" },
+    { _id: "t8", title: "The Perfect Developer Work Setup", thumbnailUrl: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?q=80&w=640&auto=format&fit=crop", channelName: "WorkspaceHub", channelAvatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=150&auto=format&fit=crop", views: 34000, duration: 540, isLive: false, ambient: "rgba(132, 204, 22, 0.15)" },
 ];
 
 const shortsData = [
-    { _id: "s1", title: "Crazy AI Art in 30 Seconds", thumbnailUrl: "https://picsum.photos/seed/short1/400/700", views: 1200000, ambient: "rgba(217, 70, 239, 0.15)" },
-    { _id: "s2", title: "One-Minute Yoga Flow", thumbnailUrl: "https://picsum.photos/seed/short2/400/700", views: 890000, ambient: "rgba(56, 189, 248, 0.15)" },
-    { _id: "s3", title: "Hidden iPhone Feature", thumbnailUrl: "https://picsum.photos/seed/short3/400/700", views: 2100000, ambient: "rgba(250, 204, 21, 0.15)" },
-    { _id: "s4", title: "Epic Drone Fail", thumbnailUrl: "https://picsum.photos/seed/short4/400/700", views: 560000, ambient: "rgba(248, 113, 113, 0.15)" },
+    { _id: "s1", title: "Crazy AI Art in 30 Seconds", thumbnailUrl: "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?q=80&w=400&h=700&auto=format&fit=crop", views: 1200000, ambient: "rgba(217, 70, 239, 0.15)" },
+    { _id: "s2", title: "Neon Cyberpunk Concepts", thumbnailUrl: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=400&h=700&auto=format&fit=crop", views: 890000, ambient: "rgba(56, 189, 248, 0.15)" },
+    { _id: "s3", title: "Abstract 3D Animations", thumbnailUrl: "https://images.unsplash.com/photo-1605806616949-1e87b487cb2a?q=80&w=400&h=700&auto=format&fit=crop", views: 2100000, ambient: "rgba(250, 204, 21, 0.15)" },
+    { _id: "s4", title: "Cinematic Lighting Setup", thumbnailUrl: "https://images.unsplash.com/photo-1534080164805-728bdf61247d?q=80&w=400&h=700&auto=format&fit=crop", views: 560000, ambient: "rgba(248, 113, 113, 0.15)" },
 ];
 
 // Combine all mock spaces
@@ -125,8 +125,8 @@ export default function Index() {
                                             {/* Metadata */}
                                             <div className="flex gap-3 px-1">
                                                 {space.type === "video" && (
-                                                    <div className="w-10 h-10 rounded-full bg-dark-800 flex items-center justify-center text-sm font-bold text-white shrink-0 border border-white/10 group-hover:border-primary-400/50 transition-colors">
-                                                        {(item as any).channelAvatar}
+                                                    <div className="w-10 h-10 rounded-full bg-dark-800 flex items-center justify-center text-sm font-bold text-white shrink-0 border border-white/10 group-hover:border-primary-400/50 transition-colors overflow-hidden">
+                                                        <img src={(item as any).channelAvatar} alt="channel avatar" className="w-full h-full object-cover" />
                                                     </div>
                                                 )}
                                                 <div className="flex flex-col min-w-0 justify-center">

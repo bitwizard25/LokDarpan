@@ -47,17 +47,9 @@ export function Header({ user }: HeaderProps) {
                 className={`w-full max-w-7xl transition-all duration-500 pointer-events-auto rounded-full border border-white/10 shadow-glow-sm bg-dark-950/40 backdrop-blur-2xl px-4 py-3 md:px-6`}
             >
                 <div className="flex items-center justify-between gap-4">
-                    {/* Brand Logo - Animated Gradient */}
-                    <Link to="/" className="flex items-center gap-3 group shrink-0">
-                        <div className="w-10 h-10 rounded-xl bg-primary-gradient flex items-center justify-center transform group-hover:rotate-12 transition-transform duration-300 shadow-glow-sm">
-                            <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <span className="text-xl font-display font-bold tracking-tight text-white group-hover:text-gradient transition-all">
-                            Lok<span className="text-primary-400">Darpan</span>
-                        </span>
+                    {/* Brand Logo */}
+                    <Link to="/" className="flex items-center gap-3 group shrink-0 hover:opacity-80 transition-opacity">
+                        <img src="/lokdarpan.png" alt="LokDarpan" className="h-7 md:h-9 w-auto object-contain" />
                     </Link>
 
                     {/* Floating Search Bar */}

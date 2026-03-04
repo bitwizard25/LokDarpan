@@ -45,11 +45,19 @@ export default function WatchExperience() {
             {/* Ambient Background for Theater transition */}
             <ChameleonCanvas ambientColor="rgba(59, 130, 246, 0.1)" intensity={isTheaterMode ? 'low' : 'medium'} />
 
-            {/* Immersive Video Player Container. Scales down in theater mode */}
+            {/* Immersive Video Player Container. Adapts to AI panel and Theater Mode */}
             <div
-                className={`absolute inset-0 flex items-center justify-center transition-all duration-[800ms] ease-[cubic-bezier(0.16,1,0.3,1)] z-10 ${isTheaterMode ? 'p-12 md:p-24 scale-[0.85] origin-top' : 'p-0 scale-100'}`}
+                className={`absolute inset-0 flex items-center justify-center transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] z-10 ${isTheaterMode
+                        ? 'p-12 md:p-24 scale-[0.85] origin-top'
+                        : isAIOpen
+                            ? 'p-0 md:py-6 md:pl-6 md:pr-[424px]' // 400px panel + 24px padding = 424px
+                            : 'p-0 md:p-6'
+                    }`}
             >
-                <div className={`w-full h-full relative transition-all duration-[800ms] bg-dark-950 ${isTheaterMode ? 'rounded-[3rem] overflow-hidden shadow-[0_0_100px_rgba(59,130,246,0.3)] ring-1 ring-white/10' : 'rounded-none md:rounded-3xl overflow-hidden'}`}>
+                <div className={`w-full h-full relative transition-all duration-700 bg-dark-950 flex shadow-2xl ${isTheaterMode
+                        ? 'rounded-[3rem] overflow-hidden shadow-[0_0_100px_rgba(59,130,246,0.3)] ring-1 ring-white/10'
+                        : 'rounded-none md:rounded-3xl overflow-hidden ring-1 ring-white/5'
+                    }`}>
 
                     {/* Actual Video Element */}
                     <video
