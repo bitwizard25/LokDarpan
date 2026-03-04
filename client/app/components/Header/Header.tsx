@@ -13,7 +13,7 @@ interface HeaderProps {
 export function Header({ user }: HeaderProps) {
     const [scrolled, setScrolled] = useState(false);
     const [searchFocused, setSearchFocused] = useState(false);
-    const { isTheaterMode, setTheaterMode } = useAppStore();
+    const { isTheaterMode, setTheaterMode, isTheaterLobbyOpen, setTheaterLobbyOpen } = useAppStore();
     const [lastScrollY, setLastScrollY] = useState(0);
     const [isHidden, setIsHidden] = useState(false);
 
@@ -52,21 +52,21 @@ export function Header({ user }: HeaderProps) {
                     <Link to="/" className="flex items-center group shrink-0 transition-opacity">
                         <div className="flex items-center gap-1 select-none">
                             {/* LOK */}
-                            <span className="text-white font-extrabold tracking-[0.2em] text-sm md:text-xl font-sans group-hover:text-white/80 transition-colors">
+                            <span className="text-white font-black tracking-[0.2em] text-2xl md:text-3xl font-sans drop-shadow-lg group-hover:text-white/80 transition-colors">
                                 LOK
                             </span>
 
                             {/* The 'D' with the Play Button inside */}
-                            <div className="relative flex items-center justify-center">
-                                <span className="text-white font-extrabold tracking-[0.2em] text-sm md:text-xl font-sans group-hover:text-white/80 transition-colors">
+                            <div className="relative flex items-center justify-center drop-shadow-lg">
+                                <span className="text-white font-black tracking-[0.2em] text-2xl md:text-3xl font-sans group-hover:text-white/80 transition-colors">
                                     D
                                 </span>
                                 {/* Tiny Play Triangle cutting out of the D */}
-                                <div className="absolute left-[30%] w-0 h-0 border-t-[3px] md:border-t-[4px] border-t-transparent border-l-[4px] md:border-l-[6px] border-l-[#0A0A0B] border-b-[3px] md:border-b-[4px] border-b-transparent"></div>
+                                <div className="absolute left-[30%] w-0 h-0 border-t-[5px] md:border-t-[6px] border-t-transparent border-l-[6px] md:border-l-[10px] border-l-[#0A0A0B] border-b-[5px] md:border-b-[6px] border-b-transparent"></div>
                             </div>
 
                             {/* ARPAN */}
-                            <span className="text-white font-extrabold tracking-[0.2em] text-sm md:text-xl font-sans group-hover:text-white/80 transition-colors">
+                            <span className="text-white font-black tracking-[0.2em] text-2xl md:text-3xl font-sans drop-shadow-lg group-hover:text-white/80 transition-colors">
                                 ARPAN
                             </span>
                         </div>
@@ -122,7 +122,10 @@ export function Header({ user }: HeaderProps) {
                             {/* Ambient Pulse Glow Behind Button */}
                             <div className="absolute inset-0 bg-primary-500/20 blur-md rounded-full animate-pulse group-hover:bg-primary-500/40 transition-colors duration-500"></div>
                             <button
-                                onClick={() => setTheaterMode(true)}
+                                onClick={() => {
+                                    setTheaterMode(true);
+                                    setTheaterLobbyOpen(true);
+                                }}
                                 className="relative w-10 h-10 md:w-auto md:px-4 md:py-2 rounded-full border border-primary-500/30 hover:border-primary-500/80 bg-primary-500/20 flex items-center justify-center gap-2 text-primary-400 hover:text-white transition-all active:scale-95"
                             >
                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -150,7 +153,13 @@ export function Header({ user }: HeaderProps) {
                     </div>
                 </div>
             </div>
-            {isTheaterMode && <TheaterLobby onClose={() => setTheaterMode(false)} />}
+            {isTheaterLobbyOpen && <TheaterLobby
+                onClose={() => {
+                    setTheaterLobbyOpen(false);
+                    if (!isTheaterMode) setTheaterMode(false); // If they didn't officially join, cancel
+                }}
+                onEnter={() => setTheaterLobbyOpen(false)}
+            />}
         </header>
     );
 }

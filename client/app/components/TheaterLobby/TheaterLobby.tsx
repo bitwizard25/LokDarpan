@@ -16,7 +16,7 @@ const mockUsers: User[] = [
     { id: "4", name: "Emma", avatar: "E", color: "rgba(245, 158, 11, 1)" },
 ];
 
-export function TheaterLobby({ onClose }: { onClose: () => void }) {
+export function TheaterLobby({ onClose, onEnter }: { onClose: () => void, onEnter: () => void }) {
     const [invited, setInvited] = useState(false);
 
     return (
@@ -105,7 +105,7 @@ export function TheaterLobby({ onClose }: { onClose: () => void }) {
                 </div>
 
                 <button
-                    onClick={onClose}
+                    onClick={onEnter}
                     className="w-full md:w-auto px-10 py-4 btn-primary rounded-xl text-lg relative overflow-hidden group"
                 >
                     <span className="relative z-10 font-bold tracking-wide">Enter Theater</span>

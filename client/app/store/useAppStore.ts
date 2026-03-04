@@ -5,6 +5,9 @@ interface AppState {
     toggleTheaterMode: () => void;
     setTheaterMode: (value: boolean) => void;
 
+    isTheaterLobbyOpen: boolean;
+    setTheaterLobbyOpen: (value: boolean) => void;
+
     isAIOpen: boolean;
     toggleAIPanel: () => void;
     setAIOpen: (value: boolean) => void;
@@ -14,6 +17,9 @@ export const useAppStore = create<AppState>((set) => ({
     isTheaterMode: false,
     toggleTheaterMode: () => set((state) => ({ isTheaterMode: !state.isTheaterMode })),
     setTheaterMode: (value) => set({ isTheaterMode: value }),
+
+    isTheaterLobbyOpen: false,
+    setTheaterLobbyOpen: (value) => set({ isTheaterLobbyOpen: value }),
 
     isAIOpen: false,
     toggleAIPanel: () => set((state) => ({ isAIOpen: !state.isAIOpen })),

@@ -96,21 +96,21 @@ export default function Signup() {
                     <Link to="/" className="inline-flex items-center justify-center group transition-opacity">
                         <div className="flex items-center gap-1 select-none">
                             {/* LOK */}
-                            <span className="text-white font-extrabold tracking-[0.2em] text-xl font-sans group-hover:text-white/80 transition-colors">
+                            <span className="text-white font-black tracking-[0.2em] text-3xl font-sans drop-shadow-lg group-hover:text-white/80 transition-colors">
                                 LOK
                             </span>
 
                             {/* The 'D' with the Play Button inside */}
-                            <div className="relative flex items-center justify-center">
-                                <span className="text-white font-extrabold tracking-[0.2em] text-xl font-sans group-hover:text-white/80 transition-colors">
+                            <div className="relative flex items-center justify-center drop-shadow-lg">
+                                <span className="text-white font-black tracking-[0.2em] text-3xl font-sans group-hover:text-white/80 transition-colors">
                                     D
                                 </span>
                                 {/* Tiny Play Triangle cutting out of the D */}
-                                <div className="absolute left-[30%] w-0 h-0 border-t-[4px] border-t-transparent border-l-[6px] border-l-[#0A0A0B] border-b-[4px] border-b-transparent"></div>
+                                <div className="absolute left-[30%] w-0 h-0 border-t-[6px] border-t-transparent border-l-[10px] border-l-[#0A0A0B] border-b-[6px] border-b-transparent"></div>
                             </div>
 
                             {/* ARPAN */}
-                            <span className="text-white font-extrabold tracking-[0.2em] text-xl font-sans group-hover:text-white/80 transition-colors">
+                            <span className="text-white font-black tracking-[0.2em] text-3xl font-sans drop-shadow-lg group-hover:text-white/80 transition-colors">
                                 ARPAN
                             </span>
                         </div>

@@ -2,13 +2,13 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "@remix-run/react";
 import { ChameleonCanvas } from "~/components/UI/ChameleonCanvas";
 import { AIPanel } from "~/components/AIAssistant/AIPanel";
-import { TheaterLobby } from "~/components/TheaterLobby/TheaterLobby";
+import { AvatarStack } from "~/components/TheaterLobby/AvatarStack";
 import { useAppStore } from "~/store/useAppStore";
 
 export default function WatchExperience() {
     const { videoId } = useParams();
     const [controlsVisible, setControlsVisible] = useState(true);
-    const { isAIOpen, setAIOpen: setIsAIOpen, isTheaterMode, setTheaterMode: setIsTheaterMode } = useAppStore();
+    const { isAIOpen, setAIOpen: setIsAIOpen, isTheaterMode, setTheaterMode: setIsTheaterMode, setTheaterLobbyOpen } = useAppStore();
     const videoRef = useRef<HTMLVideoElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -107,21 +107,21 @@ export default function WatchExperience() {
                         <div className="absolute inset-x-0 top-0 pt-6 md:pt-10 flex justify-center pointer-events-none z-0">
                             <Link to="/" className="flex items-center gap-1 select-none pointer-events-auto group transition-opacity">
                                 {/* LOK */}
-                                <span className="text-white font-extrabold tracking-[0.2em] text-sm md:text-lg font-sans drop-shadow-md group-hover:text-white/80 transition-colors">
+                                <span className="text-white font-black tracking-[0.2em] text-2xl md:text-3xl font-sans drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] group-hover:text-white/80 transition-colors">
                                     LOK
                                 </span>
 
                                 {/* The 'D' with the Play Button inside */}
-                                <div className="relative flex items-center justify-center drop-shadow-md">
-                                    <span className="text-white font-extrabold tracking-[0.2em] text-sm md:text-lg font-sans group-hover:text-white/80 transition-colors">
+                                <div className="relative flex items-center justify-center drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+                                    <span className="text-white font-black tracking-[0.2em] text-2xl md:text-3xl font-sans group-hover:text-white/80 transition-colors">
                                         D
                                     </span>
                                     {/* Tiny Play Triangle cutting out of the D */}
-                                    <div className="absolute left-[30%] w-0 h-0 border-t-[3px] border-t-transparent border-l-[4px] border-l-[#0A0A0B] border-b-[3px] border-b-transparent"></div>
+                                    <div className="absolute left-[30%] w-0 h-0 border-t-[5px] md:border-t-[6px] border-t-transparent border-l-[6px] md:border-l-[10px] border-l-[#0A0A0B] border-b-[5px] md:border-b-[6px] border-b-transparent"></div>
                                 </div>
 
                                 {/* ARPAN */}
-                                <span className="text-white font-extrabold tracking-[0.2em] text-sm md:text-lg font-sans drop-shadow-md group-hover:text-white/80 transition-colors">
+                                <span className="text-white font-black tracking-[0.2em] text-2xl md:text-3xl font-sans drop-shadow-[0_0_15px_rgba(255,255,255,0.3)] group-hover:text-white/80 transition-colors">
                                     ARPAN
                                 </span>
                             </Link>
@@ -130,7 +130,10 @@ export default function WatchExperience() {
                         <div className="flex items-center gap-4 relative z-10 w-24 justify-end">
                             {!isTheaterMode && (
                                 <button
-                                    onClick={() => setIsTheaterMode(true)}
+                                    onClick={() => {
+                                        setIsTheaterMode(true);
+                                        setTheaterLobbyOpen(true);
+                                    }}
                                     className="px-4 py-2 md:px-6 md:py-2.5 rounded-full bg-black/40 backdrop-blur-md flex items-center gap-2 text-white font-bold hover:bg-white/10 hover:shadow-glow-subtle transition-all active:scale-95 text-xs md:text-sm"
                                 >
                                     <svg className="w-4 h-4 md:w-5 md:h-5 text-accent-400 group-hover:animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -241,6 +244,9 @@ export default function WatchExperience() {
                 onClose={() => setIsAIOpen(false)}
                 onSeek={handleAISeek}
             />
+
+            {/* Persistent Social Overlay (Bottom-Left) */}
+            <AvatarStack />
         </div>
     );
 }
