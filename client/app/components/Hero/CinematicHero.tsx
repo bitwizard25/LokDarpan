@@ -8,6 +8,7 @@ interface HeroItem {
     imageUrl: string;
     category: string;
     duration: string;
+    ambient: string;
 }
 
 const HERO_ITEMS: HeroItem[] = [
@@ -17,7 +18,8 @@ const HERO_ITEMS: HeroItem[] = [
         description: "Explore how AI and human creativity are merging to create stunning new forms of expression in the digital age.",
         imageUrl: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2600&auto=format&fit=crop",
         category: "Technology",
-        duration: "12 min"
+        duration: "12 min",
+        ambient: "rgba(236, 72, 153, 0.25)"
     },
     {
         id: "h2",
@@ -25,7 +27,8 @@ const HERO_ITEMS: HeroItem[] = [
         description: "A cinematic journey through the ancient streets, temples, and tea houses of Japan's cultural capital.",
         imageUrl: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=2600&auto=format&fit=crop",
         category: "Travel",
-        duration: "8 min"
+        duration: "8 min",
+        ambient: "rgba(59, 130, 246, 0.25)"
     },
     {
         id: "h3",
@@ -33,11 +36,12 @@ const HERO_ITEMS: HeroItem[] = [
         description: "How to design a distraction-free environment that boosts productivity and mental clarity.",
         imageUrl: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?q=80&w=2600&auto=format&fit=crop",
         category: "Lifestyle",
-        duration: "15 min"
+        duration: "15 min",
+        ambient: "rgba(16, 185, 129, 0.25)"
     }
 ];
 
-export function CinematicHero() {
+export function CinematicHero({ onSlideChange }: { onSlideChange?: (color: string) => void }) {
     const [currentIndex, setCurrentIndex] = useState(0);
 
     // Auto-advance carousel
@@ -48,11 +52,14 @@ export function CinematicHero() {
         return () => clearInterval(interval);
     }, []);
 
+    useEffect(() => {
+        if (onSlideChange) onSlideChange(HERO_ITEMS[currentIndex].ambient);
+    }, [currentIndex, onSlideChange]);
+
     const currentItem = HERO_ITEMS[currentIndex];
 
     return (
-        // Nexus update: completely edge to edge, no border radius, negative margin hack
-        <div className="relative w-[100vw] ml-[calc(-50vw+50%)] h-[70vh] md:h-[80vh] overflow-hidden mb-16 group bg-dark-1000">
+        <div className="relative w-[100vw] ml-[calc(-50vw+50%)] h-[85vh] md:h-[90vh] overflow-hidden mb-8 group bg-dark-1000 -mt-32 pt-32">
             {/* Background Image with Transition */}
             {HERO_ITEMS.map((item, index) => (
                 <div
@@ -73,7 +80,7 @@ export function CinematicHero() {
 
             {/* Content Container - Centered to max-width so it aligns with page content while background is edge-to-edge */}
             <div className="absolute inset-0 w-full max-w-[1920px] mx-auto pointer-events-none">
-                <div className="absolute bottom-12 md:bottom-24 left-4 md:left-8 p-0 w-full max-w-3xl z-10 flex flex-col items-start gap-5 pointer-events-auto pl-4 lg:pl-0 xl:ml-8">
+                <div className="absolute bottom-16 md:bottom-32 left-4 md:left-8 p-0 w-full max-w-3xl z-10 flex flex-col items-start gap-5 pointer-events-auto pl-4 lg:pl-0 xl:ml-8">
                     <div className="flex items-center gap-3 animate-fade-in">
                         {/* Nexus: Glass pill overlays */}
                         <div className="px-4 py-1.5 bg-dark-900/40 backdrop-blur-md text-white text-xs font-bold uppercase tracking-wider rounded-full border border-white/20 shadow-minimal">
@@ -95,13 +102,13 @@ export function CinematicHero() {
 
                     <div className="flex gap-4 mt-6 animate-slide-up" style={{ animationDelay: "200ms" }}>
                         {/* Use Kinetic button base classes implicitly */}
-                        <Link to={`/watch/Hero-${currentItem.id}`} className="inline-flex items-center justify-center font-bold tracking-wide rounded-full transition-all duration-300 active:scale-95 active:animate-bounce-elastic outline-none px-8 py-4 text-base bg-white text-black hover:bg-dark-200 hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] border border-transparent gap-3 group">
+                        <Link to={`/watch/Hero-${currentItem.id}`} className="inline-flex items-center justify-center font-bold tracking-wide rounded-full transition-all duration-300 active:scale-95 active:animate-bounce-elastic outline-none px-8 py-4 text-base bg-white text-black hover:bg-dark-200 hover:shadow-[0_0_30px_rgba(255,255,255,0.4)] border border-transparent gap-3 group">
                             <div className="w-8 h-8 rounded-full bg-black/10 flex items-center justify-center group-hover:scale-110 transition-transform">
                                 <svg className="w-4 h-4 fill-current ml-1" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
                             </div>
                             Play Now
                         </Link>
-                        <button className="inline-flex items-center justify-center font-bold tracking-wide rounded-full transition-all duration-300 active:scale-95 active:animate-bounce-elastic outline-none px-8 py-4 text-base bg-white/5 backdrop-blur-md text-white border border-white/10 hover:bg-white/10 hover:border-white/20">
+                        <button className="inline-flex items-center justify-center font-bold tracking-wide rounded-full transition-all duration-300 active:scale-95 active:animate-bounce-elastic outline-none px-8 py-4 text-base bg-white/5 backdrop-blur-md text-white border border-white/10 hover:bg-white/10 hover:border-white/20 hover:shadow-[0_0_20px_rgba(255,255,255,0.15)]">
                             Add to List
                         </button>
                     </div>

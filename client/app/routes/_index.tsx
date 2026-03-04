@@ -56,98 +56,100 @@ export default function Index() {
     const [hoveredVideoId, setHoveredVideoId] = useState<string | null>(null);
 
     return (
-        <Layout user={user} hideSidebar={true}>
+        <Layout user={user} hideSidebar={true} flush={true}>
             {/* Ambient Overlay to provide the Chameleon Effect */}
             <ChameleonCanvas ambientColor={ambientColor} intensity="medium" />
 
-            {/* Sidebar Replacement for Spaces - Floating Top Categories */}
-            <div className="sticky top-[80px] z-40 py-2 mb-6 -mx-4 px-4 bg-dark-950/80 backdrop-blur-md border-b border-white/5">
-                <CategoryChips categories={["For You", "Late Night Coding", "Weekend Thrillers", "Learn Something", "Music", "Vibes"]} />
-            </div>
-
             {/* Hero Section */}
-            <section className="mb-12">
-                <CinematicHero />
+            <section className="relative w-full z-10 mb-8">
+                <CinematicHero onSlideChange={setAmbientColor} />
             </section>
 
-            {/* Render Spaces */}
-            <div className="flex flex-col gap-16 pb-20">
-                {SPACES.map((space, idx) => (
-                    <section key={idx} className="relative z-0">
-                        <div className="flex items-center gap-3 mb-6">
-                            <h2 className="text-2xl font-display font-bold text-white group cursor-pointer flex items-center gap-2">
-                                {space.title}
-                                <svg className="w-5 h-5 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                </svg>
-                            </h2>
-                        </div>
+            <div className="max-w-[1920px] mx-auto px-4 md:px-8">
+                {/* Sidebar Replacement for Spaces - Floating Top Categories */}
+                <div className="sticky top-[80px] z-40 py-3 mb-8 bg-dark-950/80 backdrop-blur-md border border-white/5 rounded-full mx-auto max-w-fit px-2">
+                    <CategoryChips categories={["For You", "Late Night Coding", "Weekend Thrillers", "Learn Something", "Music", "Vibes"]} />
+                </div>
 
-                        {/* Space Rail - Horizontal Scroll with Parallax effect */}
-                        <div className="flex gap-6 overflow-x-auto pb-6 pt-2 scrollbar-hide -mx-4 px-4 lg:-mx-8 lg:px-8 snap-x snap-mandatory perspective-1000">
-                            {space.items.map((item) => (
-                                <Link
-                                    key={item._id}
-                                    to={space.type === "short" ? `/shorts/${item._id}` : `/watch/${item._id}`}
-                                    className={`group flex-shrink-0 snap-center relative transition-transform duration-500 ease-out hover:-translate-y-2 active:scale-95 active:animate-bounce-elastic ${space.type === "short" ? 'w-48' : 'w-72 md:w-80'}`}
-                                    onMouseEnter={() => {
-                                        setAmbientColor(item.ambient);
-                                        setHoveredVideoId(item._id);
-                                    }}
-                                    onMouseLeave={() => setHoveredVideoId(null)}
-                                >
-                                    {/* Smart Hover Tooltip */}
-                                    <div className="absolute -top-4 w-full flex justify-center z-50 pointer-events-none">
-                                        <SmartHoverTooltip
-                                            title={item.title}
-                                            summaryBullets={(item as any).aiSummary || ["AI analyzing context...", "Extracting key moments", "Generating summary"]}
-                                            isVisible={hoveredVideoId === item._id}
-                                        />
-                                    </div>
-                                    <div className="flex flex-col gap-3">
-                                        <div className={`rounded-2xl overflow-hidden glass-panel ${space.type === "short" ? 'aspect-[9/16]' : 'aspect-video'} ring-1 ring-white/10 group-hover:ring-white/30 transition-all duration-300 relative group-hover:shadow-glow-subtle`}>
-                                            <img
-                                                src={item.thumbnailUrl}
-                                                alt={item.title}
-                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]"
+                {/* Render Spaces */}
+                <div className="flex flex-col gap-16 pb-20">
+                    {SPACES.map((space, idx) => (
+                        <section key={idx} className="relative z-0">
+                            <div className="flex items-center gap-3 mb-6">
+                                <h2 className="text-2xl font-display font-bold text-white group cursor-pointer flex items-center gap-2">
+                                    {space.title}
+                                    <svg className="w-5 h-5 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </h2>
+                            </div>
+
+                            {/* Space Rail - Horizontal Scroll with Parallax effect */}
+                            <div className="flex gap-6 overflow-x-auto pb-6 pt-2 scrollbar-hide -mx-4 px-4 lg:-mx-8 lg:px-8 snap-x snap-mandatory perspective-1000">
+                                {space.items.map((item) => (
+                                    <Link
+                                        key={item._id}
+                                        to={space.type === "short" ? `/shorts/${item._id}` : `/watch/${item._id}`}
+                                        className={`group flex-shrink-0 snap-center relative transition-transform duration-500 ease-out hover:-translate-y-2 active:scale-95 active:animate-bounce-elastic ${space.type === "short" ? 'w-48' : 'w-72 md:w-80'}`}
+                                        onMouseEnter={() => {
+                                            setAmbientColor(item.ambient);
+                                            setHoveredVideoId(item._id);
+                                        }}
+                                        onMouseLeave={() => setHoveredVideoId(null)}
+                                    >
+                                        {/* Smart Hover Tooltip */}
+                                        <div className="absolute -top-4 w-full flex justify-center z-50 pointer-events-none">
+                                            <SmartHoverTooltip
+                                                title={item.title}
+                                                summaryBullets={(item as any).aiSummary || ["AI analyzing context...", "Extracting key moments", "Generating summary"]}
+                                                isVisible={hoveredVideoId === item._id}
                                             />
-                                            <div className="absolute inset-0 bg-gradient-to-t from-dark-950/90 via-transparent to-transparent opacity-80 group-hover:opacity-50 transition-opacity duration-300" />
-
-                                            {/* Badges */}
-                                            {space.type === "video" && (
-                                                <div className="absolute bottom-3 right-3 px-2 py-1 rounded bg-black/60 backdrop-blur-sm text-[11px] font-bold text-white border border-white/10">
-                                                    {Math.floor((item as any).duration / 60)}:{((item as any).duration % 60).toString().padStart(2, '0')}
-                                                </div>
-                                            )}
                                         </div>
+                                        <div className="flex flex-col gap-3">
+                                            <div className={`rounded-2xl overflow-hidden glass-panel ${space.type === "short" ? 'aspect-[9/16]' : 'aspect-video'} ring-1 ring-white/10 group-hover:ring-white/30 transition-all duration-300 relative group-hover:shadow-glow-subtle`}>
+                                                <img
+                                                    src={item.thumbnailUrl}
+                                                    alt={item.title}
+                                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]"
+                                                />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-dark-950/90 via-transparent to-transparent opacity-80 group-hover:opacity-50 transition-opacity duration-300" />
 
-                                        {/* Metadata */}
-                                        <div className="flex gap-3 px-1">
-                                            {space.type === "video" && (
-                                                <div className="w-10 h-10 rounded-full bg-dark-800 flex items-center justify-center text-sm font-bold text-white shrink-0 border border-white/10 group-hover:border-primary-400/50 transition-colors">
-                                                    {(item as any).channelAvatar}
+                                                {/* Badges */}
+                                                {space.type === "video" && (
+                                                    <div className="absolute bottom-3 right-3 px-2 py-1 rounded bg-black/60 backdrop-blur-sm text-[11px] font-bold text-white border border-white/10">
+                                                        {Math.floor((item as any).duration / 60)}:{((item as any).duration % 60).toString().padStart(2, '0')}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Metadata */}
+                                            <div className="flex gap-3 px-1">
+                                                {space.type === "video" && (
+                                                    <div className="w-10 h-10 rounded-full bg-dark-800 flex items-center justify-center text-sm font-bold text-white shrink-0 border border-white/10 group-hover:border-primary-400/50 transition-colors">
+                                                        {(item as any).channelAvatar}
+                                                    </div>
+                                                )}
+                                                <div className="flex flex-col min-w-0 justify-center">
+                                                    <h3 className="text-white font-semibold text-sm md:text-base leading-snug line-clamp-2 group-hover:text-primary-300 transition-colors">
+                                                        {item.title}
+                                                    </h3>
+                                                    <p className="text-dark-400 text-xs md:text-sm mt-1">
+                                                        {space.type === "video" && `${(item as any).channelName} • `}
+                                                        {Intl.NumberFormat('en-US', { notation: "compact" }).format(item.views)} views
+                                                    </p>
                                                 </div>
-                                            )}
-                                            <div className="flex flex-col min-w-0 justify-center">
-                                                <h3 className="text-white font-semibold text-sm md:text-base leading-snug line-clamp-2 group-hover:text-primary-300 transition-colors">
-                                                    {item.title}
-                                                </h3>
-                                                <p className="text-dark-400 text-xs md:text-sm mt-1">
-                                                    {space.type === "video" && `${(item as any).channelName} • `}
-                                                    {Intl.NumberFormat('en-US', { notation: "compact" }).format(item.views)} views
-                                                </p>
                                             </div>
                                         </div>
-                                    </div>
-                                </Link>
-                            ))}
-                        </div>
-                    </section>
-                ))}
-            </div>
+                                    </Link>
+                                ))}
+                            </div>
+                        </section>
+                    ))}
+                </div>
 
-            <div className="flex justify-center mb-10">
-                <button className="nav-pill border-white/20 hover:border-white/40 text-white">Load more spaces</button>
+                <div className="flex justify-center pb-20">
+                    <button className="nav-pill border-white/20 hover:border-white/40 text-white">Load more spaces</button>
+                </div>
             </div>
         </Layout>
     );

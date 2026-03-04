@@ -5,13 +5,14 @@ import { Sidebar } from "~/components/Sidebar/Sidebar";
 interface LayoutProps {
     children: React.ReactNode;
     user?: {
-        channelName: string;
-        logoUrl?: string;
+        name: string;
+        channel?: string;
     } | null;
     hideSidebar?: boolean;
+    flush?: boolean;
 }
 
-export function Layout({ children, user, hideSidebar = false }: LayoutProps) {
+export function Layout({ children, user, hideSidebar = false, flush = false }: LayoutProps) {
     const [scrolled, setScrolled] = useState(false);
 
     // Background parallax effect
@@ -51,14 +52,14 @@ export function Layout({ children, user, hideSidebar = false }: LayoutProps) {
             <Header user={user} />
 
             {/* Main Container */}
-            <div className="relative z-10 flex pt-24 px-4 md:px-6 max-w-[1920px] mx-auto gap-6">
-                {!hideSidebar && (
+            <div className={`relative z-10 flex ${flush ? '' : 'pt-24 px-4 md:px-6 max-w-[1920px] mx-auto gap-6'}`}>
+                {!hideSidebar && !flush && (
                     <aside className="w-[72px] lg:w-64 shrink-0 hidden md:block sticky top-24 h-[calc(100vh-8rem)]">
                         <Sidebar />
                     </aside>
                 )}
 
-                <main className="flex-1 w-full min-w-0 pb-12">
+                <main className={`flex-1 w-full min-w-0 ${flush ? '' : 'pb-12'}`}>
                     {children}
                 </main>
             </div>
