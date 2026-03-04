@@ -15,7 +15,7 @@ export function Sidebar() {
     const location = useLocation();
 
     return (
-        <nav className="glass-panel h-full flex flex-col p-3 overflow-y-auto scrollbar-hide">
+        <nav className="glass-panel h-full flex flex-col p-3 overflow-y-auto scrollbar-hide rounded-2xl shadow-minimal-hover border-white/5">
             <ul className="space-y-2">
                 {navItems.map((item) => {
                     const isActive = location.pathname === item.path;
@@ -23,9 +23,9 @@ export function Sidebar() {
                         <li key={item.path}>
                             <Link
                                 to={item.path}
-                                className={`group flex items-center gap-4 px-3 py-3 rounded-xl transition-all duration-300 relative overflow-hidden ${isActive
-                                        ? "bg-primary-500/10 text-primary-400 font-medium"
-                                        : "text-dark-300 hover:bg-white/5 hover:text-white"
+                                className={`group flex items-center gap-4 px-3 py-3 rounded-xl transition-all duration-300 relative overflow-hidden active:scale-[0.97] active:animate-bounce-elastic ${isActive
+                                    ? "bg-primary-500/10 text-primary-400 font-medium shadow-glow-subtle"
+                                    : "text-dark-300 hover:bg-white/5 hover:text-white"
                                     }`}
                             >
                                 {/* Active Indicator Line */}

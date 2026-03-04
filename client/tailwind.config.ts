@@ -5,8 +5,8 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['"Inter"', '"Outfit"', "sans-serif"],
-                display: ['"Space Grotesk"', "sans-serif"],
+                sans: ['"Plus Jakarta Sans"', "sans-serif"],
+                display: ['"Outfit"', "sans-serif"],
             },
             colors: {
                 // Premium Minimalist Palette
@@ -64,6 +64,7 @@ export default {
                 'fade-in': 'fadeIn 0.5s ease-out forwards',
                 'slide-up': 'slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
                 'shimmer': 'shimmer 2s linear infinite',
+                'bounce-elastic': 'bounceElastic 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards',
             },
             keyframes: {
                 fadeIn: {
@@ -77,6 +78,11 @@ export default {
                 shimmer: {
                     '0%': { backgroundPosition: '-200% 0' },
                     '100%': { backgroundPosition: '200% 0' },
+                },
+                bounceElastic: {
+                    '0%': { transform: 'scale(0.95)' },
+                    '50%': { transform: 'scale(1.05)' },
+                    '100%': { transform: 'scale(1)' },
                 }
             },
         },

@@ -11,6 +11,9 @@ export const AWS_CONFIG = {
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   bucketName: process.env.S3_BUCKET_NAME,
+  accessPointAlias: process.env.S3_ACCESS_POINT_ALIAS,
+  networkOrigin: process.env.S3_NETWORK_ORIGIN,
+  bucketOwnerAccountId: process.env.S3_BUCKET_OWNER_ACCOUNT_ID,
 };
 
 // Validate required AWS configuration
