@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Header } from "~/components/Header/Header";
 import { Sidebar } from "~/components/Sidebar/Sidebar";
+import { MobileDock } from "~/components/MobileNav/MobileDock";
+import { MobileBottomSheet } from "~/components/MobileNav/MobileBottomSheet";
 
 interface LayoutProps {
     children: React.ReactNode;
@@ -36,7 +38,7 @@ export function Layout({ children, user, hideSidebar = false, flush = false }: L
     }, []);
 
     return (
-        <div className="min-h-screen bg-dark-950 text-white selection:bg-primary-500/30 font-sans">
+        <div className="min-h-screen bg-dark-950 text-white selection:bg-primary-500/30 font-sans overflow-x-hidden">
             {/* Ambient Background Glows that follow mouse subtly */}
             <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
                 <div
@@ -59,10 +61,14 @@ export function Layout({ children, user, hideSidebar = false, flush = false }: L
                     </aside>
                 )}
 
-                <main className={`flex-1 w-full min-w-0 ${flush ? '' : 'pb-12'}`}>
+                <main className={`flex-1 w-full min-w-0 ${flush ? 'pb-24 md:pb-0' : 'pb-24 md:pb-12'}`}>
                     {children}
                 </main>
             </div>
+
+            {/* Mobile Navigation */}
+            <MobileDock />
+            <MobileBottomSheet user={user} />
         </div>
     );
 }

@@ -67,7 +67,7 @@ export default function Index() {
 
             <div className="max-w-[1920px] mx-auto px-4 md:px-8">
                 {/* Sidebar Replacement for Spaces - Floating Top Categories */}
-                <div className="sticky top-[100px] md:top-[120px] z-40 py-3 mb-8 bg-dark-950/80 backdrop-blur-md border border-white/5 rounded-full mx-auto max-w-fit px-2">
+                <div className="sticky top-[100px] md:top-[120px] z-40 py-3 mb-8 bg-dark-950/80 backdrop-blur-md border border-white/5 rounded-full mx-auto max-w-full md:max-w-fit px-2 overflow-x-auto scrollbar-hide">
                     <CategoryChips categories={["For You", "Late Night Coding", "Weekend Thrillers", "Learn Something", "Music", "Vibes"]} />
                 </div>
 

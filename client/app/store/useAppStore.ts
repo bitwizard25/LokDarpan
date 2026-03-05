@@ -11,6 +11,9 @@ interface AppState {
     isAIOpen: boolean;
     toggleAIPanel: () => void;
     setAIOpen: (value: boolean) => void;
+
+    isMobileSheetOpen: boolean;
+    setMobileSheetOpen: (value: boolean) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -24,4 +27,7 @@ export const useAppStore = create<AppState>((set) => ({
     isAIOpen: false,
     toggleAIPanel: () => set((state) => ({ isAIOpen: !state.isAIOpen })),
     setAIOpen: (value) => set({ isAIOpen: value }),
+
+    isMobileSheetOpen: false,
+    setMobileSheetOpen: (value) => set({ isMobileSheetOpen: value }),
 }));
