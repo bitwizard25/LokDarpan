@@ -18,7 +18,7 @@ const getSampleChannel = (channelId: string) => ({
     channelName: channelId.charAt(0).toUpperCase() + channelId.slice(1),
     description: "Welcome to my channel! I create content about web development, programming tutorials, and tech reviews. Subscribe for weekly videos!",
     bannerUrl: "https://picsum.photos/seed/banner/1920/300",
-    logoUrl: undefined,
+    logoUrl: undefined as string | undefined,
     subscribers: 45000,
     totalViews: 1250000,
     joinedDate: "2023-06-15",
@@ -161,8 +161,8 @@ export default function Channel() {
                 <button
                     onClick={() => setActiveTab("videos")}
                     className={`pb-3 px-1 font-medium transition-colors relative ${activeTab === "videos"
-                            ? "text-white"
-                            : "text-gray-400 hover:text-gray-300"
+                        ? "text-white"
+                        : "text-gray-400 hover:text-gray-300"
                         }`}
                 >
                     Videos
@@ -173,8 +173,8 @@ export default function Channel() {
                 <button
                     onClick={() => setActiveTab("about")}
                     className={`pb-3 px-1 font-medium transition-colors relative ${activeTab === "about"
-                            ? "text-white"
-                            : "text-gray-400 hover:text-gray-300"
+                        ? "text-white"
+                        : "text-gray-400 hover:text-gray-300"
                         }`}
                 >
                     About
