@@ -12,9 +12,11 @@ interface LayoutProps {
     } | null;
     hideSidebar?: boolean;
     flush?: boolean;
+    /** App shell from the LokDarpan design: fixed top bar, sticky sidebar, plain dark canvas. */
+    shell?: boolean;
 }
 
-export function Layout({ children, user, hideSidebar = false, flush = false }: LayoutProps) {
+export function Layout({ children, user, hideSidebar = false, flush = false, shell = false }: LayoutProps) {
     const [scrolled, setScrolled] = useState(false);
 
     // Background parallax effect
@@ -37,6 +39,22 @@ export function Layout({ children, user, hideSidebar = false, flush = false }: L
         };
     }, []);
 
+    if (shell) {
+        return (
+            <div className="min-h-screen bg-dark-950 text-dark-100 selection:bg-primary-500/30 font-sans">
+                <Header user={user} />
+                <div className="flex items-start pt-[124px] md:pt-16">
+                    {!hideSidebar && <Sidebar className="hidden md:flex sticky top-16 h-[calc(100vh-4rem)]" />}
+                    <main className="flex-1 min-w-0 px-[clamp(16px,3vw,40px)] pt-6 pb-28 md:pb-12 flex flex-col gap-10">
+                        {children}
+                    </main>
+                </div>
+                <MobileDock />
+                <MobileBottomSheet user={user} />
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen bg-dark-950 text-white selection:bg-primary-500/30 font-sans overflow-x-hidden">
             {/* Ambient Background Glows that follow mouse subtly */}
@@ -56,9 +74,7 @@ export function Layout({ children, user, hideSidebar = false, flush = false }: L
             {/* Main Container */}
             <div className={`relative z-10 flex ${flush ? '' : 'pt-24 px-4 md:px-6 max-w-[1920px] mx-auto gap-6'}`}>
                 {!hideSidebar && !flush && (
-                    <aside className="w-[72px] lg:w-64 shrink-0 hidden md:block sticky top-24 h-[calc(100vh-8rem)]">
-                        <Sidebar />
-                    </aside>
+                    <Sidebar className="hidden md:flex sticky top-24 h-[calc(100vh-8rem)] rounded-2xl" />
                 )}
 
                 <main className={`flex-1 w-full min-w-0 ${flush ? 'pb-24 md:pb-0' : 'pb-24 md:pb-12'}`}>

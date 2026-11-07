@@ -1,12 +1,10 @@
 import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData, Link } from "@remix-run/react";
-import { useState } from "react";
 import { Layout } from "~/components/Layout/Layout";
 import { CategoryChips } from "~/components/CategoryChips/CategoryChips";
-import { CinematicHero } from "~/components/Hero/CinematicHero";
-import { ChameleonCanvas } from "~/components/UI/ChameleonCanvas";
-import { SmartHoverTooltip } from "~/components/VideoCard/SmartHoverTooltip";
+import { VideoCard } from "~/components/VideoCard/VideoCard";
+import { FeaturedHero } from "~/components/Hero/FeaturedHero";
 import { getUserFromSession } from "~/services/auth.server";
 
 export const meta: MetaFunction = () => {
@@ -50,107 +48,80 @@ export async function loader({ request }: LoaderFunctionArgs) {
     return json({ user: userSession?.user || null });
 }
 
+const FEATURED = {
+    id: "t2",
+    title: "Monsoon Session: what changed in the House this week",
+    description:
+        "Three bills, two walkouts and a debate that ran past midnight. Lok Report breaks down what passed, what stalled and what it means for you.",
+    imageUrl: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=2600&auto=format&fit=crop",
+    channelName: "Lok Report",
+    watching: "12.4k",
+    presenters: "Ananya Rao, Vikram Sethi",
+    language: "Hindi, English subtitles",
+};
+
+// Horizontal rail item width: ~4.5 cards visible on wide screens so the next card peeks in.
+const RAIL_ITEM = "min-w-0 shrink-0 grow-0 snap-start basis-[clamp(168px,calc((100%_-_80px)/4.5),300px)]";
+const RAIL = "flex gap-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory pt-1 pb-2";
+
 export default function Index() {
     const { user } = useLoaderData<typeof loader>();
-    const [ambientColor, setAmbientColor] = useState("rgba(59, 130, 246, 0.05)");
-    const [hoveredVideoId, setHoveredVideoId] = useState<string | null>(null);
 
     return (
-        <Layout user={user} hideSidebar={true} flush={true}>
-            {/* Ambient Overlay to provide the Chameleon Effect */}
-            <ChameleonCanvas ambientColor={ambientColor} intensity="medium" />
+        <Layout user={user} shell>
+            <FeaturedHero item={FEATURED} />
 
-            {/* Hero Section */}
-            <section className="relative w-full z-10 mb-8">
-                <CinematicHero onSlideChange={setAmbientColor} />
-            </section>
-
-            <div className="max-w-[1920px] mx-auto px-4 md:px-8">
-                {/* Sidebar Replacement for Spaces - Floating Top Categories */}
-                <div className="sticky top-[100px] md:top-[120px] z-40 py-3 mb-8 bg-dark-950/80 backdrop-blur-md border border-white/5 rounded-full mx-auto max-w-full md:max-w-fit px-2 overflow-x-auto scrollbar-hide">
-                    <CategoryChips categories={["For You", "Late Night Coding", "Weekend Thrillers", "Learn Something", "Music", "Vibes"]} />
-                </div>
-
-                {/* Render Spaces */}
-                <div className="flex flex-col gap-16 pb-20">
-                    {SPACES.map((space, idx) => (
-                        <section key={idx} className="relative z-0">
-                            <div className="flex items-center gap-3 mb-6">
-                                <h2 className="text-2xl font-display font-bold text-white group cursor-pointer flex items-center gap-2">
-                                    {space.title}
-                                    <svg className="w-5 h-5 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                    </svg>
-                                </h2>
-                            </div>
-
-                            {/* Space Rail - Horizontal Scroll with Parallax effect */}
-                            <div className="flex gap-6 overflow-x-auto pb-6 pt-2 scrollbar-hide -mx-4 px-4 lg:-mx-8 lg:px-8 snap-x snap-mandatory perspective-1000">
-                                {space.items.map((item) => (
-                                    <Link
-                                        key={item._id}
-                                        to={space.type === "short" ? `/shorts/${item._id}` : `/watch/${item._id}`}
-                                        className={`group flex-shrink-0 snap-center relative transition-transform duration-500 ease-out hover:-translate-y-2 active:scale-95 active:animate-bounce-elastic ${space.type === "short" ? 'w-48' : 'w-72 md:w-80'}`}
-                                        onMouseEnter={() => {
-                                            setAmbientColor(item.ambient);
-                                            setHoveredVideoId(item._id);
-                                        }}
-                                        onMouseLeave={() => setHoveredVideoId(null)}
-                                    >
-                                        {/* Smart Hover Tooltip */}
-                                        <div className="absolute -top-4 w-full flex justify-center z-50 pointer-events-none">
-                                            <SmartHoverTooltip
-                                                title={item.title}
-                                                summaryBullets={(item as any).aiSummary || ["AI analyzing context...", "Extracting key moments", "Generating summary"]}
-                                                isVisible={hoveredVideoId === item._id}
-                                            />
-                                        </div>
-                                        <div className="flex flex-col gap-3">
-                                            <div className={`rounded-2xl overflow-hidden glass-panel ${space.type === "short" ? 'aspect-[9/16]' : 'aspect-video'} ring-1 ring-white/10 group-hover:ring-white/30 transition-all duration-300 relative group-hover:shadow-glow-subtle`}>
-                                                <img
-                                                    src={item.thumbnailUrl}
-                                                    alt={item.title}
-                                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]"
-                                                />
-                                                <div className="absolute inset-0 bg-gradient-to-t from-dark-950/90 via-transparent to-transparent opacity-80 group-hover:opacity-50 transition-opacity duration-300" />
-
-                                                {/* Badges */}
-                                                {space.type === "video" && (
-                                                    <div className="absolute bottom-3 right-3 px-2 py-1 rounded bg-black/60 backdrop-blur-sm text-[11px] font-bold text-white border border-white/10">
-                                                        {Math.floor((item as any).duration / 60)}:{((item as any).duration % 60).toString().padStart(2, '0')}
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            {/* Metadata */}
-                                            <div className="flex gap-3 px-1">
-                                                {space.type === "video" && (
-                                                    <div className="w-10 h-10 rounded-full bg-dark-800 flex items-center justify-center text-sm font-bold text-white shrink-0 border border-white/10 group-hover:border-primary-400/50 transition-colors overflow-hidden">
-                                                        <img src={(item as any).channelAvatar} alt="channel avatar" className="w-full h-full object-cover" />
-                                                    </div>
-                                                )}
-                                                <div className="flex flex-col min-w-0 justify-center">
-                                                    <h3 className="text-white font-semibold text-sm md:text-base leading-snug line-clamp-2 group-hover:text-primary-300 transition-colors">
-                                                        {item.title}
-                                                    </h3>
-                                                    <p className="text-dark-400 text-xs md:text-sm mt-1">
-                                                        {space.type === "video" && `${(item as any).channelName} • `}
-                                                        {Intl.NumberFormat('en-US', { notation: "compact" }).format(item.views)} views
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </Link>
-                                ))}
-                            </div>
-                        </section>
-                    ))}
-                </div>
-
-                <div className="flex justify-center pb-20">
-                    <button className="nav-pill border-white/20 hover:border-white/40 text-white">Load more spaces</button>
-                </div>
+            <div className="max-w-full overflow-x-auto scrollbar-hide">
+                <CategoryChips categories={["For You", "Late Night Coding", "Weekend Thrillers", "Learn Something", "Music", "Vibes"]} />
             </div>
+
+            {SPACES.map((space) => (
+                <section key={space.title} className="flex flex-col gap-4">
+                    <div className="flex items-baseline justify-between gap-4">
+                        <h2 className="m-0 font-display font-semibold text-white text-[clamp(20px,2vw,25px)]">{space.title}</h2>
+                        <Link
+                            to={space.type === "short" ? "/shorts" : "/explore"}
+                            className="py-2 text-sm font-semibold text-dark-200 hover:text-white no-underline transition-colors"
+                        >
+                            See all
+                        </Link>
+                    </div>
+
+                    <div className={RAIL}>
+                        {space.type === "short"
+                            ? space.items.map((item) => (
+                                <Link
+                                    key={item._id}
+                                    to={`/shorts/${item._id}`}
+                                    aria-label={item.title}
+                                    className="flex-none snap-start w-[clamp(140px,16vw,200px)] flex flex-col gap-2 no-underline"
+                                >
+                                    <div className="aspect-[9/16] overflow-hidden rounded-2xl bg-dark-800 border border-white/5">
+                                        <img src={item.thumbnailUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
+                                    </div>
+                                    <span className="text-white font-semibold text-sm leading-snug line-clamp-2">{item.title}</span>
+                                    <span className="text-dark-400 text-sm">
+                                        {Intl.NumberFormat("en-US", { notation: "compact" }).format(item.views)} views
+                                    </span>
+                                </Link>
+                            ))
+                            : space.items.map((item) => (
+                                <div key={item._id} className={RAIL_ITEM}>
+                                    <VideoCard
+                                        id={item._id}
+                                        title={item.title}
+                                        thumbnailUrl={item.thumbnailUrl}
+                                        channelName={(item as any).channelName}
+                                        views={item.views}
+                                        createdAt=""
+                                        duration={(item as any).duration}
+                                        isLive={(item as any).isLive}
+                                    />
+                                </div>
+                            ))}
+                    </div>
+                </section>
+            ))}
         </Layout>
     );
 }
