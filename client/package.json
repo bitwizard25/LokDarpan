@@ -11,10 +11,10 @@
     "typecheck": "tsc"
   },
   "dependencies": {
+    "@phosphor-icons/react": "^2.1.10",
     "@remix-run/node": "^2.15.2",
     "@remix-run/react": "^2.15.2",
     "@remix-run/serve": "^2.15.2",
-    "@remixicon/react": "^4.9.0",
     "@vercel/remix": "^2.16.7",
     "baseline-browser-mapping": "^2.11.35",
     "caniuse-lite": "^1.0.30001823",

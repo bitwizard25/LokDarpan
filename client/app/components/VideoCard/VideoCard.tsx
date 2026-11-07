@@ -1,6 +1,6 @@
 import { Link } from "@remix-run/react";
 import { useState } from "react";
-import { RiAddLine, RiCheckLine, RiPlayFill } from "@remixicon/react";
+import { Plus, Check, Play } from "@phosphor-icons/react";
 
 interface VideoCardProps {
     id: string;
@@ -39,7 +39,7 @@ export function VideoCard({
                 <img src={thumbnailUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
             ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                    <RiPlayFill size={40} className="text-dark-600" />
+                    <Play size={40} weight="duotone" className="text-dark-600" />
                 </div>
             )}
 
@@ -89,7 +89,7 @@ export function VideoCard({
                         title={added ? "In My List" : "Add to My List"}
                         className={`shrink-0 w-11 h-11 -my-1.5 -mr-2 flex items-center justify-center rounded-full border-0 cursor-pointer transition-all duration-150 active:scale-90 ${added ? "bg-white/10 text-white" : "bg-transparent text-dark-400 hover:bg-white/10 hover:text-white"}`}
                     >
-                        {added ? <RiCheckLine size={20} /> : <RiAddLine size={20} />}
+                        {added ? <Check size={20} weight="bold" /> : <Plus size={20} weight="light" />}
                     </button>
                 </div>
             </div>

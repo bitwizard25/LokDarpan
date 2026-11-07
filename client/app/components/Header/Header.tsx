@@ -1,7 +1,7 @@
 import { Link, Form, useLocation } from "@remix-run/react";
 import { TheaterLobby } from "~/components/TheaterLobby/TheaterLobby";
 import { useAppStore } from "~/store/useAppStore";
-import { RiSearchLine, RiAddLine, RiTv2Line } from "@remixicon/react";
+import { MagnifyingGlass, Plus, Television } from "@phosphor-icons/react";
 
 interface HeaderProps {
     user?: {
@@ -13,7 +13,7 @@ interface HeaderProps {
 function SearchForm({ className = "" }: { className?: string }) {
     return (
         <Form role="search" action="/search" className={`relative ${className}`}>
-            <RiSearchLine size={20} className="absolute left-4 top-3 pointer-events-none text-dark-400" />
+            <MagnifyingGlass size={20} weight="light" className="absolute left-4 top-3 pointer-events-none text-dark-400" />
             <input
                 type="search"
                 name="q"
@@ -61,7 +61,7 @@ export function Header({ user }: HeaderProps) {
 
                 <div className="flex items-center gap-3 shrink-0">
                     <Link to="/upload" className="h-10 px-4 rounded-full border border-white/15 hover:bg-white/10 flex items-center gap-2 text-white text-sm font-medium transition-colors">
-                        <RiAddLine size={18} />
+                        <Plus size={18} weight="light" />
                         Create
                     </Link>
 
@@ -74,7 +74,7 @@ export function Header({ user }: HeaderProps) {
                             }}
                             className="h-10 px-4 rounded-full border border-primary-500/40 bg-primary-500/15 hover:bg-primary-500/30 flex items-center gap-2 text-primary-300 hover:text-white text-sm font-semibold transition-colors active:scale-95"
                         >
-                            <RiTv2Line size={18} />
+                            <Television size={18} weight="light" />
                             Theater
                         </button>
                     )}

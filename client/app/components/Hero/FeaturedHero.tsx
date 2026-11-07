@@ -1,6 +1,6 @@
 import { Link } from "@remix-run/react";
 import { useState } from "react";
-import { RiPlayFill } from "@remixicon/react";
+import { Play } from "@phosphor-icons/react";
 
 export interface FeaturedItem {
     id: string;
@@ -51,7 +51,7 @@ export function FeaturedHero({ item }: { item: FeaturedItem }) {
                             to={`/watch/${item.id}`}
                             className="h-12 px-6 flex items-center gap-2 rounded-full bg-primary-600 text-white font-semibold text-base no-underline transition-all hover:brightness-110 active:scale-95"
                         >
-                            <RiPlayFill size={20} />
+                            <Play size={20} weight="fill" />
                             Watch now
                         </Link>
                         <button

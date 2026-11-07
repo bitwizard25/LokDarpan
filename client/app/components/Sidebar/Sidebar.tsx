@@ -1,18 +1,14 @@
 import { Link, useLocation } from "@remix-run/react";
 import { useState } from "react";
-import {
-    RiHome5Line, RiHome5Fill, RiCompass3Line, RiCompass3Fill, RiLineChartLine, RiLineChartFill,
-    RiPlayCircleLine, RiPlayCircleFill, RiGroupLine, RiGroupFill, RiBookmarkLine, RiBookmarkFill,
-    RiArrowLeftSLine, RiArrowRightSLine,
-} from "@remixicon/react";
+import { House, Compass, TrendUp, PlayCircle, UsersThree, BookmarkSimple, CaretLeft, CaretRight } from "@phosphor-icons/react";
 
 const navItems = [
-    { label: "Home", path: "/", Icon: RiHome5Line, ActiveIcon: RiHome5Fill },
-    { label: "Explore", path: "/explore", Icon: RiCompass3Line, ActiveIcon: RiCompass3Fill },
-    { label: "Trending", path: "/trending", Icon: RiLineChartLine, ActiveIcon: RiLineChartFill },
-    { label: "Shorts", path: "/shorts", Icon: RiPlayCircleLine, ActiveIcon: RiPlayCircleFill },
-    { label: "Following", path: "/following", Icon: RiGroupLine, ActiveIcon: RiGroupFill },
-    { label: "Library", path: "/library", Icon: RiBookmarkLine, ActiveIcon: RiBookmarkFill },
+    { label: "Home", path: "/", Icon: House },
+    { label: "Explore", path: "/explore", Icon: Compass },
+    { label: "Trending", path: "/trending", Icon: TrendUp },
+    { label: "Shorts", path: "/shorts", Icon: PlayCircle },
+    { label: "Following", path: "/following", Icon: UsersThree },
+    { label: "Library", path: "/library", Icon: BookmarkSimple },
 ];
 
 interface SidebarProps {
@@ -52,7 +48,7 @@ export function Sidebar({ className = "" }: SidebarProps) {
                             }`}
                     >
                         {isActive && <span className="absolute left-0 top-3 bottom-3 w-[3px] rounded-r-[3px] bg-primary-500" />}
-                        {isActive ? <item.ActiveIcon size={24} className="shrink-0" /> : <item.Icon size={24} className="shrink-0" />}
+                        <item.Icon size={24} weight={isActive ? "duotone" : "light"} className="shrink-0" />
                         <span className={showLabel}>{item.label}</span>
                     </Link>
                 );
@@ -68,7 +64,7 @@ export function Sidebar({ className = "" }: SidebarProps) {
                         title="Collapse"
                         className="ml-auto w-11 h-11 flex items-center justify-center rounded-xl border border-white/10 text-dark-200 hover:bg-white/10 hover:text-white transition-colors"
                     >
-                        <RiArrowLeftSLine size={22} />
+                        <CaretLeft size={20} weight="light" />
                     </button>
                 </div>
                 <button
@@ -78,7 +74,7 @@ export function Sidebar({ className = "" }: SidebarProps) {
                     title="Expand"
                     className={`${showExpand} w-12 h-12 items-center justify-center rounded-xl border border-white/10 text-dark-200 hover:bg-white/10 hover:text-white transition-colors`}
                 >
-                    <RiArrowRightSLine size={22} />
+                    <CaretRight size={20} weight="light" />
                 </button>
             </div>
         </nav>

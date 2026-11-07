@@ -1,18 +1,15 @@
 import { Link, useLocation } from "@remix-run/react";
 import { useAppStore } from "~/store/useAppStore";
-import {
-    RiHome5Line, RiHome5Fill, RiCompass3Line, RiCompass3Fill, RiPlayCircleLine, RiPlayCircleFill,
-    RiAddCircleLine, RiTv2Line, RiTv2Fill, RiUser3Line, RiUser3Fill,
-} from "@remixicon/react";
+import { House, Compass, PlayCircle, PlusCircle, Television, UserCircle } from "@phosphor-icons/react";
 
-const ICONS: Record<string, { Line: typeof RiHome5Line; Fill: typeof RiHome5Fill }> = {
-    home: { Line: RiHome5Line, Fill: RiHome5Fill },
-    explore: { Line: RiCompass3Line, Fill: RiCompass3Fill },
-    shorts: { Line: RiPlayCircleLine, Fill: RiPlayCircleFill },
-    create: { Line: RiAddCircleLine, Fill: RiAddCircleLine },
-    theater: { Line: RiTv2Line, Fill: RiTv2Fill },
-    profile: { Line: RiUser3Line, Fill: RiUser3Fill },
-};
+const ICONS = {
+    home: House,
+    explore: Compass,
+    shorts: PlayCircle,
+    create: PlusCircle,
+    theater: Television,
+    profile: UserCircle,
+} as const;
 
 const dockItems = [
     { icon: "home", label: "Home", path: "/" },
@@ -37,11 +34,11 @@ export function MobileDock() {
                 if (item.icon === "theater" && !isWatchPage) return null;
                 const isActive = item.path ? location.pathname === item.path : false;
 
-                const { Line, Fill } = ICONS[item.icon];
+                const Icon = ICONS[item.icon as keyof typeof ICONS];
                 const content = (
                     <>
                         {isActive && <span className="absolute top-0 w-6 h-[3px] rounded-b-[3px] bg-primary-500" />}
-                        {isActive ? <Fill size={24} /> : <Line size={24} />}
+                        <Icon size={24} weight={isActive ? "duotone" : "light"} />
                         {item.label}
                     </>
                 );
