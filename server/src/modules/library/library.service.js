@@ -3,6 +3,7 @@ import { SavedVideo, WatchHistory, Playlist } from './library.models.js';
 import { readableVideo, publicFilter, cardFields, populateAuthor, videoCard } from '../catalogue/catalogue.service.js';
 import { objectId, pageOptions, pageResult, safeText } from '../../shared/http/pagination.js';
 import { NotFoundError, AuthorizationError, ValidationError } from '../../utils/errors.js';
+import { eventsService } from '../recommendation/events.service.js';
 
 async function permittedCards(ids, viewerId) {
   return Video.find({ _id: { $in: ids }, $or: [publicFilter, { user_id: viewerId }] })
@@ -15,6 +16,7 @@ export async function saved(userId, videoId, enabled) {
     await readableVideo(videoId, userId);
     try { await SavedVideo.updateOne({ user: userId, video: id }, { $setOnInsert: { user: userId, video: id } }, { upsert: true }); }
     catch (error) { if (error.code !== 11000) throw error; }
+    eventsService.recordAction({ userId, type: 'save', videoId }).catch(() => {});
   } else await SavedVideo.deleteOne({ user: userId, video: id });
   return { isSaved: enabled };
 }

@@ -1,5 +1,6 @@
 import { getMyVideos } from './studio-video.service.js';
 import { videoFeatures, needsPublishedAt } from '../../recommendation/features.js';
+import { eventsService } from '../../recommendation/events.service.js';
 import { createReadStream } from 'fs';
 import { unlink } from 'fs/promises';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
@@ -383,6 +384,7 @@ async function toggleLike(videoId, userId) {
     video.likedBy.push(userId);
     video.likes++;
     await video.save();
+    eventsService.recordAction({ userId, type: 'like', videoId }).catch(() => {});
     return { action: 'liked', likes: video.likes };
   }
 }
@@ -422,7 +424,10 @@ async function setReaction(videoId, userId, reaction) {
   video.dislikedBy.pull(userId);
   if (reaction === 'like') {
     video.likedBy.addToSet(userId);
-    if (!wasLiked) video.likes = (video.likes || 0) + 1;
+    if (!wasLiked) {
+      video.likes = (video.likes || 0) + 1;
+      eventsService.recordAction({ userId, type: 'like', videoId }).catch(() => {});
+    }
     if (wasDisliked) video.dislikes = Math.max(0, (video.dislikes || 0) - 1);
   } else {
     video.dislikedBy.addToSet(userId);

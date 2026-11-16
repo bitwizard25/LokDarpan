@@ -13,6 +13,7 @@ import Channel from '../../channel/schemas/channel.schema.js';
 import Network from '../../network/schemas/network.schema.js';
 import { NotFoundError, ValidationError } from '../../../utils/errors.js';
 import { isAdminEmail } from '../../verification/admin.js';
+import { profileService } from '../../recommendation/profile.service.js';
 import { isValidObjectId } from '../../../utils/db.js';
 
 /**
@@ -184,6 +185,7 @@ async function deleteAccount(userId, password) {
   await Playlist.deleteMany({ owner: userId });
   await Network.deleteMany({ owner: userId });
   await Network.updateMany({ 'members.user': userId }, { $pull: { members: { user: userId } } });
+  await profileService.deleteForUser(userId);
   await User.findByIdAndDelete(userId);
 }
 

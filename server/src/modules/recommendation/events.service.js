@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import mongoose from 'mongoose';
 import { REC } from './rec.config.js';
 import RecEvent, { REC_CLIENT_EVENT_TYPES } from './rec-event.model.js';
 import Video from '../video/schemas/video.schema.js';
@@ -8,6 +9,7 @@ import { ValidationError } from '../../utils/errors.js';
 async function defaultInsertEvents(docs) {
   if (!docs || docs.length === 0) return [];
   try {
+    if (mongoose?.connection?.readyState === 0) return [];
     return await RecEvent.insertMany(docs, { ordered: false });
   } catch (err) {
     if (err.insertedDocs && Array.isArray(err.insertedDocs)) {
@@ -37,11 +39,23 @@ async function defaultIncViews(videoId) {
   }
 }
 
+import RecProfile from './rec-profile.model.js';
+
+async function defaultIsPersonalized(userId) {
+  if (!userId) return false;
+  try {
+    const profile = await RecProfile.findOne({ user: userId });
+    return Boolean(profile?.personalizationEnabled);
+  } catch {
+    return false;
+  }
+}
+
 export function createEventsService({
   insertEvents = defaultInsertEvents,
   findPublicVideoIds = defaultFindPublicVideoIds,
   incViews = defaultIncViews,
-  isPersonalized = async () => false,
+  isPersonalized = defaultIsPersonalized,
   now = () => new Date(),
 } = {}) {
   async function ingest({ viewerId = null, sessionId, events }) {
