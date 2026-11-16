@@ -17,6 +17,8 @@ import multipart from '@fastify/multipart';
 import jwt from '@fastify/jwt';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
+import rateLimit from '@fastify/rate-limit';
+import recommendationRoutes from './modules/recommendation/recommendation.routes.js';
 import { config } from 'dotenv';
 import { APP_CONFIG } from './config/app.js';
 import { JWT_CONFIG } from './config/jwt.js';
@@ -65,6 +67,10 @@ async function buildApp() {
 
   await app.register(jwt, {
     secret: JWT_CONFIG.secret,
+  });
+
+  await app.register(rateLimit, {
+    global: false,
   });
 
   // Register Swagger for API documentation
@@ -214,6 +220,11 @@ async function buildApp() {
   await app.register(networkRoutes, {
     prefix: `${APP_CONFIG.apiPrefix}/network`,
     networkController,
+    authenticate,
+  });
+
+  await app.register(recommendationRoutes, {
+    prefix: APP_CONFIG.apiPrefix,
     authenticate,
   });
 
