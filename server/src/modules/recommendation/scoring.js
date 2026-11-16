@@ -224,27 +224,51 @@ export function rerank(
   const unusedExplore = [...explorePool];
   const remainingRanked = [...ranked];
   const results = [];
+  const seenIds = new Set();
 
   while (remainingRanked.length > 0 || unusedExplore.length > 0) {
     const pageItems = [];
     const channelCounts = new Map();
 
     for (let slot = 0; slot < pageSize; slot++) {
+      // Clean up unusedExplore from already seen
+      while (unusedExplore.length > 0 && seenIds.has(String(unusedExplore[0]._id || unusedExplore[0].id))) {
+        unusedExplore.shift();
+      }
+
+      // Clean up remainingRanked from already seen
+      while (
+        remainingRanked.length > 0 &&
+        seenIds.has(String(remainingRanked[0].video?._id || remainingRanked[0].video || remainingRanked[0]._id || remainingRanked[0].id))
+      ) {
+        remainingRanked.shift();
+      }
+
       if (slotIndices.includes(slot) && unusedExplore.length > 0) {
         const randIdx = Math.floor(random() * unusedExplore.length);
         const [expVideo] = unusedExplore.splice(randIdx, 1);
-        const ownerId = String(expVideo.user_id?._id || expVideo.user_id);
-        const count = channelCounts.get(ownerId) || 0;
-        if (count < channelCap) {
-          channelCounts.set(ownerId, count + 1);
-          pageItems.push({
-            id: String(expVideo._id),
-            source: 'explore',
-            topKey: expVideo.topKey || null,
-          });
-          continue;
-        } else {
-          unusedExplore.push(expVideo);
+        const vid = String(expVideo._id || expVideo.id);
+        if (!seenIds.has(vid)) {
+          const ownerId = String(expVideo.user_id?._id || expVideo.user_id);
+          const count = channelCounts.get(ownerId) || 0;
+          if (count < channelCap) {
+            channelCounts.set(ownerId, count + 1);
+            seenIds.add(vid);
+            // remove from remainingRanked if present
+            const rIdx = remainingRanked.findIndex(
+              (r) => String(r.video?._id || r.video || r._id || r.id) === vid
+            );
+            if (rIdx !== -1) remainingRanked.splice(rIdx, 1);
+
+            pageItems.push({
+              id: vid,
+              source: 'explore',
+              topKey: expVideo.topKey || null,
+            });
+            continue;
+          } else {
+            unusedExplore.push(expVideo);
+          }
         }
       }
 
@@ -252,13 +276,28 @@ export function rerank(
       for (let i = 0; i < remainingRanked.length; i++) {
         const item = remainingRanked[i];
         const v = item.video || item;
+        const vid = String(v._id || v.id);
+        if (seenIds.has(vid)) {
+          remainingRanked.splice(i, 1);
+          i--;
+          continue;
+        }
+
         const ownerId = String(v.user_id?._id || v.user_id);
         const count = channelCounts.get(ownerId) || 0;
         if (count < channelCap) {
           channelCounts.set(ownerId, count + 1);
+          seenIds.add(vid);
           remainingRanked.splice(i, 1);
+
+          // remove from unusedExplore if present
+          const eIdx = unusedExplore.findIndex(
+            (e) => String(e._id || e.id) === vid
+          );
+          if (eIdx !== -1) unusedExplore.splice(eIdx, 1);
+
           pageItems.push({
-            id: String(v._id),
+            id: vid,
             source: item.source || 'interest',
             topKey: item.topKey || null,
           });
@@ -273,21 +312,39 @@ export function rerank(
     }
 
     if (pageItems.length === 0) {
+      while (
+        remainingRanked.length > 0 &&
+        seenIds.has(String(remainingRanked[0].video?._id || remainingRanked[0].video || remainingRanked[0]._id || remainingRanked[0].id))
+      ) {
+        remainingRanked.shift();
+      }
+
       if (remainingRanked.length > 0) {
         const item = remainingRanked.shift();
         const v = item.video || item;
+        const vid = String(v._id || v.id);
+        seenIds.add(vid);
+        const eIdx = unusedExplore.findIndex(
+          (e) => String(e._id || e.id) === vid
+        );
+        if (eIdx !== -1) unusedExplore.splice(eIdx, 1);
+
         pageItems.push({
-          id: String(v._id),
+          id: vid,
           source: item.source || 'interest',
           topKey: item.topKey || null,
         });
       } else if (unusedExplore.length > 0) {
         const expVideo = unusedExplore.shift();
-        pageItems.push({
-          id: String(expVideo._id),
-          source: 'explore',
-          topKey: expVideo.topKey || null,
-        });
+        const vid = String(expVideo._id || expVideo.id);
+        if (!seenIds.has(vid)) {
+          seenIds.add(vid);
+          pageItems.push({
+            id: vid,
+            source: 'explore',
+            topKey: expVideo.topKey || null,
+          });
+        }
       } else {
         break;
       }

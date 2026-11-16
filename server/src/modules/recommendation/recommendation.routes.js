@@ -4,6 +4,7 @@ import {
 } from '../../middleware/auth.middleware.js';
 import { eventsService as defaultEventsService } from './events.service.js';
 import { profileService as defaultProfileService } from './profile.service.js';
+import { feedService as defaultFeedService } from './feed.service.js';
 import { ONBOARDING_V1, mapAnswers } from './onboarding.v1.js';
 import Video from '../video/schemas/video.schema.js';
 
@@ -12,6 +13,72 @@ export default async function recommendationRoutes(fastify, options = {}) {
   const optionalAuth = options.optionalAuthenticate || defaultOptionalAuthenticate;
   const eventsSvc = options.eventsService || defaultEventsService;
   const profileSvc = options.profileService || defaultProfileService;
+  const feedSvc = options.feedService || defaultFeedService;
+
+  fastify.get('/recommendations', {
+    preHandler: [optionalAuth],
+    schema: {
+      tags: ['recommendations'],
+      querystring: {
+        type: 'object',
+        additionalProperties: true,
+        properties: {
+          cursor: { type: 'string' },
+          hints: { anyOf: [{ type: 'string' }, { type: 'array' }] },
+          languages: { anyOf: [{ type: 'string' }, { type: 'array' }] },
+          category: { type: 'string', maxLength: 40 },
+          limit: { type: 'integer', minimum: 1, maximum: 24 },
+        },
+      },
+    },
+  }, async (request, reply) => {
+    const { cursor } = request.query || {};
+    const limit = request.query?.limit ? Number(request.query.limit) : 12;
+
+    if (cursor) {
+      try {
+        const page = await feedSvc.nextPage({ cursor, limit });
+        return reply.send(page);
+      } catch (err) {
+        if (err.name === 'FeedExpiredError' || err.statusCode === 410) {
+          return reply.status(410).send({
+            error: {
+              code: 'FEED_EXPIRED',
+              message: err.message || 'Feed expired',
+            },
+          });
+        }
+        if (err.statusCode === 400) {
+          return reply.status(400).send({
+            error: {
+              code: 'INVALID_CURSOR',
+              message: err.message,
+            },
+          });
+        }
+        throw err;
+      }
+    }
+
+    const parseList = (val) => {
+      if (!val) return [];
+      if (Array.isArray(val)) return val;
+      return typeof val === 'string' ? val.split(',').map((s) => s.trim()).filter(Boolean) : [];
+    };
+
+    const hints = parseList(request.query?.hints);
+    const languages = parseList(request.query?.languages);
+    const category = request.query?.category || 'all';
+
+    const page = await feedSvc.firstPage({
+      viewerId: request.userId || null,
+      hints,
+      languages,
+      category,
+      limit,
+    });
+    return reply.send(page);
+  });
 
   fastify.post('/recommendation-events', {
     preHandler: [optionalAuth],

@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 const labels = ['Entertainment', 'Education', 'Gaming', 'Music', 'Sports', 'Technology', 'News', 'Comedy', 'Film', 'Other'];
 export const categories = [{ id: 'all', label: 'For You' }, ...labels.map(label => ({ id: label.toLowerCase(), label }))];
 
@@ -18,8 +20,12 @@ function card(video) {
 }
 
 // The repository handles MongoDB; the service owns filtering and the public DTO.
-export function createHomeService(findVideos) {
-  return async ({ category = 'all', limit = 8 } = {}) => {
+export function createHomeService(findVideos, { feedService } = {}) {
+  return async (query = {}, viewer = {}) => {
+    const category = query.category || 'all';
+    const rawLimit = query.limit !== undefined ? query.limit : 8;
+    const limit = typeof rawLimit === 'number' ? rawLimit : parseInt(rawLimit, 10);
+
     if (!categories.some(item => item.id === category)) {
       throw Object.assign(new Error('Unknown category'), { statusCode: 400 });
     }
@@ -45,6 +51,46 @@ export function createHomeService(findVideos) {
       ...(section.rankingBasis ? { rankingBasis: section.rankingBasis } : {}),
       items: (await findVideos({ ...filter, type: section.type === 'short' ? 'short' : { $ne: 'short' } }, section.sort, limit)).map(card),
     })));
-    return { activeCategory: category, categories, featured: sections[0].items[0] || sections[1].items[0] || null, sections };
+
+    // Compute featured before prepending for-you
+    const featured = sections[0].items[0] || sections[1].items[0] || null;
+
+    let requestId = crypto.randomUUID();
+    const viewerId = viewer?.viewerId ?? query?.viewerId ?? null;
+    const hints = viewer?.hints ?? query?.hints ?? [];
+    const languages = viewer?.languages ?? query?.languages ?? [];
+
+    if (feedService) {
+      try {
+        const feedPage = await feedService.firstPage({
+          viewerId,
+          hints,
+          languages,
+          category,
+          limit,
+        });
+        if (feedPage?.personalized && feedPage.items?.length > 0) {
+          sections.unshift({
+            id: 'for-you',
+            title: 'For You',
+            type: 'video',
+            items: feedPage.items,
+          });
+          if (feedPage.requestId) {
+            requestId = feedPage.requestId;
+          }
+        }
+      } catch {
+        // Feed service failure: degrade gracefully without for-you section
+      }
+    }
+
+    return {
+      requestId,
+      activeCategory: category,
+      categories,
+      featured,
+      sections,
+    };
   };
 }

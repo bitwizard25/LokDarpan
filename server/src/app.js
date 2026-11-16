@@ -27,7 +27,7 @@ import authController from './modules/auth/controllers/auth.controller.js';
 import userController from './modules/user/controllers/user.controller.js';
 import videoController from './modules/video/controllers/video.controller.js';
 import commentController from './modules/comments/controllers/comment.controller.js';
-import authenticate from './middleware/auth.middleware.js';
+import authenticate, { optionalAuthenticate } from './middleware/auth.middleware.js';
 import authRoutes from './modules/auth/routes/auth.routes.js';
 import userRoutes from './modules/user/routes/user.routes.js';
 import videoRoutes from './modules/video/routes/video.routes.js';
@@ -182,12 +182,12 @@ async function buildApp() {
   });
 
   // Register module routes with options
-  await app.register(catalogueRoutes, { prefix: APP_CONFIG.apiPrefix, authenticate });
+  await app.register(catalogueRoutes, { prefix: APP_CONFIG.apiPrefix, authenticate, optionalAuthenticate });
   await app.register(libraryRoutes, { prefix: APP_CONFIG.apiPrefix, authenticate });
   await app.register(profileRoutes, { prefix: APP_CONFIG.apiPrefix, authenticate });
   await app.register(verificationRoutes, { prefix: APP_CONFIG.apiPrefix, authenticate });
   await app.register(networkMembershipRoutes, { prefix: APP_CONFIG.apiPrefix, authenticate });
-  await app.register(homeRoutes, { prefix: `${APP_CONFIG.apiPrefix}/home`, getHome });
+  await app.register(homeRoutes, { prefix: `${APP_CONFIG.apiPrefix}/home`, getHome, optionalAuthenticate });
   await app.register(authRoutes, {
     prefix: `${APP_CONFIG.apiPrefix}/auth`,
     authController,
