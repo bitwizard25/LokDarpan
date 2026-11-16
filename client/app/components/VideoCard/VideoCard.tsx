@@ -1,12 +1,19 @@
 import { Link } from "@remix-run/react";
 import { useState } from "react";
-import { Plus, Check, Play } from "@phosphor-icons/react";
+import { Plus, Check, Play } from "~/components/icons";
+import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
+import { Card } from "~/components/ui/card";
+import { LazyImage } from "~/components/ui/lazy-image";
+import { cn } from "~/lib/utils";
 
 interface VideoCardProps {
     id: string;
     title: string;
     thumbnailUrl?: string;
     channelName: string;
+    channelId?: string;
+    showSave?: boolean;
     channelLogo?: string;
     views: number;
     createdAt: string;
@@ -21,6 +28,8 @@ export function VideoCard({
     title,
     thumbnailUrl,
     channelName,
+    channelId,
+    showSave = true,
     views,
     duration,
     isLive = false,
@@ -36,10 +45,10 @@ export function VideoCard({
             className={`relative block overflow-hidden rounded-[10px] bg-dark-800 ${featured ? "md:w-3/5 md:h-full aspect-video md:aspect-auto" : "aspect-video"}`}
         >
             {thumbnailUrl ? (
-                <img src={thumbnailUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
+                <LazyImage src={thumbnailUrl} wrapperClassName="w-full h-full" />
             ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                    <Play size={40} weight="duotone" className="text-dark-600" />
+                    <Play size={40} className="text-dark-600 opacity-60" />
                 </div>
             )}
 
@@ -58,8 +67,11 @@ export function VideoCard({
     );
 
     return (
-        <article
-            className={`flex flex-col gap-2 h-full box-border p-2 rounded-2xl bg-dark-900 border border-white/5 transition-all duration-200 hover:-translate-y-1 hover:border-white/20 motion-reduce:transition-none motion-reduce:hover:translate-y-0 ${featured ? "md:flex-row md:col-span-2 md:row-span-2" : ""}`}
+        <Card
+            className={cn(
+                "flex flex-col gap-2 h-full box-border p-2 rounded-2xl bg-dark-900 border-white/5 shadow-none transition-all duration-200 hover:-translate-y-1 hover:border-white/20 motion-reduce:transition-none motion-reduce:hover:translate-y-0",
+                featured && "md:flex-row md:col-span-2 md:row-span-2",
+            )}
         >
             {thumb}
 
@@ -73,27 +85,29 @@ export function VideoCard({
 
                 <div className="flex items-center gap-2 min-h-8">
                     {isLive && (
-                        <span className="shrink-0 px-1.5 py-0.5 rounded bg-primary-600 text-white text-xs font-bold tracking-wider">LIVE</span>
+                        <Badge className="shrink-0 rounded px-1.5 py-0.5 bg-primary-600 hover:bg-primary-600 text-white text-xs font-bold tracking-wider border-transparent">LIVE</Badge>
                     )}
                     <span className="flex-1 min-w-0 truncate text-sm text-dark-400">
-                        <Link to={`/channel/${channelName}`} className="hover:text-white transition-colors">{channelName}</Link>
+                        {channelId ? <Link to={`/channel/${channelId}`} className="hover:text-white transition-colors">{channelName}</Link> : <span>{channelName}</span>}
                         {" · "}
                         {isLive ? `${formatCount(views)} watching` : `${formatCount(views)} views`}
                     </span>
 
-                    <button
+                    {showSave && <Button
                         type="button"
+                        variant="ghost"
+                        size="icon"
                         onClick={() => setAdded((a) => !a)}
                         aria-pressed={added}
                         aria-label={added ? "Remove from My List" : "Add to My List"}
                         title={added ? "In My List" : "Add to My List"}
-                        className={`shrink-0 w-11 h-11 -my-1.5 -mr-2 flex items-center justify-center rounded-full border-0 cursor-pointer transition-all duration-150 active:scale-90 ${added ? "bg-white/10 text-white" : "bg-transparent text-dark-400 hover:bg-white/10 hover:text-white"}`}
+                        className={cn("shrink-0 size-11 -my-1.5 -mr-2 rounded-full active:scale-90 transition-transform", added ? "bg-white/10 text-white" : "text-dark-400 hover:bg-white/10 hover:text-white")}
                     >
-                        {added ? <Check size={20} weight="bold" /> : <Plus size={20} weight="light" />}
-                    </button>
+                        {added ? <Check size={18} /> : <Plus size={18} />}
+                    </Button>}
                 </div>
             </div>
-        </article>
+        </Card>
     );
 }
 

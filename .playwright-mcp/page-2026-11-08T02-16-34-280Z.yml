@@ -1,0 +1,41 @@
+- generic [ref=f8e3]:
+  - link "LOK D ARPAN" [ref=f8e5] [cursor=pointer]:
+    - /url: /
+    - generic [ref=f8e6]:
+      - generic [ref=f8e7]: LOK
+      - generic [ref=f8e8]: D
+      - generic [ref=f8e11]: ARPAN
+  - generic [ref=f8e12]:
+    - generic [ref=f8e13]:
+      - heading "Create your account" [level=1] [ref=f8e14]
+      - paragraph [ref=f8e15]: Join the community
+    - generic [ref=f8e16]:
+      - generic [ref=f8e17]:
+        - text: Full Name
+        - textbox "John Doe" [ref=f8e18]
+      - generic [ref=f8e19]:
+        - text: Email
+        - textbox "name@company.com" [ref=f8e20]
+      - generic [ref=f8e21]:
+        - text: Phone
+        - textbox "1234567890" [ref=f8e22]
+      - generic [ref=f8e23]:
+        - generic [ref=f8e24]:
+          - text: Password
+          - textbox "••••••" [ref=f8e25]
+        - generic [ref=f8e26]:
+          - text: Confirm
+          - textbox "••••••" [ref=f8e27]
+      - button "Sign Up" [ref=f8e28] [cursor=pointer]
+    - paragraph [ref=f8e29]:
+      - text: By signing up, you agree to our
+      - link "Terms" [ref=f8e30] [cursor=pointer]:
+        - /url: "#"
+      - text: and
+      - link "Privacy Policy" [ref=f8e31] [cursor=pointer]:
+        - /url: "#"
+      - text: .
+    - paragraph [ref=f8e33]:
+      - text: Already have an account?
+      - link "Sign In" [ref=f8e34] [cursor=pointer]:
+        - /url: /auth/login

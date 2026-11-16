@@ -8,6 +8,8 @@ export const COLLECTIONS = {
   CHANNEL: 'Channel',
   VIDEO: 'Video',
   COMMENT: 'Comment',
+  NETWORK: 'Network',
+  VERIFICATION_REQUEST: 'VerificationRequest',
 };
 
 export default COLLECTIONS;

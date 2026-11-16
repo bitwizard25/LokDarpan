@@ -1,0 +1,60 @@
+- generic [ref=f4e2]:
+  - banner [ref=f4e3]:
+    - generic [ref=f4e4]:
+      - link "LokDarpan" [ref=f4e5] [cursor=pointer]:
+        - /url: /
+      - search [ref=f4e6]:
+        - searchbox "Search" [ref=f4e7]
+      - generic [ref=f4e8]:
+        - link "Create" [ref=f4e9] [cursor=pointer]:
+          - /url: /upload
+        - link "Sign In" [ref=f4e12] [cursor=pointer]:
+          - /url: /auth/login
+  - main [ref=f4e15]:
+    - generic [ref=f4e16]:
+      - generic [ref=f4e19]:
+        - generic [ref=f4e20]:
+          - generic:
+            - generic [ref=f4e23]:
+              - generic [ref=f4e24]:
+                - generic [ref=f4e25]: M
+                - generic [ref=f4e26]: MusicMakers
+                - button "Subscribe" [ref=f4e27] [cursor=pointer]
+              - heading "Wait for the drop! 🎵" [level=2] [ref=f4e28]
+              - generic [ref=f4e29]: Original Sound - MusicMakers
+            - generic [ref=f4e33]:
+              - button "123.0K" [ref=f4e34] [cursor=pointer]
+              - button "1.2K" [ref=f4e39] [cursor=pointer]
+              - button [ref=f4e44] [cursor=pointer]
+              - button [ref=f4e48] [cursor=pointer]
+        - generic [ref=f4e53]:
+          - generic:
+            - generic [ref=f4e56]:
+              - generic [ref=f4e57]:
+                - generic [ref=f4e58]: C
+                - generic [ref=f4e59]: CleanTok
+                - button "Subscribe" [ref=f4e60] [cursor=pointer]
+              - heading "Satisfying cleanup 🧹" [level=2] [ref=f4e61]
+              - generic [ref=f4e62]: Original Sound - CleanTok
+            - generic [ref=f4e66]:
+              - button "89.0K" [ref=f4e67] [cursor=pointer]
+              - button "450" [ref=f4e72] [cursor=pointer]
+              - button [ref=f4e77] [cursor=pointer]
+              - button [ref=f4e81] [cursor=pointer]
+        - generic [ref=f4e86]:
+          - generic [ref=f4e87]: No Video Source
+          - generic:
+            - generic [ref=f4e91]:
+              - generic [ref=f4e92]:
+                - generic [ref=f4e93]: G
+                - generic [ref=f4e94]: GameLore
+                - button "Subscribe" [ref=f4e95] [cursor=pointer]
+              - heading "Hidden secrets in Zelda 🎮" [level=2] [ref=f4e96]
+              - generic [ref=f4e97]: Original Sound - GameLore
+            - generic [ref=f4e101]:
+              - button "230.0K" [ref=f4e102] [cursor=pointer]
+              - button "2K" [ref=f4e107] [cursor=pointer]
+              - button [ref=f4e112] [cursor=pointer]
+              - button [ref=f4e116] [cursor=pointer]
+      - link "Back to Feed" [ref=f4e121] [cursor=pointer]:
+        - /url: /

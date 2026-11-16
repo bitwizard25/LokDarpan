@@ -40,7 +40,7 @@ export function AIPanel({ isOpen, onClose, onSeek }: AIPanelProps) {
 
     return (
         <div
-            className={`fixed inset-x-0 bottom-0 md:inset-x-auto md:top-0 md:right-0 md:bottom-0 w-full md:w-[400px] h-[60vh] md:h-full z-[60] transform transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${isOpen ? 'translate-y-0 md:translate-x-0' : 'translate-y-full md:translate-x-full md:translate-y-0'}`}
+            className={`fixed inset-x-0 bottom-0 md:inset-x-auto md:top-0 md:right-0 md:bottom-0 w-full md:w-[400px] h-[60vh] md:h-full z-[60] transform transition-transform duration-500 ease-out-expo ${isOpen ? 'translate-y-0 md:translate-x-0' : 'translate-y-full md:translate-x-full md:translate-y-0'}`}
         >
             <div className="absolute inset-0 bg-dark-950/80 backdrop-blur-2xl md:border-l border-t md:border-t-0 border-white/10 shadow-[0_-20px_50px_-20px_rgba(0,0,0,0.8)] md:shadow-[-20px_0_50px_-20px_rgba(0,0,0,0.8)] flex flex-col rounded-t-3xl md:rounded-none overflow-hidden">
                 {/* Header */}

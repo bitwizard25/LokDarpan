@@ -37,13 +37,33 @@ async function unsubscribe(request, reply) {
   });
 }
 
+async function me(request, reply) {
+  const profile = await userService.getUserSummary(request.userId);
+  return reply.status(200).send({ user: profile });
+}
+
 export {
   subscribe,
   unsubscribe,
+  me,
 };
 
+async function updateProfile(request, reply) {
+  return reply.send({ message: 'Profile updated successfully', user: await userService.updateProfile(request.userId, request.body) });
+}
+async function changePassword(request, reply) {
+  await userService.changePassword(request.userId, request.body.currentPassword, request.body.newPassword);
+  return reply.send({ message: 'Password changed successfully' });
+}
+async function deleteAccount(request, reply) {
+  await userService.deleteAccount(request.userId, request.body.password);
+  return reply.send({ message: 'Account deleted successfully' });
+}
+
 export default {
+  updateProfile, changePassword, deleteAccount,
   subscribe,
   unsubscribe,
+  me,
 };
 

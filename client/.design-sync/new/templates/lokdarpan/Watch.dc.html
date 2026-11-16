@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><style>body{margin:0}a:focus-visible,button:focus-visible,input:focus-visible,[role=slider]:focus-visible{outline:2px solid #93C5FD;outline-offset:2px}@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}</style></helmet>
+<div class="bg-dark-950 text-dark-100 font-sans" style="min-height:100vh">
+<dc-import name="LdTopbar" is-mobile="{{ isMobile }}" style="position:sticky;top:0;z-index:20" hint-size="100%,64px"></dc-import>
+<div style="display:flex;align-items:flex-start">
+<sc-if value="{{ desktop }}" hint-placeholder-val="{{ true }}"><dc-import name="LdSidebar" active="Explore" collapsed="{{ navCollapsed }}" on-toggle="{{ toggleNav }}" style="position:sticky;top:64px" hint-size="72px,600px"></dc-import></sc-if>
+<main style="flex:1;min-width:0;padding:24px clamp(16px,3vw,40px) 104px">
+<div style="display:flex;flex-wrap:wrap;gap:40px 32px;align-items:flex-start">
+<div style="flex:999 1 560px;min-width:0;display:flex;flex-direction:column;gap:24px">
+<div onMouseEnter="{{ hoverOn }}" onMouseLeave="{{ hoverOff }}" style="position:relative;aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:repeating-linear-gradient(135deg,#1c1c22 0 14px,#17171c 14px 28px)">
+<span style="position:absolute;left:16px;top:16px;font:12px ui-monospace,monospace;color:#8b8b95">video · 16:9</span>
+<sc-if value="{{ paused }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ togglePlay }}" aria-label="Play" style="position:absolute;left:50%;top:50%;width:72px;height:72px;margin:-36px 0 0 -36px;border-radius:50%;border:0;background:rgba(255,255,255,.16);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .15s ease,background .15s ease" style-hover="background:rgba(255,255,255,.26);transform:scale(1.06)"><svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg></button></sc-if>
+<sc-if value="{{ showControls }}" hint-placeholder-val="{{ true }}"><div style="position:absolute;left:0;right:0;bottom:0;padding:48px 16px 8px;background:linear-gradient(0deg,rgba(0,0,0,.85),rgba(0,0,0,0));display:flex;flex-direction:column;gap:8px">
+<div role="slider" tabindex="0" aria-label="Seek" aria-valuemin="0" aria-valuemax="754" aria-valuenow="252" style="position:relative;height:16px;display:flex;align-items:center;cursor:pointer"><div style="position:relative;width:100%;height:4px;border-radius:2px;background:rgba(255,255,255,.28)"><div class="bg-primary-500" style="position:absolute;left:0;top:0;bottom:0;width:34%;border-radius:2px"></div><div style="position:absolute;left:34%;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:#fff"></div></div></div>
+<div style="display:flex;align-items:center;gap:8px;color:#fff">
+<sc-if value="{{ paused }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ togglePlay }}" aria-label="Play" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:0;border-radius:10px;background:transparent;color:#fff;cursor:pointer" style-hover="background:rgba(255,255,255,.12)"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg></button></sc-if><sc-if value="{{ playing }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ togglePlay }}" aria-label="Pause" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:0;border-radius:10px;background:transparent;color:#fff;cursor:pointer" style-hover="background:rgba(255,255,255,.12)"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h4v14H7zM13 5h4v14h-4z"></path></svg></button></sc-if>
+<button type="button" aria-label="Mute" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:0;border-radius:10px;background:transparent;color:#fff;cursor:pointer" style-hover="background:rgba(255,255,255,.12)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4zM16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"></path></svg></button>
+<span style="font-size:14px;font-variant-numeric:tabular-nums">4:12 / 12:34</span>
+<span style="flex:1"></span>
+<button type="button" onClick="{{ toggleGear }}" aria-label="Settings" aria-expanded="{{ gearOpen }}" title="Settings" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:0;border-radius:10px;background:transparent;color:#fff;cursor:pointer" style-hover="background:rgba(255,255,255,.12)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><path d="M4 7h9M17 7h3M4 17h3M11 17h9M15 5a2 2 0 1 1 0 4a2 2 0 1 1 0-4zM9 15a2 2 0 1 1 0 4a2 2 0 1 1 0-4z"></path></svg></button>
+<button type="button" aria-label="Full screen" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:0;border-radius:10px;background:transparent;color:#fff;cursor:pointer" style-hover="background:rgba(255,255,255,.12)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"></path></svg></button>
+</div></div></sc-if>
+<sc-if value="{{ gearOpen }}" hint-placeholder-val="{{ false }}"><div role="menu" aria-label="Playback settings" style="position:absolute;right:16px;bottom:72px;width:min(280px,calc(100% - 32px));box-sizing:border-box;padding:8px;border-radius:16px;background:rgba(24,24,27,.96);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.12);display:flex;flex-direction:column"><sc-for list="{{ settings }}" as="s" hint-placeholder-count="4"><button type="button" role="menuitem" style="height:44px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 12px;border:0;border-radius:10px;background:transparent;color:#fff;font:500 14px 'Plus Jakarta Sans',sans-serif;cursor:pointer" style-hover="background:rgba(255,255,255,.08)"><span>{{ s.k }}</span><span style="color:#A1A1AA">{{ s.v }} ›</span></button></sc-for></div></sc-if>
+</div>
+<div style="display:flex;flex-direction:column;gap:16px">
+<h1 class="font-display" style="margin:0;color:#fff;font-weight:700;font-size:clamp(25px,3vw,31px);line-height:1.15;letter-spacing:-0.02em;text-wrap:balance">Budget 2027: five numbers that matter</h1>
+<div style="display:flex;flex-wrap:wrap;align-items:center;gap:16px">
+<div style="display:flex;align-items:center;gap:16px"><div style="width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.1);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px">LR</div><div><div style="color:#fff;font-weight:600">Lok Report</div><div style="color:#A1A1AA;font-size:14px">1.2M followers</div></div></div>
+<button type="button" onClick="{{ toggleFollow }}" aria-pressed="{{ following }}" style="height:44px;padding:0 20px;border-radius:999px;border:1px solid rgba(255,255,255,.2);background:transparent;color:#fff;font:600 14px 'Plus Jakarta Sans',sans-serif;cursor:pointer;transition:background .15s ease" style-hover="background:rgba(255,255,255,.08)">{{ followLabel }}</button>
+<div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap"><button type="button" style="height:44px;padding:0 20px;border-radius:999px;border:0;background:rgba(255,255,255,.1);color:#fff;font:600 14px 'Plus Jakarta Sans',sans-serif;cursor:pointer" style-hover="background:rgba(255,255,255,.18)">Like · 8.2k</button><button type="button" style="height:44px;padding:0 20px;border-radius:999px;border:0;background:rgba(255,255,255,.1);color:#fff;font:600 14px 'Plus Jakarta Sans',sans-serif;cursor:pointer" style-hover="background:rgba(255,255,255,.18)">+ My List</button><a href="./Lobby.dc.html" class="bg-primary-600" style="height:44px;padding:0 20px;display:flex;align-items:center;border-radius:999px;color:#fff;font-weight:600;font-size:14px;text-decoration:none" style-hover="filter:brightness(1.12)">Watch together</a></div>
+</div>
+<section class="bg-dark-900" style="padding:16px;border-radius:16px;border:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;gap:8px">
+<div style="color:#A1A1AA;font-size:14px">128,400 views · 2 days ago · Politics</div>
+<sc-if value="{{ less }}" hint-placeholder-val="{{ true }}"><p style="margin:0;color:#D4D4D8;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">The five figures that decide what you pay and what the government spends: fiscal deficit, capital spending, tax slabs, state transfers and the subsidy bill. We explain each one in plain language, with what changed from last year.</p></sc-if>
+<sc-if value="{{ more }}" hint-placeholder-val="{{ false }}"><p style="margin:0;color:#D4D4D8;line-height:1.6;max-width:70ch">The five figures that decide what you pay and what the government spends: fiscal deficit, capital spending, tax slabs, state transfers and the subsidy bill. We explain each one in plain language, with what changed from last year.</p><div style="display:flex;flex-direction:column;gap:4px;margin-top:8px"><div style="color:#fff;font-weight:600;margin-bottom:4px">Chapters</div><sc-for list="{{ chapters }}" as="c" hint-placeholder-count="5"><a href="#" style="display:flex;gap:16px;align-items:center;min-height:44px;padding:0 8px;margin:0 -8px;border-radius:10px;color:#D4D4D8;text-decoration:none" style-hover="background:rgba(255,255,255,.06);color:#fff"><span style="font:500 14px ui-monospace,monospace;color:#A1A1AA;width:48px">{{ c.t }}</span>{{ c.title }}</a></sc-for><div style="color:#A1A1AA;font-size:14px;margin-top:8px">Presented by Ananya Rao · Produced by Lok Report</div></div></sc-if>
+<button type="button" onClick="{{ toggleMore }}" aria-expanded="{{ moreOpen }}" style="align-self:flex-start;height:44px;padding:0;border:0;background:transparent;color:#fff;font:600 14px 'Plus Jakarta Sans',sans-serif;text-decoration:underline;text-underline-offset:4px;cursor:pointer">{{ moreLabel }}</button>
+</section>
+</div></div>
+<aside style="flex:1 1 320px;min-width:0;display:flex;flex-direction:column;gap:16px"><h2 class="font-display" style="margin:0;color:#fff;font-weight:600;font-size:20px">Up next</h2>
+<sc-for list="{{ next }}" as="n" hint-placeholder-count="5"><a href="./Watch.dc.html" class="bg-dark-900" style="display:grid;grid-template-columns:144px minmax(0,1fr);gap:16px;padding:8px;border-radius:16px;border:1px solid rgba(255,255,255,.06);text-decoration:none;transition:border-color .2s ease" style-hover="border-color:rgba(255,255,255,.2)"><div style="position:relative;aspect-ratio:16/9;border-radius:10px;background:repeating-linear-gradient(135deg,#26262c 0 10px,#1f1f25 10px 20px)"><span style="position:absolute;right:4px;bottom:4px;padding:2px 6px;border-radius:6px;background:rgba(0,0,0,.8);color:#fff;font-size:12px;font-weight:600">{{ n.dur }}</span></div><div style="display:flex;flex-direction:column;gap:4px;min-width:0;padding-top:2px"><span style="color:#fff;font-weight:600;font-size:16px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">{{ n.title }}</span><span style="color:#A1A1AA;font-size:14px">{{ n.ch }}</span></div></a></sc-for></aside>
+</div></main></div>
+<sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}"><dc-import name="LdDock" active="Explore" hint-size="100%,64px"></dc-import></sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { w: window.innerWidth, collapsed: true, playing: false, hover: false, gear: false, more: false, following: false };
+  componentDidMount() { this.onR = () => this.setState({ w: window.innerWidth }); window.addEventListener('resize', this.onR); }
+  componentWillUnmount() { window.removeEventListener('resize', this.onR); }
+  renderVals() {
+    const s = this.state, isMobile = s.w < 768;
+    return {
+      isMobile, desktop: !isMobile, navCollapsed: s.collapsed,
+      toggleNav: () => this.setState(x => ({ collapsed: !x.collapsed })),
+      playing: s.playing, paused: !s.playing,
+      togglePlay: () => this.setState(x => ({ playing: !x.playing, gear: false })),
+      hoverOn: () => this.setState({ hover: true }), hoverOff: () => this.setState({ hover: false, gear: false }),
+      showControls: !s.playing || s.hover || s.gear || isMobile,
+      gearOpen: s.gear, toggleGear: () => this.setState(x => ({ gear: !x.gear })),
+      settings: [['Quality','Auto (1080p)'],['Subtitles','English'],['Audio','Hindi'],['Speed','1.0×']].map(([k,v]) => ({ k, v })),
+      less: !s.more, more: s.more, moreOpen: s.more, moreLabel: s.more ? 'Show less' : 'More info',
+      toggleMore: () => this.setState(x => ({ more: !x.more })),
+      following: s.following, followLabel: s.following ? 'Following' : 'Follow',
+      toggleFollow: () => this.setState(x => ({ following: !x.following })),
+      chapters: [['0:00','Where the money comes from'],['2:40','Defence and infrastructure'],['4:12','What it means for your tax bill'],['7:30','States: winners and losers'],['10:05','Verdict']].map(([t,title]) => ({ t, title })),
+      next: [['Explained: the new data protection rules','Lok Report','9:21'],['Why Mumbai local trains run on time','Metro Notes','18:02'],['What the repo rate actually does','Money Matters','7:45'],['How a bill becomes law','Explain India','8:02'],['Semi-final highlights in 6 minutes','Cover Drive','6:10']].map(([title,ch,dur]) => ({ title, ch, dur }))
+    };
+  }
+}
+</script>
+</body>
+</html>

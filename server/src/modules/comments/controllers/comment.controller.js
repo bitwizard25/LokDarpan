@@ -5,6 +5,10 @@
 
 import commentService from '../services/comment.service.js';
 
+async function listComments(request, reply) {
+  return reply.send(await commentService.listComments(request.params.videoId, request.query));
+}
+
 /**
  * Handle comment creation
  * @param {FastifyRequest} request - Fastify request
@@ -58,12 +62,14 @@ async function deleteComment(request, reply) {
 }
 
 export {
+  listComments,
   createComment,
   updateComment,
   deleteComment,
 };
 
 export default {
+  listComments,
   createComment,
   updateComment,
   deleteComment,

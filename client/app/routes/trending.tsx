@@ -1,29 +1,33 @@
 import { json, type MetaFunction, type LoaderFunctionArgs } from "@remix-run/node";
-import { useLoaderData, Link } from "@remix-run/react";
+import { useLoaderData, useNavigation, Link } from "@remix-run/react";
 import { Layout } from "~/components/Layout/Layout";
 import { getUserFromSession } from "~/services/auth.server";
 import { VideoCard } from "~/components/VideoCard/VideoCard";
+import { getServerApiBaseUrl } from "~/lib/api";
+import { VideoSkeleton } from "~/components/VideoSkeleton/VideoSkeleton";
 
 export const meta: MetaFunction = () => {
     return [{ title: "Trending - LokDarpan" }];
 };
 
-const trendingData = [
-    { _id: "t1", rank: 1, title: "The Future of AI: Beyond 2024", thumbnailUrl: "https://picsum.photos/seed/ai/1280/720", channelName: "TechVision", views: 2500000, duration: 1840, description: "Exploring the next frontier of artificial intelligence and its impact on society." },
-    { _id: "t2", rank: 2, title: "Street Food Tour: Mumbai", thumbnailUrl: "https://picsum.photos/seed/food/640/360", channelName: "FoodieTravels", views: 1800000, duration: 920, description: "Join us on an epic culinary adventure through the streets of Mumbai." },
-    { _id: "t3", rank: 3, title: "Epic Gaming Moments #45", thumbnailUrl: "https://picsum.photos/seed/game/640/360", channelName: "ProGamer", views: 1200000, duration: 650, description: "The most insane gaming clips from this week's community submissions." },
-    { _id: "t4", rank: 4, title: "Build a House in 24 Hours", thumbnailUrl: "https://picsum.photos/seed/build/640/360", channelName: "MakerSpace", views: 980000, duration: 2400, description: "Can we actually construct a livable house in just one day? Watch to find out!" },
-    { _id: "t5", rank: 5, title: "Coding ASMR - Python", thumbnailUrl: "https://picsum.photos/seed/code/640/360", channelName: "DevRelax", views: 850000, duration: 3600, description: "Relax and learn Python with soothing keyboard sounds and calm narration." },
-    { _id: "t6", rank: 6, title: "New electric supercar review", thumbnailUrl: "https://picsum.photos/seed/car/640/360", channelName: "AutoDaily", views: 720000, duration: 1100, description: "First look at the latest electric hypercar with 1000+ horsepower." },
-];
-
 export async function loader({ request }: LoaderFunctionArgs) {
     const userSession = await getUserFromSession(request);
-    return json({ user: userSession?.user || null, videos: trendingData });
+    const url = new URL(request.url);
+    const category = url.searchParams.get("category");
+    const qs = new URLSearchParams({ section: "trending", limit: "24" });
+    if (category) qs.set("category", category);
+
+    const response = await fetch(`${getServerApiBaseUrl()}/video?${qs.toString()}`);
+    const data = response.ok ? await response.json() : { videos: [] };
+    const videos = (data.videos || []).map((video: any, index: number) => ({ ...video, rank: index + 1, channelName: video.channel?.name || 'Creator', duration: video.durationSeconds || 0 }));
+    return json({ user: userSession?.user || null, videos, category, error: response.ok ? null : 'Trending videos could not be loaded.' });
 }
 
 export default function Trending() {
-    const { user, videos } = useLoaderData<typeof loader>();
+    const { user, videos, error } = useLoaderData<typeof loader>();
+    const loading = useNavigation().state !== 'idle';
+    if (loading && !videos.length) return <Layout user={user}><main className="mx-auto max-w-6xl"><h1 className="mb-6 text-3xl font-bold text-white">Trending Now</h1><div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"><VideoSkeleton count={6} /></div></main></Layout>;
+    if (!videos.length) return <Layout user={user}><main className="mx-auto max-w-6xl"><h1 className="mb-4 text-3xl font-bold text-white">Trending Now</h1><p role={error ? 'alert' : undefined} className="text-dark-300">{error || 'No published videos are trending yet.'}</p></main></Layout>;
     const heroVideo = videos[0];
     const rankingVideos = videos.slice(1);
 
@@ -79,7 +83,7 @@ export default function Trending() {
                                         </div>
                                         <div>
                                             <p className="font-bold text-white">{heroVideo.channelName}</p>
-                                            <p className="text-dark-400 text-sm">2.4M subscribers</p>
+                                    <p className="text-dark-400 text-sm">{(heroVideo.channel?.name || 'Creator')}</p>
                                         </div>
                                     </div>
                                     <button className="ml-auto btn-primary">Watch Now</button>
@@ -91,7 +95,7 @@ export default function Trending() {
 
                 {/* Ranked List */}
                 <div className="space-y-6">
-                    {rankingVideos.map((video) => (
+                    {rankingVideos.map((video: any) => (
                         <div key={video._id} className="group flex flex-col md:flex-row gap-6 p-4 rounded-2xl hover:bg-white/5 transition-all duration-300 border border-transparent hover:border-white/5">
                             {/* Rank Number */}
                             <div className="hidden md:flex flex-col items-center justify-center w-16 shrink-0">

@@ -1,3 +1,6 @@
+import { optionalAuthenticate } from '../../../middleware/auth.middleware.js';
+import { channelUpdateBody, channelDeleteBody } from '../schemas/studio.schema.js';
+import { studioPageQuery } from '../../video/schemas/studio.schema.js';
 
 /**
  * Channel Routes
@@ -40,6 +43,11 @@ async function channelRoutes(fastify, options) {
                             type: 'object',
                             properties: {
                                 _id: { type: 'string' },
+                                id: { type: 'string' },
+                                handle: { type: 'string' },
+                                avatarUrl: { type: ['string', 'null'] },
+                                bannerUrl: { type: ['string', 'null'] },
+                                createdAt: { type: 'string' },
                                 name: { type: 'string' },
                                 description: { type: 'string' },
                                 logoUrl: { type: 'string' },
@@ -66,6 +74,11 @@ async function channelRoutes(fastify, options) {
                             type: 'object',
                             properties: {
                                 _id: { type: 'string' },
+                                id: { type: 'string' },
+                                handle: { type: 'string' },
+                                avatarUrl: { type: ['string', 'null'] },
+                                bannerUrl: { type: ['string', 'null'] },
+                                createdAt: { type: 'string' },
                                 name: { type: 'string' },
                                 description: { type: 'string' },
                                 logoUrl: { type: 'string' },
@@ -76,6 +89,7 @@ async function channelRoutes(fastify, options) {
                 },
                 404: {
                     type: 'object',
+          additionalProperties: true,
                     properties: {
                         error: {
                             type: 'object',
@@ -88,6 +102,11 @@ async function channelRoutes(fastify, options) {
             }
         }
     }, channelController.getMyChannel);
+
+    fastify.put('/me', { preHandler: [authenticate], schema: { body: channelUpdateBody } }, channelController.updateMyChannel);
+    fastify.delete('/me', { preHandler: [authenticate], schema: { body: channelDeleteBody } }, channelController.deleteMyChannel);
+    fastify.get('/:channelId/videos', { schema: { querystring: { ...studioPageQuery, properties: { limit: studioPageQuery.properties.limit, cursor: studioPageQuery.properties.cursor } } } }, channelController.getChannelVideos);
+    fastify.get('/:channelId', { preHandler: [optionalAuthenticate] }, channelController.getPublicChannel);
 
 }
 

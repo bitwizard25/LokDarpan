@@ -6,6 +6,15 @@
 async function commentRoutes(fastify, options) {
   const { commentController, authenticate } = options;
 
+  fastify.get('/:videoId/comments', {
+    schema: {
+      description: 'List comments for a video',
+      tags: ['comments'],
+      params: { type: 'object', required: ['videoId'], properties: { videoId: { type: 'string' } } },
+      querystring: { type: 'object', properties: { limit: { type: 'integer', minimum: 1, maximum: 50 }, cursor: { type: 'string' } } },
+    },
+  }, commentController.listComments);
+
   // Create comment route
   fastify.post('/:videoId/comments', {
     preHandler: [authenticate],

@@ -24,7 +24,7 @@ export function ChameleonCanvas({
     return (
         <div className="fixed inset-0 pointer-events-none z-[-1] overflow-hidden bg-dark-950">
             <div
-                className="absolute inset-0 transition-colors duration-[1500ms] ease-in-out blur-[120px]"
+                className="absolute inset-0 transition-colors duration-1500 ease-in-out blur-[120px]"
                 style={{
                     backgroundColor: ambientColor,
                     opacity: opacities.base
@@ -33,7 +33,7 @@ export function ChameleonCanvas({
 
             {/* Soft decorative secondary glows to add depth */}
             <div
-                className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full blur-[150px] transition-colors duration-[2000ms] ease-in-out mix-blend-screen"
+                className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full blur-[150px] transition-colors duration-2000 ease-in-out mix-blend-screen"
                 style={{
                     backgroundColor: ambientColor,
                     opacity: opacities.glow
@@ -41,7 +41,7 @@ export function ChameleonCanvas({
             />
 
             <div
-                className="absolute bottom-[-10%] right-[-20%] w-[50%] h-[50%] rounded-full blur-[150px] transition-colors duration-[2500ms] ease-in-out mix-blend-screen"
+                className="absolute bottom-[-10%] right-[-20%] w-[50%] h-[50%] rounded-full blur-[150px] transition-colors duration-2500 ease-in-out mix-blend-screen"
                 style={{
                     backgroundColor: ambientColor,
                     opacity: opacities.glow * 0.8

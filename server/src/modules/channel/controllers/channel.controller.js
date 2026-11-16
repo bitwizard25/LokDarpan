@@ -1,3 +1,4 @@
+import { safeChannel } from '../services/channel.service.js';
 
 /**
  * Channel Controller
@@ -53,7 +54,7 @@ async function createChannel(request, reply) {
         description,
         logoUrl: logoUpload.url,
         logoId: logoUpload.key,
-        owner: request.user._id,
+        owner: request.userId,
     });
 
     return reply.status(201).send({
@@ -68,7 +69,7 @@ async function createChannel(request, reply) {
  * @param {FastifyReply} reply - Fastify reply
  */
 async function getMyChannel(request, reply) {
-    const channel = await channelService.getChannelByOwner(request.user._id);
+    const channel = await channelService.getChannelByOwner(request.userId);
 
     if (!channel) {
         return reply.status(404).send({
@@ -79,11 +80,26 @@ async function getMyChannel(request, reply) {
     }
 
     return reply.status(200).send({
-        channel
+        channel: safeChannel(channel)
     });
 }
 
+async function getPublicChannel(request, reply) {
+    return reply.send({ channel: await channelService.getPublicChannel(request.params.channelId, request.userId) });
+}
+async function getChannelVideos(request, reply) {
+    return reply.send(await channelService.getChannelVideos(request.params.channelId, request.query));
+}
+async function updateMyChannel(request, reply) {
+    return reply.send({ message: 'Channel updated successfully', channel: await channelService.updateMyChannel(request.userId, request.body) });
+}
+async function deleteMyChannel(request, reply) {
+    await channelService.deleteMyChannel(request.userId, request.body.confirmHandle);
+    return reply.send({ message: 'Channel deleted successfully' });
+}
+
 export default {
+    getPublicChannel, getChannelVideos, updateMyChannel, deleteMyChannel,
     createChannel,
     getMyChannel
 };

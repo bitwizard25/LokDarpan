@@ -10,6 +10,7 @@ import type { LinksFunction, MetaFunction } from "@remix-run/node";
 import "./tailwind.css";
 
 export const links: LinksFunction = () => [
+    { rel: "icon", type: "image/png", href: "/lokdarpan.png" },
     { rel: "preconnect", href: "https://fonts.googleapis.com" },
     {
         rel: "preconnect",
@@ -32,14 +33,14 @@ export const meta: MetaFunction = () => {
 
 export function Layout({ children }: { children: React.ReactNode }) {
     return (
-        <html lang="en" className="dark">
-            <head>
+        <html lang="en" className="dark" suppressHydrationWarning>
+            <head suppressHydrationWarning>
                 <meta charSet="utf-8" />
                 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
                 <Meta />
                 <Links />
             </head>
-            <body>
+            <body suppressHydrationWarning>
                 {children}
                 <ScrollRestoration />
                 <Scripts />

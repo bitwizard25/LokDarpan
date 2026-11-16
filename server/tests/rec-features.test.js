@@ -41,3 +41,4 @@ test('keyLabel maps feature keys to readable labels', () => {
   assert.equal(keyLabel('tag:dance'), '#dance');
   assert.equal(keyLabel('tag:हास्य'), '#हास्य');
 });
+

@@ -47,7 +47,7 @@ async function uploadFile(file, folder = 'uploads', contentType = null) {
     const uniqueFileName = `${folder}/${randomUUID()}.${fileExtension}`;
 
     // Read file stream
-    const fileStream = createReadStream(file.filepath);
+    const fileStream = file.buffer || createReadStream(file.filepath);
 
     // Upload to S3
     const uploadParams = {
@@ -65,7 +65,7 @@ async function uploadFile(file, folder = 'uploads', contentType = null) {
 
     // Clean up temporary file
     try {
-      await unlink(file.filepath);
+      if (file.filepath) await unlink(file.filepath);
     } catch (cleanupError) {
       console.warn('Warning: Could not delete temporary file:', cleanupError);
     }
@@ -77,7 +77,7 @@ async function uploadFile(file, folder = 'uploads', contentType = null) {
   } catch (error) {
     // Clean up temporary file on error
     try {
-      await unlink(file.filepath);
+      if (file.filepath) await unlink(file.filepath);
     } catch (cleanupError) {
       console.warn('Warning: Could not delete temporary file:', cleanupError);
     }

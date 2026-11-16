@@ -1,14 +1,21 @@
 import { Link, useLocation } from "@remix-run/react";
 import { useAppStore } from "~/store/useAppStore";
-import { House, Compass, PlayCircle, PlusCircle, Television, UserCircle } from "@phosphor-icons/react";
+import {
+    Home,
+    Explore,
+    Shorts,
+    CreateUpload,
+    Theater,
+    Profile,
+} from "~/components/icons";
 
 const ICONS = {
-    home: House,
-    explore: Compass,
-    shorts: PlayCircle,
-    create: PlusCircle,
-    theater: Television,
-    profile: UserCircle,
+    home: Home,
+    explore: Explore,
+    shorts: Shorts,
+    create: CreateUpload,
+    theater: Theater,
+    profile: Profile,
 } as const;
 
 const dockItems = [
@@ -37,9 +44,9 @@ export function MobileDock() {
                 const Icon = ICONS[item.icon as keyof typeof ICONS];
                 const content = (
                     <>
-                        {isActive && <span className="absolute top-0 w-6 h-[3px] rounded-b-[3px] bg-primary-500" />}
-                        <Icon size={24} weight={isActive ? "duotone" : "light"} />
-                        {item.label}
+                        {isActive && <span className="absolute top-0 w-6 h-[3px] rounded-b-[3px] bg-primary-500 shadow-glow-subtle transition-all duration-300" />}
+                        <Icon size={24} variant={isActive ? "filled" : "outline"} className="transition-transform duration-150 active:scale-90" />
+                        <span>{item.label}</span>
                     </>
                 );
                 const cls = `relative flex-1 flex flex-col items-center justify-center gap-1 text-xs transition-colors ${isActive ? "text-white font-semibold" : "text-dark-400 font-medium active:text-white"}`;

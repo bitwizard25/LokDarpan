@@ -4,6 +4,13 @@
  */
 
 import Fastify from 'fastify';
+import catalogueRoutes from './modules/catalogue/catalogue.routes.js';
+import libraryRoutes from './modules/library/library.routes.js';
+import profileRoutes from './modules/user/profile.routes.js';
+import verificationRoutes from './modules/verification/verification.routes.js';
+import networkMembershipRoutes from './modules/network/network.routes.js';
+import homeRoutes from './modules/home/home.routes.js';
+import { getHome } from './modules/home/home.repository.js';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import multipart from '@fastify/multipart';
@@ -25,6 +32,8 @@ import videoRoutes from './modules/video/routes/video.routes.js';
 import commentRoutes from './modules/comments/routes/comment.routes.js';
 import channelRoutes from './modules/channel/routes/channel.routes.js';
 import channelController from './modules/channel/controllers/channel.controller.js';
+import networkRoutes from './modules/network/routes/network.routes.js';
+import networkController from './modules/network/controllers/network.controller.js';
 
 // Load environment variables
 config();
@@ -167,6 +176,12 @@ async function buildApp() {
   });
 
   // Register module routes with options
+  await app.register(catalogueRoutes, { prefix: APP_CONFIG.apiPrefix, authenticate });
+  await app.register(libraryRoutes, { prefix: APP_CONFIG.apiPrefix, authenticate });
+  await app.register(profileRoutes, { prefix: APP_CONFIG.apiPrefix, authenticate });
+  await app.register(verificationRoutes, { prefix: APP_CONFIG.apiPrefix, authenticate });
+  await app.register(networkMembershipRoutes, { prefix: APP_CONFIG.apiPrefix, authenticate });
+  await app.register(homeRoutes, { prefix: `${APP_CONFIG.apiPrefix}/home`, getHome });
   await app.register(authRoutes, {
     prefix: `${APP_CONFIG.apiPrefix}/auth`,
     authController,
@@ -193,6 +208,12 @@ async function buildApp() {
   await app.register(channelRoutes, {
     prefix: `${APP_CONFIG.apiPrefix}/channel`,
     channelController,
+    authenticate,
+  });
+
+  await app.register(networkRoutes, {
+    prefix: `${APP_CONFIG.apiPrefix}/network`,
+    networkController,
     authenticate,
   });
 

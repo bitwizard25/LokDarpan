@@ -1,9 +1,12 @@
+import { safeVideo } from '../services/studio-video.service.js';
+import { ValidationError } from '../../../utils/errors.js';
 /**
  * Video Controller
  * Handles HTTP request/response for video endpoints
  */
 
 import videoService from '../services/video.service.js';
+import * as catalogue from '../../catalogue/catalogue.service.js';
 
 /**
  * Handle video upload initiation
@@ -107,36 +110,15 @@ async function updateVideo(request, reply) {
   const { videoId } = request.params;
   const userId = request.userId;
 
-  // Parse multipart form data
-  const parts = request.parts();
-  const data = {};
-  let thumbnailFile = null;
-
-  for await (const part of parts) {
-    if (part.file) {
-      // It's a file
-      if (part.fieldname === 'thumbnail') {
-        thumbnailFile = part;
-      }
-    } else {
-      // It's a field
-      data[part.fieldname] = part.value;
-    }
-  }
-
-  const { title, description, category, tags } = data;
-
-  const updateData = {};
-  if (title) updateData.title = title;
-  if (description) updateData.description = description;
-  if (category) updateData.category = category;
-  if (tags) updateData.tags = tags;
+  const updateData = request.body;
+  const thumbnailFile = request.thumbnailFile || null;
+  if (!Object.keys(updateData).length && !thumbnailFile) throw new ValidationError('At least one video field or thumbnail is required');
 
   const updatedVideo = await videoService.updateVideo(videoId, userId, updateData, thumbnailFile);
 
   return reply.status(200).send({
     message: 'Video updated successfully',
-    video: updatedVideo,
+    video: safeVideo(updatedVideo),
   });
 }
 
@@ -190,34 +172,23 @@ async function dislikeVideo(request, reply) {
   });
 }
 
+async function setReaction(request, reply) {
+  const result = await videoService.setReaction(request.params.videoId, request.userId, request.body.reaction);
+  return reply.send(result);
+}
+
+async function clearReaction(request, reply) {
+  const result = await videoService.clearReaction(request.params.videoId, request.userId);
+  return reply.send(result);
+}
+
 /**
  * Get all videos
  * @param {FastifyRequest} request - Fastify request
  * @param {FastifyReply} reply - Fastify reply
  */
 async function getAllVideos(request, reply) {
-  const query = request.query;
-  const videos = await videoService.getAllVideos(query);
-
-  // Map videos to include channelName and author info
-  const mappedVideos = videos.map(video => {
-    const videoObj = video.toObject();
-    const user = videoObj.user_id;
-
-    if (user) {
-      videoObj.channelName = user.name; // Fallback to user name
-      // TODO: If user has channel, fetch it? Or populate deeper?
-      // For now, let's assume we use user name if no channel details readily available
-      if (user.channel && typeof user.channel === 'object') {
-        videoObj.channelName = user.channel.name;
-        videoObj.channelLogo = user.channel.logoUrl;
-      }
-      // Clean up user object if needed, but client might use other fields
-    }
-    return videoObj;
-  });
-
-  return reply.status(200).send({ videos: mappedVideos });
+  return reply.send(await catalogue.listVideos(request.query));
 }
 
 /**
@@ -226,21 +197,7 @@ async function getAllVideos(request, reply) {
  * @param {FastifyReply} reply - Fastify reply
  */
 async function getVideoById(request, reply) {
-  const { videoId } = request.params;
-  const video = await videoService.getVideoById(videoId);
-
-  const videoObj = video.toObject();
-  const user = videoObj.user_id;
-
-  if (user) {
-    videoObj.channelName = user.name;
-    if (user.channel && typeof user.channel === 'object') {
-      videoObj.channelName = user.channel.name;
-      videoObj.channelLogo = user.channel.logoUrl;
-    }
-  }
-
-  return reply.status(200).send({ video: videoObj });
+  return reply.send(await catalogue.getVideo(request.params.videoId, request.userId));
 }
 
 export {
@@ -252,9 +209,40 @@ export {
   deleteVideo,
   likeVideo,
   dislikeVideo,
+  setReaction,
+  clearReaction,
 };
 
+async function getMyVideos(request, reply) {
+  return reply.send(await videoService.getMyVideos(request.userId, request.query));
+}
+
+async function prepareUpdate(request) {
+  if (!request.isMultipart()) return;
+  const data = {};
+  for await (const part of request.parts({ limits: { fileSize: 10 * 1024 * 1024 } })) {
+    if (part.file) {
+      if (part.fieldname !== 'thumbnail') {
+        await part.toBuffer();
+        throw new ValidationError('Only a thumbnail file can be updated');
+      }
+      let buffer;
+      try {
+        buffer = await part.toBuffer();
+      } catch (error) {
+        if (error.code === 'FST_REQ_FILE_TOO_LARGE') throw new ValidationError('Thumbnail must be at most 10 MB');
+        throw error;
+      }
+      if (buffer.length > 10 * 1024 * 1024 || !['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(part.mimetype)) throw new ValidationError('Thumbnail must be an image of at most 10 MB');
+      request.thumbnailFile = { filename: part.filename, mimetype: part.mimetype, buffer, fileSize: buffer.length };
+    } else data[part.fieldname] = part.value;
+  }
+  request.body = data;
+}
+
 export default {
+  getMyVideos,
+  prepareUpdate,
   initiateUpload,
   uploadVideo,
   completeUpload,
@@ -265,5 +253,7 @@ export default {
   deleteVideo,
   likeVideo,
   dislikeVideo,
+  setReaction,
+  clearReaction,
 };
 

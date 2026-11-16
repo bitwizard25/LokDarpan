@@ -1,7 +1,15 @@
 import { Link, Form, useLocation } from "@remix-run/react";
 import { TheaterLobby } from "~/components/TheaterLobby/TheaterLobby";
 import { useAppStore } from "~/store/useAppStore";
-import { MagnifyingGlass, Plus, Television } from "@phosphor-icons/react";
+import { Search, Plus, Theater } from "~/components/icons";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 
 interface HeaderProps {
     user?: {
@@ -13,7 +21,7 @@ interface HeaderProps {
 function SearchForm({ className = "" }: { className?: string }) {
     return (
         <Form role="search" action="/search" className={`relative ${className}`}>
-            <MagnifyingGlass size={20} weight="light" className="absolute left-4 top-3 pointer-events-none text-dark-400" />
+            <Search size={18} className="absolute left-4 top-3.5 pointer-events-none text-dark-400" />
             <input
                 type="search"
                 name="q"
@@ -34,13 +42,24 @@ function Account({ user, size }: { user: HeaderProps["user"]; size: string }) {
         );
     }
     return (
-        <Link
-            to="/profile"
-            aria-label="Your account"
-            className={`${size} shrink-0 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center font-semibold text-sm transition-colors`}
-        >
-            {user.name.charAt(0).toUpperCase()}
-        </Link>
+        <DropdownMenu>
+            <DropdownMenuTrigger
+                aria-label="Account menu"
+                className={`${size} shrink-0 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center font-semibold text-sm transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary-500`}
+            >
+                {user.name.charAt(0).toUpperCase()}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56 bg-dark-900 border-white/10 text-white">
+                <DropdownMenuLabel className="truncate">{user.name}</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild><Link to="/profile">Your profile</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link to="/studio">Creator Studio</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link to="/upload">Upload video</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link to="/settings">Settings</Link></DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild><Link to="/auth/logout">Sign out</Link></DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
     );
 }
 
@@ -60,8 +79,8 @@ export function Header({ user }: HeaderProps) {
                 <SearchForm className="flex-1 max-w-[560px] mx-auto" />
 
                 <div className="flex items-center gap-3 shrink-0">
-                    <Link to="/upload" className="h-10 px-4 rounded-full border border-white/15 hover:bg-white/10 flex items-center gap-2 text-white text-sm font-medium transition-colors">
-                        <Plus size={18} weight="light" />
+                    <Link to="/upload" className="h-10 px-4 rounded-full border border-white/15 hover:bg-white/10 flex items-center gap-2 text-white text-sm font-medium transition-all active:scale-95">
+                        <Plus size={18} />
                         Create
                     </Link>
 
@@ -72,9 +91,9 @@ export function Header({ user }: HeaderProps) {
                                 setTheaterMode(true);
                                 setTheaterLobbyOpen(true);
                             }}
-                            className="h-10 px-4 rounded-full border border-primary-500/40 bg-primary-500/15 hover:bg-primary-500/30 flex items-center gap-2 text-primary-300 hover:text-white text-sm font-semibold transition-colors active:scale-95"
+                            className="h-10 px-4 rounded-full border border-primary-500/40 bg-primary-500/15 hover:bg-primary-500/30 flex items-center gap-2 text-primary-300 hover:text-white text-sm font-semibold transition-all active:scale-95"
                         >
-                            <Television size={18} weight="light" />
+                            <Theater size={18} variant="outline" />
                             Theater
                         </button>
                     )}

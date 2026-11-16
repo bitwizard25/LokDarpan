@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><style>body{margin:0}a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #93C5FD;outline-offset:2px}@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}</style></helmet>
+<div class="bg-dark-950 text-dark-100 font-sans" style="min-height:100vh">
+<dc-import name="LdTopbar" is-mobile="{{ isMobile }}" style="position:sticky;top:0;z-index:20" hint-size="100%,64px"></dc-import>
+<div style="display:flex;align-items:flex-start">
+<sc-if value="{{ desktop }}" hint-placeholder-val="{{ true }}"><dc-import name="LdSidebar" active="Explore" collapsed="{{ navCollapsed }}" on-toggle="{{ toggleNav }}" style="position:sticky;top:64px" hint-size="240px,600px"></dc-import></sc-if>
+<main style="flex:1;min-width:0;padding:24px clamp(16px,3vw,40px) 104px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px"><h1 class="font-display" style="margin:0;color:#fff;font-weight:700;font-size:clamp(25px,3vw,31px);letter-spacing:-0.02em">Results for “budget”</h1><div style="color:#A1A1AA;font-size:14px">128 videos · 3 channels</div>
+<div role="tablist" aria-label="Filter results" style="display:flex;gap:8px;flex-wrap:wrap"><sc-for list="{{ chips }}" as="c" hint-placeholder-count="4"><sc-if value="{{ c.on }}" hint-placeholder-val="{{ false }}"><button type="button" role="tab" aria-selected="true" style="height:44px;padding:0 20px;border-radius:999px;border:0;background:#fff;color:#09090B;font:600 14px 'Plus Jakarta Sans',sans-serif;cursor:pointer">{{ c.label }}</button></sc-if><sc-if value="{{ c.off }}" hint-placeholder-val="{{ true }}"><button type="button" role="tab" aria-selected="false" onClick="{{ c.pick }}" style="height:44px;padding:0 20px;border-radius:999px;border:0;background:rgba(255,255,255,.1);color:#fff;font:500 14px 'Plus Jakarta Sans',sans-serif;cursor:pointer;transition:background .15s ease" style-hover="background:rgba(255,255,255,.18)">{{ c.label }}</button></sc-if></sc-for></div></div>
+<sc-if value="{{ showChannels }}" hint-placeholder-val="{{ true }}"><section style="display:flex;flex-direction:column;gap:16px"><h2 class="font-display" style="margin:0;color:#fff;font-weight:600;font-size:clamp(20px,2vw,25px)">Channels</h2><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:16px"><sc-for list="{{ channels }}" as="ch" hint-placeholder-count="3"><div class="bg-dark-900" style="display:flex;align-items:center;gap:16px;padding:16px;border-radius:16px;border:1px solid rgba(255,255,255,.06)"><div style="width:56px;height:56px;flex:none;border-radius:50%;background:rgba(255,255,255,.1);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600">{{ ch.i }}</div><div style="flex:1;min-width:0"><div style="color:#fff;font-weight:600">{{ ch.name }}</div><div style="color:#A1A1AA;font-size:14px">{{ ch.meta }}</div></div><button type="button" style="height:44px;padding:0 16px;border-radius:999px;border:1px solid rgba(255,255,255,.2);background:transparent;color:#fff;font:600 14px 'Plus Jakarta Sans',sans-serif;cursor:pointer" style-hover="background:rgba(255,255,255,.08)">Follow</button></div></sc-for></div></section></sc-if>
+<sc-if value="{{ showVideos }}" hint-placeholder-val="{{ true }}"><section style="display:flex;flex-direction:column;gap:16px"><h2 class="font-display" style="margin:0;color:#fff;font-weight:600;font-size:clamp(20px,2vw,25px)">Videos</h2><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr));gap:16px"><sc-for list="{{ videos }}" as="v" hint-placeholder-count="6"><dc-import name="LdCard" label="{{ v.title }}" meta="{{ v.meta }}" dur="{{ v.dur }}" live="{{ v.live }}" progress="{{ v.progress }}" hint-size="100%,250px"></dc-import></sc-for></div><button type="button" style="align-self:flex-start;height:44px;padding:0 24px;border-radius:999px;border:0;background:rgba(255,255,255,.1);color:#fff;font:600 14px 'Plus Jakarta Sans',sans-serif;cursor:pointer" style-hover="background:rgba(255,255,255,.18)">Show more results</button></section></sc-if>
+</main></div>
+<sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}"><dc-import name="LdDock" active="Explore" hint-size="100%,64px"></dc-import></sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { w: window.innerWidth, collapsed: window.innerWidth < 1200, f: 'All' };
+  componentDidMount() { this.onR = () => this.setState({ w: window.innerWidth }); window.addEventListener('resize', this.onR); }
+  componentWillUnmount() { window.removeEventListener('resize', this.onR); }
+  renderVals() {
+    const s = this.state, isMobile = s.w < 768, f = s.f;
+    const all = [
+      ['Budget 2027: five numbers that matter','Lok Report · 128k views','12:34',false],
+      ['Union Budget: reactions from the panel','Lok Report · 9.8k watching','',true],
+      ['Budget for beginners: reading the fine print','Explain India · 2.1M views','10:03',false],
+      ['What the budget means for farmers','Kisan Talk · 44k views','8:47',false],
+      ['Budget day markets: live wrap','Money Matters · 5.7k watching','',true],
+      ['Five budget myths, busted','Explain India · 310k views','6:58',false]
+    ].map(([title, meta, dur, live]) => ({ title, meta, dur, live, progress: 0 }));
+    return {
+      isMobile, desktop: !isMobile, navCollapsed: s.collapsed,
+      toggleNav: () => this.setState(x => ({ collapsed: !x.collapsed })),
+      chips: ['All','Videos','Live','Channels'].map(label => ({ label, on: label === f, off: label !== f, pick: () => this.setState({ f: label }) })),
+      showChannels: f === 'All' || f === 'Channels',
+      showVideos: f !== 'Channels',
+      channels: [['Lok Report','1.2M followers'],['Money Matters','640k followers'],['Explain India','2.4M followers']].map(([name, meta]) => ({ name, meta, i: name[0] })),
+      videos: f === 'Live' ? all.filter(v => v.live) : all
+    };
+  }
+}
+</script>
+</body>
+</html>

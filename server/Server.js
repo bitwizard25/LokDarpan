@@ -7,6 +7,7 @@ import connectDatabase, { disconnectDatabase } from './src/config/database.js';
 import { APP_CONFIG } from './src/config/app.js';
 import { config } from 'dotenv';
 import { startTranscodeResultListener, stopTranscodeResultListener } from './src/modules/video/listeners/transcodeResult.listener.js';
+import { startTranscodeReconciler, stopTranscodeReconciler } from './src/modules/video/services/transcodeReconciler.js';
 
 // Load environment variables
 config();
@@ -20,6 +21,7 @@ async function start() {
     await connectDatabase();
 
     startTranscodeResultListener();
+    startTranscodeReconciler();
 
     // Build Fastify app
     const app = await buildApp();
@@ -40,6 +42,7 @@ async function start() {
       
       try {
         await app.close();
+        stopTranscodeReconciler();
         await stopTranscodeResultListener();
         await disconnectDatabase();
         console.log('✅ Server closed');

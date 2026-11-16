@@ -6,9 +6,10 @@ type HlsPlayerProps = {
     poster?: string;
     className?: string;
     autoPlay?: boolean;
+    onTimeUpdate?: (seconds: number) => void;
 };
 
-export function HlsPlayer({ src, poster, className, autoPlay }: HlsPlayerProps) {
+export function HlsPlayer({ src, poster, className, autoPlay, onTimeUpdate }: HlsPlayerProps) {
     const ref = useRef<HTMLVideoElement>(null);
 
     useEffect(() => {
@@ -42,6 +43,7 @@ export function HlsPlayer({ src, poster, className, autoPlay }: HlsPlayerProps) 
             controls
             playsInline
             autoPlay={autoPlay}
+            onTimeUpdate={event => onTimeUpdate?.(event.currentTarget.currentTime)}
             className={className}
         />
     );

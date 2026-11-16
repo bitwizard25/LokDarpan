@@ -1,0 +1,35 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - link "LokDarpan" [ref=e5] [cursor=pointer]:
+        - /url: /
+      - search [ref=e6]:
+        - searchbox "Search" [ref=e7]
+      - generic [ref=e8]:
+        - link "Create" [ref=e9] [cursor=pointer]:
+          - /url: /upload
+        - link "Sign In" [ref=e12] [cursor=pointer]:
+          - /url: /auth/login
+  - generic [ref=e14]:
+    - navigation "Main" [ref=e15]:
+      - link "Home" [ref=e16] [cursor=pointer]:
+        - /url: /
+      - link "Explore" [ref=e21] [cursor=pointer]:
+        - /url: /explore
+      - link "Trending" [ref=e24] [cursor=pointer]:
+        - /url: /trending
+      - link "Shorts" [ref=e27] [cursor=pointer]:
+        - /url: /shorts
+      - link "Following" [ref=e30] [cursor=pointer]:
+        - /url: /following
+      - link "Library" [ref=e33] [cursor=pointer]:
+        - /url: /library
+      - button "Expand sidebar" [ref=e37] [cursor=pointer]
+    - main [ref=e40]:
+      - status
+      - alert [ref=e41]:
+        - heading "Videos are temporarily unavailable" [level=1] [ref=e42]
+        - paragraph [ref=e43]: We couldn’t load the home feed. Please try again.
+        - button "Try again" [ref=e44] [cursor=pointer]
+        - link "Reset filters" [ref=e45] [cursor=pointer]:
+          - /url: /

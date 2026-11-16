@@ -1,27 +1,35 @@
 import { json, type MetaFunction, type LoaderFunctionArgs } from "@remix-run/node";
-import { useLoaderData, Link } from "@remix-run/react";
+import { useLoaderData, useNavigation, Link } from "@remix-run/react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Layout } from "~/components/Layout/Layout";
 import { getUserFromSession } from "~/services/auth.server";
+import { getServerApiBaseUrl } from "~/lib/api";
+import { ShortsSkeleton } from "~/components/VideoSkeleton/VideoSkeleton";
+import { Heart, Comment, Share, MoreVertical, Play, VolumeMute, ChevronLeft } from "~/components/icons";
 
 export const meta: MetaFunction = () => {
     return [{ title: "Shorts - LokDarpan" }];
 };
 
-// Mock Shorts Data with actual placeholder videos if available, else colors/gradients
-const shortsData = [
-    { id: "s1", title: "Wait for the drop! 🎵", channel: "MusicMakers", likes: 123000, comments: "1.2K", color: "#F59E0B", src: "https://www.w3schools.com/html/mov_bbb.mp4" },
-    { id: "s2", title: "Satisfying cleanup 🧹", channel: "CleanTok", likes: 89000, comments: "450", color: "#14B8A6", src: "https://www.w3schools.com/html/movie.mp4" },
-    { id: "s3", title: "Hidden secrets in Zelda 🎮", channel: "GameLore", likes: 230000, comments: "2K", color: "#8B5CF6", src: null },
-];
-
 export async function loader({ request }: LoaderFunctionArgs) {
     const userSession = await getUserFromSession(request);
-    return json({ user: userSession?.user || null, shorts: shortsData });
+    const base = getServerApiBaseUrl();
+    const headers: HeadersInit = userSession ? { Authorization: `Bearer ${userSession.token}` } : {};
+    const response = await fetch(`${base}/video?type=short&limit=24`);
+    const data = response.ok ? await response.json() : { videos: [] };
+    const shorts = await Promise.all((data.videos || []).map(async (video: any) => {
+        try {
+            const detail = await fetch(`${base}/video/${video.id}`, { headers });
+            const full = detail.ok ? (await detail.json()).video : {};
+            return { id: video.id, title: video.title, channel: video.channel?.name || 'Creator', likes: full.likes || 0, comments: full.commentCount || 0, color: '#14B8A6', src: full.videoUrl || full.hlsMasterUrl || '' };
+        } catch { return { id: video.id, title: video.title, channel: video.channel?.name || 'Creator', likes: 0, comments: 0, color: '#14B8A6', src: '' }; }
+    }));
+    return json({ user: userSession?.user || null, shorts, error: response.ok ? null : 'Short videos could not be loaded.' });
 }
 
 export default function Shorts() {
-    const { user, shorts } = useLoaderData<typeof loader>();
+    const { user, shorts, error } = useLoaderData<typeof loader>();
+    const loading = useNavigation().state !== 'idle';
     const [activeIndex, setActiveIndex] = useState(0);
     const [isPlaying, setIsPlaying] = useState(true);
     const [isMuted, setIsMuted] = useState(true);
@@ -81,8 +89,11 @@ export default function Shorts() {
 
     const activeColor = shorts[activeIndex]?.color || "#14B8A6";
 
+    if (loading && !shorts.length) return <Layout user={user} hideSidebar><div className="mx-auto max-w-4xl pt-10"><ShortsSkeleton count={3} /></div></Layout>;
+
     return (
         <Layout user={user} hideSidebar={true}>
+            {!shorts.length && <div className="fixed inset-0 z-20 flex items-center justify-center bg-dark-950 p-6 text-center"><div><h1 className="text-2xl font-bold text-white">No Shorts yet</h1><p className="mt-2 text-dark-300">{error || 'Published short videos will appear here.'}</p><Link to="/" className="mt-5 inline-block text-primary-300">Back to home</Link></div></div>}
             <div className="fixed inset-0 pt-16 bg-dark-950 flex justify-center overflow-hidden">
                 {/* Ambient Background */}
                 <div
@@ -127,11 +138,10 @@ export default function Shorts() {
                                             playsInline
                                         />
                                     ) : (
-                                        // Fallback for missing video
                                         <div className="w-full h-full flex items-center justify-center relative">
                                             <div className="absolute inset-0 opacity-30" style={{ backgroundColor: short.color }} />
                                             <span className="text-white/20 font-display text-4xl font-bold uppercase tracking-widest z-10">
-                                                No Video Source
+                                                Video is processing
                                             </span>
                                         </div>
                                     )}
@@ -141,14 +151,14 @@ export default function Shorts() {
                                     {/* Play/Pause Icon Overlay */}
                                     {!isPlaying && index === activeIndex && (
                                         <div className="absolute inset-0 flex items-center justify-center bg-black/30 pointer-events-none">
-                                            <svg className="w-20 h-20 text-white/80" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                                            <Play size={64} className="text-white/80" />
                                         </div>
                                     )}
 
                                     {/* Mute Indicator */}
                                     {isMuted && (
-                                        <div className="absolute top-4 right-4 p-2 bg-black/40 rounded-full backdrop-blur pointer-events-none">
-                                            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" stroke="currentColor" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" /></svg>
+                                        <div className="absolute top-4 right-4 p-2.5 bg-black/40 rounded-full backdrop-blur pointer-events-none">
+                                            <VolumeMute size={20} className="text-white" />
                                         </div>
                                     )}
                                 </div>
@@ -162,7 +172,7 @@ export default function Shorts() {
                                             </div>
                                             <span className="font-bold text-white drop-shadow-md truncate max-w-[150px]">{short.channel}</span>
                                             <button
-                                                className="px-4 py-1.5 bg-white text-black text-xs font-bold rounded-full hover:bg-gray-200 hover:scale-105 transition-all shadow-lg"
+                                                className="px-4 py-1.5 bg-white text-black text-xs font-bold rounded-full hover:bg-gray-200 hover:scale-105 transition-all shadow-lg active:scale-95"
                                                 onClick={(e) => { e.stopPropagation(); alert(`Subscribed to ${short.channel}`); }}
                                             >
                                                 Subscribe
@@ -172,7 +182,7 @@ export default function Shorts() {
                                             {short.title}
                                         </h2>
                                         <div className="flex items-center gap-2 text-white/80 text-xs">
-                                            <svg className="w-3 h-3 animate-spin-slow" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" /></svg>
+                                            <span className="w-2 h-2 rounded-full bg-primary-400 animate-ping" />
                                             <span className="truncate max-w-[200px]">Original Sound - {short.channel}</span>
                                         </div>
                                     </div>
@@ -182,8 +192,8 @@ export default function Shorts() {
                                         <ActionButton icon="heart" count={short.likes} active={false} />
                                         <ActionButton icon="message" count={short.comments} />
                                         <ActionButton icon="share" label="Share" />
-                                        <button className="w-10 h-10 rounded-full bg-dark-800/60 backdrop-blur-sm flex items-center justify-center text-white hover:bg-dark-700 transition-colors">
-                                            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" /></svg>
+                                        <button aria-label="More options" className="w-10 h-10 rounded-full bg-dark-800/60 backdrop-blur-sm flex items-center justify-center text-white hover:bg-dark-700 transition-colors active:scale-90">
+                                            <MoreVertical size={20} />
                                         </button>
                                         <div className="w-10 h-10 rounded-lg bg-dark-800 border-2 border-white/20 overflow-hidden animate-spin-slow shadow-lg">
                                             <div className="w-full h-full bg-gradient-to-tr from-primary-500 to-accent-500" />
@@ -196,8 +206,8 @@ export default function Shorts() {
                 </div>
 
                 {/* Return to Feed */}
-                <Link to="/" className="fixed top-20 left-4 z-50 px-4 py-2 bg-black/40 backdrop-blur-md rounded-full text-white text-xs font-medium hover:bg-white/10 transition-all border border-white/5 flex items-center gap-2 group">
-                    <svg className="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                <Link to="/" className="fixed top-20 left-4 z-50 px-4 py-2 bg-black/40 backdrop-blur-md rounded-full text-white text-xs font-medium hover:bg-white/10 transition-all border border-white/5 flex items-center gap-2 group active:scale-95">
+                    <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
                     Back to Feed
                 </Link>
             </div>
@@ -212,24 +222,29 @@ function ActionButton({ icon, count, label, active: initialActive }: { icon: str
     const handleClick = (e: React.MouseEvent) => {
         e.stopPropagation();
         setIsActive(!isActive);
-        setScale(1.2); // Bounce effect
-        setTimeout(() => setScale(1), 200);
+        setScale(1.08); // Fluid bounce effect (as recommended by UI/UX audit)
+        setTimeout(() => setScale(1), 160);
     };
 
     return (
         <button
+            type="button"
+            aria-pressed={icon === "heart" ? isActive : undefined}
+            aria-label={label || (icon === "heart" ? (isActive ? "Unlike" : "Like") : icon)}
             className="flex flex-col items-center gap-1 group"
             onClick={handleClick}
         >
             <div
-                className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg ${isActive ? 'bg-red-500 text-white' : 'bg-dark-800/60 backdrop-blur-sm text-white hover:bg-dark-700'}`}
+                className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg ${isActive ? 'bg-red-500 text-white shadow-glow-subtle' : 'bg-dark-800/60 backdrop-blur-sm text-white hover:bg-dark-700'}`}
                 style={{ transform: `scale(${scale})` }}
             >
-                {getIcon(icon, isActive)}
+                {icon === "heart" && <Heart size={24} variant={isActive ? "filled" : "outline"} />}
+                {icon === "message" && <Comment size={24} />}
+                {icon === "share" && <Share size={24} />}
             </div>
             {(count || label) && <span className="text-white text-xs font-semibold drop-shadow-md">{formatCount(count)}</span>}
         </button>
-    )
+    );
 }
 
 function formatCount(count?: number | string) {
@@ -238,16 +253,4 @@ function formatCount(count?: number | string) {
     if (count >= 1000000) return (count / 1000000).toFixed(1) + 'M';
     if (count >= 1000) return (count / 1000).toFixed(1) + 'K';
     return count.toString();
-}
-
-function getIcon(name: string, filled?: boolean) {
-    const className = "w-6 h-6";
-    switch (name) {
-        case "heart": return filled
-            ? <svg className={className} fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" /></svg>
-            : <svg className={className} fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fillOpacity="0" stroke="currentColor" strokeWidth="2" /></svg>;
-        case "message": return <svg className={className} fill="currentColor" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z" /></svg>;
-        case "share": return <svg className={className} fill="currentColor" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.66 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z" /></svg>;
-        default: return null;
-    }
 }

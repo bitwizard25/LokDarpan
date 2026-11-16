@@ -1,9 +1,9 @@
 
 import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { json, redirect, unstable_parseMultipartFormData, unstable_createMemoryUploadHandler } from "@remix-run/node";
-import { Form, Link, useActionData, useNavigation } from "@remix-run/react";
+import { Form, Link, useActionData, useLoaderData, useNavigation } from "@remix-run/react";
 import { requireUserSession, getUserFromSession } from "~/services/auth.server";
-import { authApi } from "~/lib/api";
+import { authApi, verificationApi } from "~/lib/api";
 
 type ActionData = {
     errors?: {
@@ -20,14 +20,18 @@ export const meta: MetaFunction = () => {
 };
 
 export async function loader({ request }: LoaderFunctionArgs) {
-    const { user } = await requireUserSession(request);
+    const { user, token } = await requireUserSession(request);
 
     // If user already has a channel, redirect to it or dashboard
     if (user.channel) {
         return redirect(`/channel/${user.channel}`); // Assuming channel ID is stored
     }
 
-    return json({ user });
+    // The API refuses channel creation until the identity is verified (DigiLocker or manual review).
+    const verification = await verificationApi.status(token);
+    const needsVerification = verification.data ? verification.data.status !== "verified" : false;
+
+    return json({ user, needsVerification, verificationStatus: verification.data?.status ?? null });
 }
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -109,8 +113,29 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function CreateChannel() {
     const actionData = useActionData<ActionData>();
+    const { needsVerification, verificationStatus } = useLoaderData<typeof loader>();
     const navigation = useNavigation();
     const isSubmitting = navigation.state === "submitting";
+
+    if (needsVerification) {
+        return (
+            <div className="min-h-screen bg-dark-950 text-white flex items-center justify-center px-4">
+                <div className="glass-panel w-full max-w-md rounded-2xl p-8 text-center">
+                    <h1 className="mb-2 text-xl font-semibold">
+                        {verificationStatus === "pending" ? "Your ID is under review" : "Verify your identity first"}
+                    </h1>
+                    <p className="mb-6 text-sm text-dark-400">
+                        {verificationStatus === "pending"
+                            ? "You can create a channel as soon as a reviewer approves your ID."
+                            : "We verify every creator before they can create a channel and upload videos."}
+                    </p>
+                    <Link to="/verify" className="btn-primary inline-block">
+                        {verificationStatus === "pending" ? "View status" : "Verify identity"}
+                    </Link>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-dark-950 text-white flex flex-col items-center justify-center relative overflow-hidden py-10">

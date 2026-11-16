@@ -1,0 +1,180 @@
+- generic [ref=f2e2]:
+  - banner [ref=f2e3]:
+    - generic [ref=f2e4]:
+      - link "LokDarpan" [ref=f2e5] [cursor=pointer]:
+        - /url: /
+      - search [ref=f2e6]:
+        - searchbox "Search" [ref=f2e7]
+      - generic [ref=f2e8]:
+        - link "Create" [ref=f2e9] [cursor=pointer]:
+          - /url: /upload
+        - link "Sign In" [ref=f2e12] [cursor=pointer]:
+          - /url: /auth/login
+  - generic [ref=f2e14]:
+    - navigation "Main" [ref=f2e15]:
+      - link "Home" [ref=f2e16] [cursor=pointer]:
+        - /url: /
+      - link "Explore" [ref=f2e21] [cursor=pointer]:
+        - /url: /explore
+      - link "Trending" [ref=f2e24] [cursor=pointer]:
+        - /url: /trending
+      - link "Shorts" [ref=f2e27] [cursor=pointer]:
+        - /url: /shorts
+      - link "Following" [ref=f2e30] [cursor=pointer]:
+        - /url: /following
+      - link "Library" [ref=f2e33] [cursor=pointer]:
+        - /url: /library
+      - button "Expand sidebar" [ref=f2e37] [cursor=pointer]
+    - main [ref=f2e40]:
+      - region "Featured" [ref=f2e42]:
+        - generic [ref=f2e44]:
+          - generic [ref=f2e45]:
+            - generic [ref=f2e46]: LIVE
+            - text: Lok Report · 12.4k watching
+          - 'heading "Monsoon Session: what changed in the House this week" [level=1] [ref=f2e47]'
+          - paragraph [ref=f2e48]: Three bills, two walkouts and a debate that ran past midnight. Lok Report breaks down what passed, what stalled and what it means for you.
+          - generic [ref=f2e49]:
+            - link "Watch now" [ref=f2e50] [cursor=pointer]:
+              - /url: /watch/t2
+            - button "More info" [ref=f2e53] [cursor=pointer]
+      - generic [ref=f2e55]:
+        - button "For You" [ref=f2e56] [cursor=pointer]
+        - button "Late Night Coding" [ref=f2e57] [cursor=pointer]
+        - button "Weekend Thrillers" [ref=f2e58] [cursor=pointer]
+        - button "Learn Something" [ref=f2e59] [cursor=pointer]
+        - button "Music" [ref=f2e60] [cursor=pointer]
+        - button "Vibes" [ref=f2e61] [cursor=pointer]
+      - generic [ref=f2e62]:
+        - generic [ref=f2e63]:
+          - heading "Trending Now" [level=2] [ref=f2e64]
+          - link "See all" [ref=f2e65] [cursor=pointer]:
+            - /url: /explore
+        - generic [ref=f2e66]:
+          - generic [ref=f2e68]:
+            - link "The Future of Digital Art" [ref=f2e69] [cursor=pointer]:
+              - /url: /watch/t1
+              - generic [ref=f2e72]: 7:00
+            - generic [ref=f2e73]:
+              - link "The Future of Digital Art" [ref=f2e74] [cursor=pointer]:
+                - /url: /watch/t1
+              - generic [ref=f2e75]:
+                - generic [ref=f2e76]:
+                  - link "NeonVibes" [ref=f2e77] [cursor=pointer]:
+                    - /url: /channel/NeonVibes
+                  - text: · 88.0K views
+                - button "Add to My List" [ref=f2e78] [cursor=pointer]
+          - generic [ref=f2e80]:
+            - link "Building a Next.js App from Scratch" [ref=f2e81] [cursor=pointer]:
+              - /url: /watch/t2
+            - generic [ref=f2e84]:
+              - link "Building a Next.js App from Scratch" [ref=f2e85] [cursor=pointer]:
+                - /url: /watch/t2
+              - generic [ref=f2e86]:
+                - generic [ref=f2e87]: LIVE
+                - generic [ref=f2e88]:
+                  - link "DevDaily" [ref=f2e89] [cursor=pointer]:
+                    - /url: /channel/DevDaily
+                  - text: · 120.0K watching
+                - button "Add to My List" [ref=f2e90] [cursor=pointer]
+          - generic [ref=f2e92]:
+            - link "React 19 Features Explained" [ref=f2e93] [cursor=pointer]:
+              - /url: /watch/t3
+              - generic [ref=f2e96]: 14:50
+            - generic [ref=f2e97]:
+              - link "React 19 Features Explained" [ref=f2e98] [cursor=pointer]:
+                - /url: /watch/t3
+              - generic [ref=f2e99]:
+                - generic [ref=f2e100]:
+                  - link "TechWeekly" [ref=f2e101] [cursor=pointer]:
+                    - /url: /channel/TechWeekly
+                  - text: · 45.0K views
+                - button "Add to My List" [ref=f2e102] [cursor=pointer]
+          - generic [ref=f2e104]:
+            - link "Cinematic Lighting for Small Studios" [ref=f2e105] [cursor=pointer]:
+              - /url: /watch/t4
+              - generic [ref=f2e108]: 10:00
+            - generic [ref=f2e109]:
+              - link "Cinematic Lighting for Small Studios" [ref=f2e110] [cursor=pointer]:
+                - /url: /watch/t4
+              - generic [ref=f2e111]:
+                - generic [ref=f2e112]:
+                  - link "CreatorHQ" [ref=f2e113] [cursor=pointer]:
+                    - /url: /channel/CreatorHQ
+                  - text: · 23.0K views
+                - button "Add to My List" [ref=f2e114] [cursor=pointer]
+      - generic [ref=f2e115]:
+        - generic [ref=f2e116]:
+          - heading "Bite-Sized (Shorts)" [level=2] [ref=f2e117]
+          - link "See all" [ref=f2e118] [cursor=pointer]:
+            - /url: /shorts
+        - generic [ref=f2e119]:
+          - link "Crazy AI Art in 30 Seconds" [ref=f2e120] [cursor=pointer]:
+            - /url: /shorts/s1
+            - generic [ref=f2e124]: 1.2M views
+          - link "Neon Cyberpunk Concepts" [ref=f2e125] [cursor=pointer]:
+            - /url: /shorts/s2
+            - generic [ref=f2e129]: 890K views
+          - link "Abstract 3D Animations" [ref=f2e130] [cursor=pointer]:
+            - /url: /shorts/s3
+            - generic [ref=f2e134]: 2.1M views
+          - link "Cinematic Lighting Setup" [ref=f2e135] [cursor=pointer]:
+            - /url: /shorts/s4
+            - generic [ref=f2e139]: 560K views
+      - generic [ref=f2e140]:
+        - generic [ref=f2e141]:
+          - heading "Late Night Coding & Tech" [level=2] [ref=f2e142]
+          - link "See all" [ref=f2e143] [cursor=pointer]:
+            - /url: /explore
+        - generic [ref=f2e144]:
+          - generic [ref=f2e146]:
+            - link "Mastering Glassmorphism in TailwindCSS" [ref=f2e147] [cursor=pointer]:
+              - /url: /watch/t5
+              - generic [ref=f2e150]: 25:00
+            - generic [ref=f2e151]:
+              - link "Mastering Glassmorphism in TailwindCSS" [ref=f2e152] [cursor=pointer]:
+                - /url: /watch/t5
+              - generic [ref=f2e153]:
+                - generic [ref=f2e154]:
+                  - link "IndieHacker" [ref=f2e155] [cursor=pointer]:
+                    - /url: /channel/IndieHacker
+                  - text: · 67.0K views
+                - button "Add to My List" [ref=f2e156] [cursor=pointer]
+          - generic [ref=f2e158]:
+            - link "Designing with Framer Motion Elements" [ref=f2e159] [cursor=pointer]:
+              - /url: /watch/t6
+              - generic [ref=f2e162]: 15:00
+            - generic [ref=f2e163]:
+              - link "Designing with Framer Motion Elements" [ref=f2e164] [cursor=pointer]:
+                - /url: /watch/t6
+              - generic [ref=f2e165]:
+                - generic [ref=f2e166]:
+                  - link "CreativeFlow" [ref=f2e167] [cursor=pointer]:
+                    - /url: /channel/CreativeFlow
+                  - text: · 12.0K views
+                - button "Add to My List" [ref=f2e168] [cursor=pointer]
+          - generic [ref=f2e170]:
+            - link "Why the Default UI Paradigm is Dead" [ref=f2e171] [cursor=pointer]:
+              - /url: /watch/t7
+              - generic [ref=f2e174]: 20:50
+            - generic [ref=f2e175]:
+              - link "Why the Default UI Paradigm is Dead" [ref=f2e176] [cursor=pointer]:
+                - /url: /watch/t7
+              - generic [ref=f2e177]:
+                - generic [ref=f2e178]:
+                  - link "DesignInsight" [ref=f2e179] [cursor=pointer]:
+                    - /url: /channel/DesignInsight
+                  - text: · 156.0K views
+                - button "Add to My List" [ref=f2e180] [cursor=pointer]
+          - generic [ref=f2e182]:
+            - link "The Perfect Developer Work Setup" [ref=f2e183] [cursor=pointer]:
+              - /url: /watch/t8
+              - generic [ref=f2e186]: 9:00
+            - generic [ref=f2e187]:
+              - link "The Perfect Developer Work Setup" [ref=f2e188] [cursor=pointer]:
+                - /url: /watch/t8
+              - generic [ref=f2e189]:
+                - generic [ref=f2e190]:
+                  - link "WorkspaceHub" [ref=f2e191] [cursor=pointer]:
+                    - /url: /channel/WorkspaceHub
+                  - text: · 34.0K views
+                - button "Add to My List" [ref=f2e192] [cursor=pointer]

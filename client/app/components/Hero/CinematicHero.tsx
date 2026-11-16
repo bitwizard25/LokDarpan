@@ -70,7 +70,7 @@ export function CinematicHero({ onSlideChange }: { onSlideChange?: (color: strin
                     <img
                         src={item.imageUrl}
                         alt={item.title}
-                        className="w-full h-full object-cover transform scale-[1.02] group-hover:scale-[1.05] transition-transform duration-[10000ms] ease-out mix-blend-screen"
+                        className="w-full h-full object-cover transform scale-[1.02] group-hover:scale-[1.05] transition-transform duration-10000 ease-out mix-blend-screen"
                     />
                     {/* Dark gradient mapping for legibility and cinematic feel */}
                     <div className="absolute inset-0 bg-gradient-to-t from-dark-950 via-dark-950/20 to-transparent" />

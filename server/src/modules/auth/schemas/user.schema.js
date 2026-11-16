@@ -9,6 +9,13 @@ const userSchema = new mongoose.Schema(
   {
     _id: mongoose.Schema.Types.ObjectId,
     name: { type: String, required: true },
+    bio: { type: String, maxlength: 1000, default: '' },
+    avatarUrl: { type: String, default: null },
+    identityVerification: {
+      provider: { type: String, enum: ['digilocker', 'manual'] },
+      verifiedAt: { type: Date },
+      reference: { type: String, select: false },
+    },
     email: { type: String, required: true, unique: true },
     phone: { type: String, required: true },
     password: { type: String, required: true },

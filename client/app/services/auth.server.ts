@@ -74,7 +74,9 @@ export async function requireUserSession(request: Request) {
     const userSession = await getUserFromSession(request);
 
     if (!userSession) {
-        throw redirect("/auth/login");
+        const url = new URL(request.url);
+        const redirectTo = encodeURIComponent(url.pathname + url.search);
+        throw redirect(`/auth/login?redirectTo=${redirectTo}`);
     }
 
     return userSession;

@@ -1,6 +1,6 @@
 import { Link } from "@remix-run/react";
 import { useState } from "react";
-import { Play } from "@phosphor-icons/react";
+import { Play } from "~/components/icons";
 
 export interface FeaturedItem {
     id: string;
@@ -8,7 +8,9 @@ export interface FeaturedItem {
     description: string;
     imageUrl?: string;
     channelName: string;
-    watching: string;
+    watching?: string;
+    isLive?: boolean;
+    views?: number;
     presenters?: string;
     language?: string;
 }
@@ -36,8 +38,8 @@ export function FeaturedHero({ item }: { item: FeaturedItem }) {
 
                 <div className="relative flex flex-col items-start gap-4 max-w-[640px] p-[clamp(24px,4vw,48px)]">
                     <div className="flex items-center gap-2 text-sm text-dark-200">
-                        <span className="px-2 py-0.5 rounded bg-primary-600 text-white text-xs font-bold tracking-wider">LIVE</span>
-                        {item.channelName} · {item.watching} watching
+                        {item.isLive && <span className="px-2 py-0.5 rounded bg-primary-600 text-white text-xs font-bold tracking-wider">LIVE</span>}
+                        {item.channelName} · {item.isLive ? `${item.watching || '0'} watching` : `${Intl.NumberFormat('en-US', { notation: 'compact' }).format(item.views || 0)} views`}
                     </div>
 
                     <h1 className="font-display font-bold text-white tracking-tight leading-[1.08] text-[clamp(31px,4.5vw,49px)] text-balance m-0">
@@ -51,7 +53,7 @@ export function FeaturedHero({ item }: { item: FeaturedItem }) {
                             to={`/watch/${item.id}`}
                             className="h-12 px-6 flex items-center gap-2 rounded-full bg-primary-600 text-white font-semibold text-base no-underline transition-all hover:brightness-110 active:scale-95"
                         >
-                            <Play size={20} weight="fill" />
+                            <Play size={20} />
                             Watch now
                         </Link>
                         <button
@@ -72,7 +74,7 @@ export function FeaturedHero({ item }: { item: FeaturedItem }) {
                     className="grid gap-6 p-6 rounded-2xl bg-dark-900 border border-white/5 grid-cols-[repeat(auto-fit,minmax(min(100%,240px),1fr))]"
                 >
                     <div className="flex flex-col gap-2 md:col-span-2">
-                        <div className="text-white font-semibold">About this stream</div>
+                        <div className="text-white font-semibold">About this video</div>
                         <p className="m-0 text-dark-200 leading-relaxed max-w-[65ch]">{item.description}</p>
                     </div>
                     <div className="flex flex-col gap-2">
