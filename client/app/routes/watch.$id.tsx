@@ -1,11 +1,13 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { useLoaderData, useFetcher, Link } from "@remix-run/react";
+import { useLoaderData, useFetcher, Link, useLocation } from "@remix-run/react";
 import { useRef, useState } from "react";
 import { Layout } from "~/components/Layout/Layout";
 import { getUserFromSession } from "~/services/auth.server";
 import { getServerApiBaseUrl } from "~/lib/api";
 import { HlsPlayer } from "~/components/VideoPlayer/HlsPlayer";
+import { usePlaybackTracking } from "~/hooks/usePlaybackTracking";
+import type { Tracking } from "~/lib/tracker.client";
 
 type WatchActionData = { error?: string; ok?: boolean; intent?: string };
 
@@ -137,6 +139,16 @@ export default function Watch() {
     const { video, user, isSaved, comments } = useLoaderData<typeof loader>();
     const fetcher = useFetcher<typeof action>();
     const historyFetcher = useFetcher<typeof action>();
+    const location = useLocation();
+    const rec = (location.state as { rec?: Tracking } | null)?.rec;
+    const [videoEl, setVideoEl] = useState<HTMLVideoElement | null>(null);
+
+    usePlaybackTracking(videoEl, {
+        video: video._id,
+        durationSeconds: video.duration || 0,
+        rec,
+    });
+
     const actionData = fetcher.data;
     const lastHistoryUpdate = useRef(0);
     const [shareMessage, setShareMessage] = useState('');
@@ -177,7 +189,7 @@ export default function Watch() {
                                     <p>
                                         This video failed processing.
                                         {video.processingError
-                                            ? ` ${video.processingError}`
+                                             ? ` ${video.processingError}`
                                             : ""}
                                     </p>
                                 </div>
@@ -189,6 +201,7 @@ export default function Watch() {
                             )}
                             {!isProcessing && !isFailed && isHls && playUrl && (
                                 <HlsPlayer
+                                    ref={setVideoEl}
                                     src={playUrl}
                                     poster={video.thumbnailUrl}
                                     className="w-full h-full object-contain"
@@ -198,6 +211,7 @@ export default function Watch() {
                             )}
                             {!isProcessing && !isFailed && !isHls && playUrl && (
                                 <video
+                                    ref={setVideoEl}
                                     src={playUrl}
                                     poster={video.thumbnailUrl}
                                     controls

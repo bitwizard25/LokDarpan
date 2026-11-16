@@ -1,11 +1,13 @@
 import { Link } from "@remix-run/react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Plus, Check, Play } from "~/components/icons";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { LazyImage } from "~/components/ui/lazy-image";
 import { cn } from "~/lib/utils";
+import { track, type Tracking } from "~/lib/tracker.client";
+import { useImpression } from "~/hooks/useImpression";
 
 interface VideoCardProps {
     id: string;
@@ -21,6 +23,7 @@ interface VideoCardProps {
     isLive?: boolean;
     progress?: number;
     featured?: boolean; // bento layout: large horizontal card
+    tracking?: Tracking;
 }
 
 export function VideoCard({
@@ -35,12 +38,33 @@ export function VideoCard({
     isLive = false,
     progress = 0,
     featured = false,
+    tracking,
 }: VideoCardProps) {
     const [added, setAdded] = useState(false);
+    const cardRef = useRef<HTMLDivElement>(null);
+
+    useImpression(cardRef, tracking, id);
+
+    const handleClick = () => {
+        if (tracking) {
+            track({
+                type: "click",
+                video: id,
+                surface: tracking.surface,
+                requestId: tracking.requestId,
+                position: tracking.position,
+                source: tracking.source,
+            });
+        }
+    };
+
+    const linkState = tracking ? { rec: tracking } : undefined;
 
     const thumb = (
         <Link
             to={`/watch/${id}`}
+            state={linkState}
+            onClick={handleClick}
             aria-label={title}
             className={`relative block overflow-hidden rounded-[10px] bg-dark-800 ${featured ? "md:w-3/5 md:h-full aspect-video md:aspect-auto" : "aspect-video"}`}
         >
@@ -68,6 +92,7 @@ export function VideoCard({
 
     return (
         <Card
+            ref={cardRef}
             className={cn(
                 "flex flex-col gap-2 h-full box-border p-2 rounded-2xl bg-dark-900 border-white/5 shadow-none transition-all duration-200 hover:-translate-y-1 hover:border-white/20 motion-reduce:transition-none motion-reduce:hover:translate-y-0",
                 featured && "md:flex-row md:col-span-2 md:row-span-2",
@@ -78,6 +103,8 @@ export function VideoCard({
             <div className={`flex flex-col gap-1 px-1 pb-1 ${featured ? "md:w-2/5 md:justify-center md:p-6" : ""}`}>
                 <Link
                     to={`/watch/${id}`}
+                    state={linkState}
+                    onClick={handleClick}
                     className={`text-white font-semibold leading-snug line-clamp-2 no-underline ${featured ? "text-2xl" : "text-base min-h-[2.6em]"}`}
                 >
                     {title}
