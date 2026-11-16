@@ -6,6 +6,7 @@ import { Layout } from "~/components/Layout/Layout";
 import { getUserFromSession } from "~/services/auth.server";
 import { getServerApiBaseUrl } from "~/lib/api";
 import { HlsPlayer } from "~/components/VideoPlayer/HlsPlayer";
+import { VideoCard } from "~/components/VideoCard/VideoCard";
 import { usePlaybackTracking } from "~/hooks/usePlaybackTracking";
 import type { Tracking } from "~/lib/tracker.client";
 
@@ -63,12 +64,14 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
         isSubscribed: Boolean(v.isSubscribed),
     };
 
-    const [commentsResponse, savedResponse] = await Promise.all([
+    const [commentsResponse, savedResponse, relatedResponse] = await Promise.all([
         fetch(`${base}/comment/${videoId}/comments?limit=30`),
         userSession ? fetch(`${base}/user/me/saved-videos?limit=50`, { headers }) : Promise.resolve(null),
+        fetch(`${base}/video/${videoId}/related?limit=12`, { headers }),
     ]);
     const commentsData = commentsResponse.ok ? await commentsResponse.json() : { items: [] };
     const savedData = savedResponse?.ok ? await savedResponse.json() : { items: [] };
+    const relatedData = relatedResponse.ok ? await relatedResponse.json() : { items: [], requestId: '' };
     const isSaved = Boolean(savedData.items?.some((item: { id?: string }) => item.id === videoId));
 
     return json({
@@ -76,6 +79,8 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
         user: userSession?.user || null,
         isSaved,
         comments: commentsData.items || [],
+        related: relatedData.items || relatedData.videos || [],
+        relatedRequestId: relatedData.requestId || '',
     });
 }
 
@@ -136,7 +141,7 @@ function formatTimeAgo(dateString: string): string {
 }
 
 export default function Watch() {
-    const { video, user, isSaved, comments } = useLoaderData<typeof loader>();
+    const { video, user, isSaved, comments, related, relatedRequestId } = useLoaderData<typeof loader>();
     const fetcher = useFetcher<typeof action>();
     const historyFetcher = useFetcher<typeof action>();
     const location = useLocation();
@@ -354,9 +359,36 @@ export default function Watch() {
                     </div>
 
                     {/* Sidebar */}
-                    <div className="xl:w-[400px] flex-shrink-0">
-                        <h3 className="text-lg font-semibold text-white mb-4">More on LokDarpan</h3>
-                        <p className="text-gray-500 text-sm">Browse the home feed for related videos.</p>
+                    <div className="xl:w-[400px] flex-shrink-0 flex flex-col gap-4">
+                        <h3 className="text-lg font-semibold text-white mb-2">Related Videos</h3>
+                        {related && related.length > 0 ? (
+                            <div className="flex flex-col gap-3">
+                                {related.map((item: any, index: number) => (
+                                    <div key={item.id} className="w-full">
+                                        <VideoCard
+                                            id={item.id}
+                                            title={item.title}
+                                            thumbnailUrl={item.thumbnailUrl}
+                                            channelName={item.channel?.name || "Creator"}
+                                            channelId={item.channel?.id || undefined}
+                                            views={item.views}
+                                            createdAt={item.publishedAt || ""}
+                                            duration={item.durationSeconds}
+                                            showSave={false}
+                                            reason={item.rec?.reason}
+                                            tracking={{
+                                                requestId: relatedRequestId,
+                                                surface: "related",
+                                                position: index,
+                                                source: "related",
+                                            }}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-gray-500 text-sm">Browse the home feed for related videos.</p>
+                        )}
                     </div>
                 </div>
             </div>

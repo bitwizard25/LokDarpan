@@ -1,10 +1,16 @@
 import { Link } from "@remix-run/react";
 import { useState, useRef } from "react";
-import { Plus, Check, Play } from "~/components/icons";
+import { Plus, Check, Play, MoreVertical } from "~/components/icons";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { LazyImage } from "~/components/ui/lazy-image";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 import { cn } from "~/lib/utils";
 import { track, type Tracking } from "~/lib/tracker.client";
 import { useImpression } from "~/hooks/useImpression";
@@ -24,6 +30,8 @@ interface VideoCardProps {
     progress?: number;
     featured?: boolean; // bento layout: large horizontal card
     tracking?: Tracking;
+    reason?: { type: string; label?: string };
+    feedback?: boolean;
 }
 
 export function VideoCard({
@@ -39,8 +47,13 @@ export function VideoCard({
     progress = 0,
     featured = false,
     tracking,
+    reason,
+    feedback = true,
 }: VideoCardProps) {
     const [added, setAdded] = useState(false);
+    const [isRemoved, setIsRemoved] = useState(false);
+    const [lastAction, setLastAction] = useState<string | null>(null);
+    const [guestPrompt, setGuestPrompt] = useState(false);
     const cardRef = useRef<HTMLDivElement>(null);
 
     useImpression(cardRef, tracking, id);
@@ -57,6 +70,63 @@ export function VideoCard({
             });
         }
     };
+
+    const handleFeedback = async (action: "not_interested" | "hide_channel") => {
+        try {
+            const res = await fetch("/api/rec-feedback", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ videoId: id, action, active: true }),
+            });
+            if (res.status === 401) {
+                setGuestPrompt(true);
+                return;
+            }
+            if (res.ok) {
+                setLastAction(action);
+                setIsRemoved(true);
+            }
+        } catch {
+            // Network failure: do nothing
+        }
+    };
+
+    const handleUndo = async () => {
+        if (!lastAction) return;
+        try {
+            const res = await fetch("/api/rec-feedback", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ videoId: id, action: lastAction, active: false }),
+            });
+            if (res.ok) {
+                setIsRemoved(false);
+                setLastAction(null);
+            }
+        } catch {
+            // Network failure
+        }
+    };
+
+    if (isRemoved) {
+        return (
+            <Card
+                ref={cardRef}
+                className="flex items-center justify-between p-3 rounded-2xl bg-dark-900/60 border border-white/5 text-sm text-dark-300 min-h-[4.5rem]"
+            >
+                <span className="text-xs text-dark-300">Video removed.</span>
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleUndo}
+                    className="text-primary-400 hover:text-primary-300 hover:bg-white/5 font-medium text-xs px-2 py-1 h-auto"
+                >
+                    Undo
+                </Button>
+            </Card>
+        );
+    }
 
     const linkState = tracking ? { rec: tracking } : undefined;
 
@@ -101,14 +171,63 @@ export function VideoCard({
             {thumb}
 
             <div className={`flex flex-col gap-1 px-1 pb-1 ${featured ? "md:w-2/5 md:justify-center md:p-6" : ""}`}>
-                <Link
-                    to={`/watch/${id}`}
-                    state={linkState}
-                    onClick={handleClick}
-                    className={`text-white font-semibold leading-snug line-clamp-2 no-underline ${featured ? "text-2xl" : "text-base min-h-[2.6em]"}`}
-                >
-                    {title}
-                </Link>
+                <div className="flex items-start justify-between gap-1">
+                    <Link
+                        to={`/watch/${id}`}
+                        state={linkState}
+                        onClick={handleClick}
+                        className={`flex-1 text-white font-semibold leading-snug line-clamp-2 no-underline ${featured ? "text-2xl" : "text-base min-h-[2.6em]"}`}
+                    >
+                        {title}
+                    </Link>
+
+                    {feedback && (
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    className="shrink-0 size-8 -mr-1 -mt-1 rounded-full text-dark-400 hover:text-white hover:bg-white/10"
+                                    aria-label="More options"
+                                >
+                                    <MoreVertical size={16} />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-52 bg-dark-900 border-white/10 text-white">
+                                {guestPrompt ? (
+                                    <div className="p-2 text-xs text-dark-300">
+                                        <Link to="/auth/login" className="text-primary-400 hover:underline font-medium">
+                                            Sign in
+                                        </Link>{" "}
+                                        to tune recommendations.
+                                    </div>
+                                ) : (
+                                    <>
+                                        <DropdownMenuItem
+                                            onClick={() => handleFeedback("not_interested")}
+                                            className="cursor-pointer text-sm hover:bg-white/10 focus:bg-white/10"
+                                        >
+                                            Not interested
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            onClick={() => handleFeedback("hide_channel")}
+                                            className="cursor-pointer text-sm hover:bg-white/10 focus:bg-white/10"
+                                        >
+                                            Don't recommend channel
+                                        </DropdownMenuItem>
+                                    </>
+                                )}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    )}
+                </div>
+
+                {reason?.label && (
+                    <span className="text-xs text-dark-400/90 line-clamp-1">
+                        {reason.label}
+                    </span>
+                )}
 
                 <div className="flex items-center gap-2 min-h-8">
                     {isLive && (

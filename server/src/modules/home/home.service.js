@@ -75,6 +75,8 @@ export function createHomeService(findVideos, { feedService } = {}) {
             title: 'For You',
             type: 'video',
             items: feedPage.items,
+            nextCursor: feedPage.nextCursor || null,
+            hasMore: Boolean(feedPage.hasMore),
           });
           if (feedPage.requestId) {
             requestId = feedPage.requestId;

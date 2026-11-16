@@ -487,6 +487,82 @@ export const verificationApi = {
         }),
 };
 
+/**
+ * Recommendations API
+ */
+export const recApi = {
+    getRecommendations: async (params: {
+        cursor?: string;
+        hints?: string[];
+        languages?: string[];
+        category?: string;
+        limit?: number;
+        token?: string;
+    } = {}) => {
+        const qs = new URLSearchParams();
+        if (params.cursor) qs.set('cursor', params.cursor);
+        if (params.category && params.category !== 'all') qs.set('category', params.category);
+        if (params.limit) qs.set('limit', String(params.limit));
+        if (params.hints && params.hints.length > 0) qs.set('hints', params.hints.join(','));
+        if (params.languages && params.languages.length > 0) qs.set('languages', params.languages.join(','));
+
+        return apiRequest<any>(`/recommendations?${qs.toString()}`, {
+            method: 'GET',
+            token: params.token,
+        });
+    },
+
+    sendFeedback: async (
+        videoId: string,
+        action: 'not_interested' | 'hide_channel',
+        active = true,
+        token?: string
+    ) => {
+        return apiRequest<any>(`/user/me/recommendation-feedback/${encodeURIComponent(videoId)}`, {
+            method: 'PUT',
+            body: JSON.stringify({ action, active }),
+            token,
+        });
+    },
+
+    getPreferences: async (token?: string) => {
+        return apiRequest<any>('/user/me/recommendation-preferences', {
+            method: 'GET',
+            token,
+        });
+    },
+
+    updatePreferences: async (data: any, token?: string) => {
+        return apiRequest<any>('/user/me/recommendation-preferences', {
+            method: 'PUT',
+            body: JSON.stringify(data),
+            token,
+        });
+    },
+
+    resetPreferences: async (scope: string = 'all', token?: string) => {
+        return apiRequest<any>(`/user/me/recommendation-preferences?scope=${encodeURIComponent(scope)}`, {
+            method: 'DELETE',
+            token,
+        });
+    },
+
+    getOnboarding: async (token?: string) => {
+        return apiRequest<any>('/recommendation-onboarding', {
+            method: 'GET',
+            token,
+        });
+    },
+
+    previewOnboarding: async (answers: any[], pickedVideoIds: string[] = [], token?: string) => {
+        return apiRequest<any>('/recommendation-onboarding/preview', {
+            method: 'POST',
+            body: JSON.stringify({ answers, pickedVideoIds }),
+            token,
+        });
+    },
+};
+
 export interface Paginated<T> {
     items: T[];
     nextCursor: string | null;
