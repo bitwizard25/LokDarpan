@@ -41,6 +41,23 @@ export default function Index() {
     const [forYouCursor, setForYouCursor] = useState<string | null>(forYouSection?.nextCursor || null);
     const [hasMoreForYou, setHasMoreForYou] = useState<boolean>(Boolean(forYouSection?.hasMore));
     const [loadingMore, setLoadingMore] = useState(false);
+    const [bannerDismissed, setBannerDismissed] = useState(true);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const dismissed = localStorage.getItem('ld_onboarding_dismissed');
+            if (!dismissed) {
+                setBannerDismissed(false);
+            }
+        }
+    }, []);
+
+    const handleDismissBanner = () => {
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('ld_onboarding_dismissed', '1');
+        }
+        setBannerDismissed(true);
+    };
 
     useEffect(() => {
         setExtraForYou([]);
@@ -90,6 +107,29 @@ export default function Index() {
                 </section>
             ) : (
                 <div className="flex flex-col gap-10" aria-busy={loading}>
+                    {!bannerDismissed && (
+                        <div className="flex items-center justify-between rounded-xl bg-primary-600/15 border border-primary-500/30 px-4 py-2.5 text-sm -mb-4">
+                            <span className="text-white text-xs md:text-sm font-medium">
+                                Personalize your feed for better video recommendations.
+                            </span>
+                            <div className="flex items-center gap-3">
+                                <Link
+                                    to="/onboarding"
+                                    className="text-xs md:text-sm font-semibold text-primary-300 hover:text-white underline"
+                                >
+                                    Personalize
+                                </Link>
+                                <button
+                                    type="button"
+                                    onClick={handleDismissBanner}
+                                    className="text-dark-400 hover:text-white px-1 text-sm"
+                                    aria-label="Dismiss banner"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                        </div>
+                    )}
                     {feed.featured && <FeaturedHero item={{
                         id: feed.featured.id, title: feed.featured.title, description: feed.featured.description,
                         imageUrl: feed.featured.thumbnailUrl || undefined, channelName: feed.featured.channel.name,
