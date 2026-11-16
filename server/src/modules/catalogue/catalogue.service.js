@@ -42,11 +42,11 @@ export async function listVideos(query = {}, extra = {}) {
   const popular = query.section === 'popular' || query.section === 'trending';
   if (popular && after) throw new ValidationError('Popular ranking uses a snapshot; use the latest feed for continuation');
   const rows = await Video.find({ $and: clauses }).select(cardFields)
-    .sort(popular ? { views: -1, _id: -1 } : { _id: -1 }).limit(limit + 1)
+    .sort(popular ? { 'stats.trending': -1, publishedAt: -1, _id: -1 } : { _id: -1 }).limit(limit + 1)
     .populate(populateAuthor).lean();
   const result = pageResult(rows, limit, videoCard);
   if (popular) { result.hasMore = false; result.nextCursor = null; }
-  return { ...result, videos: result.items, rankingBasis: popular ? 'lifetime_views' : undefined };
+  return { ...result, videos: result.items, rankingBasis: popular ? 'trending_7d' : undefined };
 }
 
 export async function readableVideo(id, viewerId) {

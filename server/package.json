@@ -5,9 +5,10 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "concurrently -n api,worker -c blue,magenta \"node Server.js\" \"node workers/transcodeEncode.worker.js\"",
-    "dev": "concurrently -n api,worker -c blue,magenta \"nodemon Server.js\" \"node workers/transcodeEncode.worker.js\"",
+    "start": "concurrently -n api,worker,rec -c blue,magenta,yellow \"node Server.js\" \"node workers/transcodeEncode.worker.js\" \"node workers/recStats.worker.js\"",
+    "dev": "concurrently -n api,worker,rec -c blue,magenta,yellow \"nodemon Server.js\" \"node workers/transcodeEncode.worker.js\" \"node workers/recStats.worker.js\"",
     "worker:transcode": "node workers/transcodeEncode.worker.js",
+    "worker:rec": "node workers/recStats.worker.js",
     "test": "node --test tests/*.test.js"
   },
   "author": "RajBhoyar729",

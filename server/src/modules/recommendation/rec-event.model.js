@@ -123,6 +123,6 @@ recEventSchema.index(
   { partialFilterExpression: { user: { $type: 'objectId' } } }
 );
 
-const RecEvent = mongoose.models.RecEvent || mongoose.model('RecEvent', recEventSchema);
+export const RecEvent = mongoose.models.RecEvent || mongoose.model('RecEvent', recEventSchema);
 
 export default RecEvent;
