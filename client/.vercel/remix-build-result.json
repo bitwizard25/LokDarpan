@@ -14,15 +14,19 @@
       "routes/admin.verifications": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/channel.$channelId": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/network.$networkId": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/api.rec-feedback": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/shorts.$videoId": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/channel.create": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/studio.channel": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/studio._index": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/auth.logout": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/auth.signup": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/api.events": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/auth.login": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/onboarding": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/following": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/watch.$id": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/api.feed": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/settings": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/showcase": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/trending": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
@@ -35,7 +39,8 @@
       "routes/shorts": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/upload": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
       "routes/verify": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
-      "routes/_index": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0"
+      "routes/_index": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/story": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0"
     },
     "routes": {
       "root": {
@@ -76,6 +81,15 @@
         "id": "routes/network.$networkId",
         "path": ":networkId",
         "parentId": "routes/network",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/api.rec-feedback": {
+        "file": "app/routes/api.rec-feedback.tsx",
+        "id": "routes/api.rec-feedback",
+        "path": "api/rec-feedback",
+        "parentId": "root",
         "config": {
           "runtime": "nodejs"
         }
@@ -134,10 +148,28 @@
           "runtime": "nodejs"
         }
       },
+      "routes/api.events": {
+        "file": "app/routes/api.events.tsx",
+        "id": "routes/api.events",
+        "path": "api/events",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
       "routes/auth.login": {
         "file": "app/routes/auth.login.tsx",
         "id": "routes/auth.login",
         "path": "auth/login",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/onboarding": {
+        "file": "app/routes/onboarding.tsx",
+        "id": "routes/onboarding",
+        "path": "onboarding",
         "parentId": "root",
         "config": {
           "runtime": "nodejs"
@@ -156,6 +188,15 @@
         "file": "app/routes/watch.$id.tsx",
         "id": "routes/watch.$id",
         "path": "watch/:id",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/api.feed": {
+        "file": "app/routes/api.feed.tsx",
+        "id": "routes/api.feed",
+        "path": "api/feed",
         "parentId": "root",
         "config": {
           "runtime": "nodejs"
@@ -284,6 +325,15 @@
         "config": {
           "runtime": "nodejs"
         }
+      },
+      "routes/story": {
+        "file": "app/routes/story.tsx",
+        "id": "routes/story",
+        "path": "story",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
       }
     }
   },
@@ -332,6 +382,12 @@
         "path": ":networkId",
         "parentId": "routes/network"
       },
+      "routes/api.rec-feedback": {
+        "file": "routes/api.rec-feedback.tsx",
+        "id": "routes/api.rec-feedback",
+        "path": "api/rec-feedback",
+        "parentId": "root"
+      },
       "routes/shorts.$videoId": {
         "file": "routes/shorts.$videoId.tsx",
         "id": "routes/shorts.$videoId",
@@ -368,10 +424,22 @@
         "path": "auth/signup",
         "parentId": "root"
       },
+      "routes/api.events": {
+        "file": "routes/api.events.tsx",
+        "id": "routes/api.events",
+        "path": "api/events",
+        "parentId": "root"
+      },
       "routes/auth.login": {
         "file": "routes/auth.login.tsx",
         "id": "routes/auth.login",
         "path": "auth/login",
+        "parentId": "root"
+      },
+      "routes/onboarding": {
+        "file": "routes/onboarding.tsx",
+        "id": "routes/onboarding",
+        "path": "onboarding",
         "parentId": "root"
       },
       "routes/following": {
@@ -384,6 +452,12 @@
         "file": "routes/watch.$id.tsx",
         "id": "routes/watch.$id",
         "path": "watch/:id",
+        "parentId": "root"
+      },
+      "routes/api.feed": {
+        "file": "routes/api.feed.tsx",
+        "id": "routes/api.feed",
+        "path": "api/feed",
         "parentId": "root"
       },
       "routes/settings": {
@@ -468,6 +542,12 @@
         "file": "routes/_index.tsx",
         "id": "routes/_index",
         "index": true,
+        "parentId": "root"
+      },
+      "routes/story": {
+        "file": "routes/story.tsx",
+        "id": "routes/story",
+        "path": "story",
         "parentId": "root"
       }
     },
