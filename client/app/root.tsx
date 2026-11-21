@@ -10,6 +10,7 @@ import type { LinksFunction, MetaFunction } from "@remix-run/node";
 import "./tailwind.css";
 
 export const links: LinksFunction = () => [
+    { rel: "icon", type: "image/png", href: "/lokdarpan.png" },
     { rel: "preconnect", href: "https://fonts.googleapis.com" },
     {
         rel: "preconnect",
@@ -24,6 +25,8 @@ export const links: LinksFunction = () => [
 
 export const meta: MetaFunction = () => {
     return [
+        { charSet: "utf-8" },
+        { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
         { title: "LokDarpan - Share Your Vision" },
         { name: "description", content: "A modern video hosting and streaming platform" },
         { name: "theme-color", content: "#0f0f0f" },
@@ -32,14 +35,12 @@ export const meta: MetaFunction = () => {
 
 export function Layout({ children }: { children: React.ReactNode }) {
     return (
-        <html lang="en" className="dark">
+        <html lang="en" className="dark" suppressHydrationWarning>
             <head>
-                <meta charSet="utf-8" />
-                <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
                 <Meta />
                 <Links />
             </head>
-            <body>
+            <body suppressHydrationWarning>
                 {children}
                 <ScrollRestoration />
                 <Scripts />

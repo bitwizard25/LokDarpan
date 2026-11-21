@@ -5,10 +5,16 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "concurrently -n api,worker -c blue,magenta \"node Server.js\" \"node workers/transcodeEncode.worker.js\"",
-    "dev": "concurrently -n api,worker -c blue,magenta \"nodemon Server.js\" \"node workers/transcodeEncode.worker.js\"",
+    "start": "concurrently -n api,worker,rec -c blue,magenta,yellow \"node Server.js\" \"node workers/transcodeEncode.worker.js\" \"node workers/recStats.worker.js\"",
+    "dev": "concurrently -n api,worker,rec -c blue,magenta,yellow \"nodemon Server.js\" \"node workers/transcodeEncode.worker.js\" \"node workers/recStats.worker.js\"",
     "worker:transcode": "node workers/transcodeEncode.worker.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "worker:rec": "node workers/recStats.worker.js",
+    "test": "node --test tests/*.test.js",
+    "e2e:up": "docker compose -f e2e/docker-compose.e2e.yml up -d --build",
+    "e2e:down": "docker compose -f e2e/docker-compose.e2e.yml down -v",
+    "e2e:logs": "docker compose -f e2e/docker-compose.e2e.yml logs backend --tail=200",
+    "e2e": "node --test --test-concurrency=1 --test-timeout=180000 e2e/*.e2e.test.js",
+    "e2e:reset": "docker compose -f e2e/docker-compose.e2e.yml down -v && docker compose -f e2e/docker-compose.e2e.yml up -d --build"
   },
   "author": "RajBhoyar729",
   "license": "UNLICENSED",
@@ -20,6 +26,7 @@
     "@fastify/helmet": "^11.1.1",
     "@fastify/jwt": "^8.0.1",
     "@fastify/multipart": "^8.0.0",
+    "@fastify/rate-limit": "^9.1.0",
     "@fastify/swagger": "^8.13.0",
     "@fastify/swagger-ui": "^2.1.0",
     "bcrypt": "^6.0.0",

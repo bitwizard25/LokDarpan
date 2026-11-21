@@ -1,6 +1,6 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import { Form, Link, useActionData, useNavigation } from "@remix-run/react";
+import { Form, Link, useActionData, useLoaderData, useNavigation } from "@remix-run/react";
 import { getUserFromSession, createUserSession } from "~/services/auth.server";
 import { authApi } from "~/lib/api";
 
@@ -10,14 +10,18 @@ export const meta: MetaFunction = () => {
 
 export async function loader({ request }: LoaderFunctionArgs) {
     const userSession = await getUserFromSession(request);
-    if (userSession) return redirect("/");
-    return json({});
+    const url = new URL(request.url);
+    const redirectTo = url.searchParams.get("redirectTo") || "/";
+    if (userSession) return redirect(redirectTo);
+    return json({ redirectTo });
 }
 
 export async function action({ request }: ActionFunctionArgs) {
     const formData = await request.formData();
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
+    const url = new URL(request.url);
+    const redirectTo = (formData.get("redirectTo") as string) || url.searchParams.get("redirectTo") || "/";
 
     if (!email || !password) {
         return json({ errors: { form: "All fields are required" }, success: false }, { status: 400 });
@@ -37,7 +41,7 @@ export async function action({ request }: ActionFunctionArgs) {
         }
 
         const { user, token } = response.data;
-        return createUserSession(user._id, token, user, "/");
+        return createUserSession(user._id, token, user, redirectTo);
 
     } catch (error) {
         // Catch network or unexpected errors to prevent "fetch failed" crash page
@@ -53,6 +57,7 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function Login() {
+    const { redirectTo } = useLoaderData<typeof loader>();
     const actionData = useActionData<typeof action>();
     const navigation = useNavigation();
     const isSubmitting = navigation.state === "submitting";
@@ -99,6 +104,7 @@ export default function Login() {
                     </div>
 
                     <Form method="post" className="space-y-6">
+                        <input type="hidden" name="redirectTo" value={redirectTo} />
                         {/* Global Error Alert */}
                         {actionData?.errors?.form && (
                             <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 flex items-start gap-3">

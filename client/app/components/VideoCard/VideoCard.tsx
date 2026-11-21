@@ -1,18 +1,37 @@
 import { Link } from "@remix-run/react";
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { Plus, Check, Play, MoreVertical } from "~/components/icons";
+import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
+import { Card } from "~/components/ui/card";
+import { LazyImage } from "~/components/ui/lazy-image";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
+import { cn } from "~/lib/utils";
+import { track, type Tracking } from "~/lib/tracker.client";
+import { useImpression } from "~/hooks/useImpression";
 
 interface VideoCardProps {
     id: string;
     title: string;
     thumbnailUrl?: string;
     channelName: string;
+    channelId?: string;
+    showSave?: boolean;
     channelLogo?: string;
     views: number;
     createdAt: string;
     duration?: number;
     isLive?: boolean;
     progress?: number;
-    featured?: boolean; // New prop for bento layout
+    featured?: boolean; // bento layout: large horizontal card
+    tracking?: Tracking;
+    reason?: { type: string; label?: string };
+    feedback?: boolean;
 }
 
 export function VideoCard({
@@ -20,115 +39,229 @@ export function VideoCard({
     title,
     thumbnailUrl,
     channelName,
-    channelLogo,
+    channelId,
+    showSave = true,
     views,
-    createdAt,
     duration,
     isLive = false,
     progress = 0,
     featured = false,
+    tracking,
+    reason,
+    feedback = true,
 }: VideoCardProps) {
-    const [isHovered, setIsHovered] = useState(false);
+    const [added, setAdded] = useState(false);
+    const [isRemoved, setIsRemoved] = useState(false);
+    const [lastAction, setLastAction] = useState<string | null>(null);
+    const [guestPrompt, setGuestPrompt] = useState(false);
+    const cardRef = useRef<HTMLDivElement>(null);
+
+    useImpression(cardRef, tracking, id);
+
+    const handleClick = () => {
+        if (tracking) {
+            track({
+                type: "click",
+                video: id,
+                surface: tracking.surface,
+                requestId: tracking.requestId,
+                position: tracking.position,
+                source: tracking.source,
+            });
+        }
+    };
+
+    const handleFeedback = async (action: "not_interested" | "hide_channel") => {
+        try {
+            const res = await fetch("/api/rec-feedback", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ videoId: id, action, active: true }),
+            });
+            if (res.status === 401) {
+                setGuestPrompt(true);
+                return;
+            }
+            if (res.ok) {
+                setLastAction(action);
+                setIsRemoved(true);
+            }
+        } catch {
+            // Network failure: do nothing
+        }
+    };
+
+    const handleUndo = async () => {
+        if (!lastAction) return;
+        try {
+            const res = await fetch("/api/rec-feedback", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ videoId: id, action: lastAction, active: false }),
+            });
+            if (res.ok) {
+                setIsRemoved(false);
+                setLastAction(null);
+            }
+        } catch {
+            // Network failure
+        }
+    };
+
+    if (isRemoved) {
+        return (
+            <Card
+                ref={cardRef}
+                className="flex items-center justify-between p-3 rounded-2xl bg-dark-900/60 border border-white/5 text-sm text-dark-300 min-h-[4.5rem]"
+            >
+                <span className="text-xs text-dark-300">Video removed.</span>
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleUndo}
+                    className="text-primary-400 hover:text-primary-300 hover:bg-white/5 font-medium text-xs px-2 py-1 h-auto"
+                >
+                    Undo
+                </Button>
+            </Card>
+        );
+    }
+
+    const linkState = tracking ? { rec: tracking } : undefined;
+
+    const thumb = (
+        <Link
+            to={`/watch/${id}`}
+            state={linkState}
+            onClick={handleClick}
+            aria-label={title}
+            className={`relative block overflow-hidden rounded-[10px] bg-dark-800 ${featured ? "md:w-3/5 md:h-full aspect-video md:aspect-auto" : "aspect-video"}`}
+        >
+            {thumbnailUrl ? (
+                <LazyImage src={thumbnailUrl} wrapperClassName="w-full h-full" />
+            ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                    <Play size={40} className="text-dark-600 opacity-60" />
+                </div>
+            )}
+
+            {!isLive && duration ? (
+                <span className="absolute right-2 bottom-2 px-1.5 py-0.5 rounded-md bg-black/80 text-white text-xs font-semibold">
+                    {formatDuration(duration)}
+                </span>
+            ) : null}
+
+            {progress > 0 && (
+                <span className="absolute left-0 right-0 bottom-0 h-1 bg-white/20">
+                    <span className="block h-full bg-primary-500" style={{ width: `${Math.min(progress, 100)}%` }} />
+                </span>
+            )}
+        </Link>
+    );
 
     return (
-        <article
-            className={`lok-card group flex flex-col ${featured ? 'md:flex-row md:col-span-2 md:row-span-2' : ''}`}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
+        <Card
+            ref={cardRef}
+            className={cn(
+                "flex flex-col gap-2 h-full box-border p-2 rounded-2xl bg-dark-900 border-white/5 shadow-none transition-all duration-200 hover:-translate-y-1 hover:border-white/20 motion-reduce:transition-none motion-reduce:hover:translate-y-0",
+                featured && "md:flex-row md:col-span-2 md:row-span-2",
+            )}
         >
-            <Link to={`/watch/${id}`} className={`block relative overflow-hidden ${featured ? 'md:w-3/5 h-full' : 'w-full aspect-video'}`}>
-                {/* Thumbnail */}
-                {thumbnailUrl ? (
-                    <img
-                        src={thumbnailUrl}
-                        alt={title}
-                        className={`w-full h-full object-cover transition-transform duration-700 ease-out ${isHovered ? 'scale-105' : 'scale-100'
-                            }`}
-                        loading="lazy"
-                    />
-                ) : (
-                    <div className="w-full h-full bg-dark-800 flex items-center justify-center">
-                        <svg className="w-12 h-12 text-dark-600" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
-                    </div>
+            {thumb}
+
+            <div className={`flex flex-col gap-1 px-1 pb-1 ${featured ? "md:w-2/5 md:justify-center md:p-6" : ""}`}>
+                <div className="flex items-start justify-between gap-1">
+                    <Link
+                        to={`/watch/${id}`}
+                        state={linkState}
+                        onClick={handleClick}
+                        className={`flex-1 text-white font-semibold leading-snug line-clamp-2 no-underline ${featured ? "text-2xl" : "text-base min-h-[2.6em]"}`}
+                    >
+                        {title}
+                    </Link>
+
+                    {feedback && (
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    className="shrink-0 size-8 -mr-1 -mt-1 rounded-full text-dark-400 hover:text-white hover:bg-white/10"
+                                    aria-label="More options"
+                                >
+                                    <MoreVertical size={16} />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-52 bg-dark-900 border-white/10 text-white">
+                                {guestPrompt ? (
+                                    <div className="p-2 text-xs text-dark-300">
+                                        <Link to="/auth/login" className="text-primary-400 hover:underline font-medium">
+                                            Sign in
+                                        </Link>{" "}
+                                        to tune recommendations.
+                                    </div>
+                                ) : (
+                                    <>
+                                        <DropdownMenuItem
+                                            onClick={() => handleFeedback("not_interested")}
+                                            className="cursor-pointer text-sm hover:bg-white/10 focus:bg-white/10"
+                                        >
+                                            Not interested
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            onClick={() => handleFeedback("hide_channel")}
+                                            className="cursor-pointer text-sm hover:bg-white/10 focus:bg-white/10"
+                                        >
+                                            Don't recommend channel
+                                        </DropdownMenuItem>
+                                    </>
+                                )}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    )}
+                </div>
+
+                {reason?.label && (
+                    <span className="text-xs text-dark-400/90 line-clamp-1">
+                        {reason.label}
+                    </span>
                 )}
 
-                {/* Overlays */}
-                <div className={`absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-300`} />
-
-                {/* Duration/Live Badge - Floating Style */}
-                <div className="absolute top-3 right-3 flex gap-2">
+                <div className="flex items-center gap-2 min-h-8">
                     {isLive && (
-                        <span className="px-2 py-1 bg-red-500/90 backdrop-blur-md text-white text-xs font-bold rounded-lg animate-pulse shadow-lg">
-                            LIVE
-                        </span>
+                        <Badge className="shrink-0 rounded px-1.5 py-0.5 bg-primary-600 hover:bg-primary-600 text-white text-xs font-bold tracking-wider border-transparent">LIVE</Badge>
                     )}
-                    {duration && (
-                        <span className="px-2 py-1 bg-dark-900/80 backdrop-blur-md text-xs font-mono text-white rounded-lg border border-white/10">
-                            {formatDuration(duration)}
-                        </span>
-                    )}
-                </div>
+                    <span className="flex-1 min-w-0 truncate text-sm text-dark-400">
+                        {channelId ? <Link to={`/channel/${channelId}`} className="hover:text-white transition-colors">{channelName}</Link> : <span>{channelName}</span>}
+                        {" · "}
+                        {isLive ? `${formatCount(views)} watching` : `${formatCount(views)} views`}
+                    </span>
 
-                {/* Play Button Reveal */}
-                <div className={`absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none`}>
-                    <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center transform scale-75 group-hover:scale-100 transition-transform duration-300">
-                        <svg className="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
-                    </div>
-                </div>
-
-                {/* Progress Bar */}
-                {progress > 0 && (
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-dark-900/50">
-                        <div className="h-full bg-gradient-to-r from-primary-500 to-primary-300" style={{ width: `${progress}%` }} />
-                    </div>
-                )}
-            </Link>
-
-            {/* Info Section */}
-            <div className={`p-4 flex flex-col ${featured ? 'md:w-2/5 justify-center p-8' : 'flex-1'}`}>
-                <div className="flex gap-3 items-start">
-                    {!featured && (
-                        <div className="w-10 h-10 rounded-full bg-dark-800 border border-white/5 shrink-0 overflow-hidden">
-                            {channelLogo ? <img src={channelLogo} className="w-full h-full object-cover" /> : <div className="w-full h-full bg-primary-900/50" />}
-                        </div>
-                    )}
-
-                    <div className="flex-1 min-w-0">
-                        <Link to={`/watch/${id}`}>
-                            <h3 className={`font-display font-extrabold text-white leading-tight group-hover:text-primary-400 transition-colors ${featured ? 'text-2xl mb-3' : 'text-base mb-1 line-clamp-2'}`}>
-                                {title}
-                            </h3>
-                        </Link>
-
-                        <div className="flex items-center gap-2 text-white/60 font-light text-sm mb-2">
-                            <Link to={`/channel/${channelName}`} className="hover:text-white transition-colors">{channelName}</Link>
-                            <span>•</span>
-                            <span>{formatViews(views)}</span>
-                        </div>
-
-                        {featured && (
-                            <p className="text-dark-300 text-sm line-clamp-3 mb-6 hidden md:block">
-                                Experience this amazing content exclusively on LokDarpan. Join thousands of viewers watching this right now.
-                            </p>
-                        )}
-
-                        {featured && (
-                            <Link to={`/watch/${id}`} className="inline-flex items-center gap-2 text-primary-400 font-medium hover:gap-3 transition-all">
-                                Watch Now <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-                            </Link>
-                        )}
-                    </div>
+                    {showSave && <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setAdded((a) => !a)}
+                        aria-pressed={added}
+                        aria-label={added ? "Remove from My List" : "Add to My List"}
+                        title={added ? "In My List" : "Add to My List"}
+                        className={cn("shrink-0 size-11 -my-1.5 -mr-2 rounded-full active:scale-90 transition-transform", added ? "bg-white/10 text-white" : "text-dark-400 hover:bg-white/10 hover:text-white")}
+                    >
+                        {added ? <Check size={18} /> : <Plus size={18} />}
+                    </Button>}
                 </div>
             </div>
-        </article>
+        </Card>
     );
 }
 
 // Helpers
-function formatViews(views: number): string {
-    if (views >= 1000000) return `${(views / 1000000).toFixed(1)}M views`;
-    if (views >= 1000) return `${(views / 1000).toFixed(1)}K views`;
-    return `${views} views`;
+function formatCount(n: number): string {
+    if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
+    if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
+    return `${n}`;
 }
 
 function formatDuration(seconds?: number): string {

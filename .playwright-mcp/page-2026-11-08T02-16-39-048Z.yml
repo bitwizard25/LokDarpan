@@ -1,0 +1,97 @@
+- generic [ref=f12e2]:
+  - banner [ref=f12e3]:
+    - generic [ref=f12e4]:
+      - link "LokDarpan" [ref=f12e5] [cursor=pointer]:
+        - /url: /
+      - search [ref=f12e6]:
+        - searchbox "Search" [ref=f12e7]
+      - generic [ref=f12e8]:
+        - link "Create" [ref=f12e9] [cursor=pointer]:
+          - /url: /upload
+        - link "Sign In" [ref=f12e12] [cursor=pointer]:
+          - /url: /auth/login
+  - generic [ref=f12e14]:
+    - navigation "Main" [ref=f12e15]:
+      - link "Home" [ref=f12e16] [cursor=pointer]:
+        - /url: /
+      - link "Explore" [ref=f12e19] [cursor=pointer]:
+        - /url: /explore
+      - link "Trending" [ref=f12e22] [cursor=pointer]:
+        - /url: /trending
+      - link "Shorts" [ref=f12e25] [cursor=pointer]:
+        - /url: /shorts
+      - link "Following" [ref=f12e28] [cursor=pointer]:
+        - /url: /following
+      - link "Library" [ref=f12e31] [cursor=pointer]:
+        - /url: /library
+      - button "Expand sidebar" [ref=f12e35] [cursor=pointer]
+    - main [ref=f12e38]:
+      - img "Channel banner" [ref=f12e40]
+      - generic [ref=f12e41]:
+        - generic [ref=f12e42]: D
+        - generic [ref=f12e43]:
+          - heading "Demo" [level=1] [ref=f12e44]
+          - generic [ref=f12e45]:
+            - generic [ref=f12e46]: "@demo"
+            - generic [ref=f12e47]: •
+            - generic [ref=f12e48]: 45.0K subscribers
+            - generic [ref=f12e49]: •
+            - generic [ref=f12e50]: 4 videos
+          - paragraph [ref=f12e51]: Welcome to my channel! I create content about web development, programming tutorials, and tech reviews. Subscribe for weekly videos!
+        - button "Subscribe" [ref=f12e53] [cursor=pointer]
+      - generic [ref=f12e54]:
+        - button "Videos" [ref=f12e55] [cursor=pointer]
+        - button "About" [ref=f12e57] [cursor=pointer]
+      - generic [ref=f12e58]:
+        - generic [ref=f12e59]:
+          - link "Getting Started with Remix Framework" [ref=f12e60] [cursor=pointer]:
+            - /url: /watch/v1
+            - generic [ref=f12e62]: 20:45
+          - generic [ref=f12e63]:
+            - link "Getting Started with Remix Framework" [ref=f12e64] [cursor=pointer]:
+              - /url: /watch/v1
+            - generic [ref=f12e65]:
+              - generic [ref=f12e66]:
+                - link "Demo" [ref=f12e67] [cursor=pointer]:
+                  - /url: /channel/Demo
+                - text: · 23.0K views
+              - button "Add to My List" [ref=f12e68] [cursor=pointer]
+        - generic [ref=f12e69]:
+          - link "Building APIs with Fastify" [ref=f12e70] [cursor=pointer]:
+            - /url: /watch/v2
+            - generic [ref=f12e72]: 14:52
+          - generic [ref=f12e73]:
+            - link "Building APIs with Fastify" [ref=f12e74] [cursor=pointer]:
+              - /url: /watch/v2
+            - generic [ref=f12e75]:
+              - generic [ref=f12e76]:
+                - link "Demo" [ref=f12e77] [cursor=pointer]:
+                  - /url: /channel/Demo
+                - text: · 18.0K views
+              - button "Add to My List" [ref=f12e78] [cursor=pointer]
+        - generic [ref=f12e79]:
+          - link "Tailwind CSS Tips and Tricks" [ref=f12e80] [cursor=pointer]:
+            - /url: /watch/v3
+            - generic [ref=f12e82]: 12:36
+          - generic [ref=f12e83]:
+            - link "Tailwind CSS Tips and Tricks" [ref=f12e84] [cursor=pointer]:
+              - /url: /watch/v3
+            - generic [ref=f12e85]:
+              - generic [ref=f12e86]:
+                - link "Demo" [ref=f12e87] [cursor=pointer]:
+                  - /url: /channel/Demo
+                - text: · 31.0K views
+              - button "Add to My List" [ref=f12e88] [cursor=pointer]
+        - generic [ref=f12e89]:
+          - link "TypeScript Advanced Patterns" [ref=f12e90] [cursor=pointer]:
+            - /url: /watch/v4
+            - generic [ref=f12e92]: 23:52
+          - generic [ref=f12e93]:
+            - link "TypeScript Advanced Patterns" [ref=f12e94] [cursor=pointer]:
+              - /url: /watch/v4
+            - generic [ref=f12e95]:
+              - generic [ref=f12e96]:
+                - link "Demo" [ref=f12e97] [cursor=pointer]:
+                  - /url: /channel/Demo
+                - text: · 27.0K views
+              - button "Add to My List" [ref=f12e98] [cursor=pointer]

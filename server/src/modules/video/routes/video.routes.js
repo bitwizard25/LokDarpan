@@ -1,10 +1,30 @@
+import { videoUpdateBody, studioPageQuery } from '../schemas/studio.schema.js';
+import { REC } from '../../recommendation/rec.config.js';
+
 /**
  * Video Routes
  * Fastify routes with inline JSON Schema validation
  */
 
+import { optionalAuthenticate } from '../../../middleware/auth.middleware.js';
+
 async function videoRoutes(fastify, options) {
   const { videoController, authenticate } = options;
+
+  fastify.put('/:videoId/reaction', {
+    preHandler: [authenticate],
+    schema: {
+      description: 'Set the current user reaction on a video',
+      tags: ['video'],
+      params: { type: 'object', required: ['videoId'], properties: { videoId: { type: 'string' } } },
+      body: { type: 'object', required: ['reaction'], properties: { reaction: { type: 'string', enum: ['like', 'dislike'] } } },
+    },
+  }, videoController.setReaction);
+
+  fastify.delete('/:videoId/reaction', {
+    preHandler: [authenticate],
+    schema: { description: 'Remove the current user reaction from a video', tags: ['video'], params: { type: 'object', required: ['videoId'], properties: { videoId: { type: 'string' } } } },
+  }, videoController.clearReaction);
 
   // Get all videos
   fastify.get('/', {
@@ -15,14 +35,20 @@ async function videoRoutes(fastify, options) {
         type: 'object',
         properties: {
           category: { type: 'string' },
-          search: { type: 'string' }
+          search: { type: 'string', maxLength: 150 },
+          q: { type: 'string', maxLength: 150 },
+          type: { type: 'string', enum: ['video', 'short'] },
+          section: { type: 'string', enum: ['latest', 'popular', 'trending'] },
+          cursor: { type: 'string' },
+          limit: { type: 'integer', minimum: 1, maximum: 50 }
         }
       },
       response: {
         200: {
           type: 'object',
+          additionalProperties: true,
           properties: {
-            videos: { type: 'array' }
+            videos: { type: 'array', items: { type: 'object', additionalProperties: true } }
           }
         }
       }
@@ -58,15 +84,28 @@ async function videoRoutes(fastify, options) {
             type: 'string',
             description: 'Comma-separated tags',
           },
+          language: {
+            type: 'string',
+            enum: [...REC.languages, 'und'],
+            description: 'Language code',
+          },
+          format: {
+            type: 'string',
+            enum: REC.formats,
+            description: 'Video format',
+          },
         },
+        additionalProperties: false,
       },
       response: {
         201: {
           type: 'object',
           description: 'Created video object',
+          additionalProperties: true,
         },
         400: {
           type: 'object',
+          additionalProperties: true,
           properties: {
             error: {
               type: 'object',
@@ -106,8 +145,12 @@ async function videoRoutes(fastify, options) {
     },
   }, videoController.getTranscodeStatus);
 
-  // Get video by ID (register after /:videoId/transcode-status)
+  fastify.get('/me', { preHandler: [authenticate], schema: { tags: ['video'], querystring: studioPageQuery } }, videoController.getMyVideos);
+
+  // Get video by ID (register after /me)
   fastify.get('/:videoId', {
+    preHandler: [optionalAuthenticate],
+    preHandler: optionalAuthenticate,
     schema: {
       description: 'Get video by ID',
       tags: ['video'],
@@ -122,7 +165,7 @@ async function videoRoutes(fastify, options) {
         200: {
           type: 'object',
           properties: {
-            video: { type: 'object' }
+            video: { type: 'object', additionalProperties: true }
           }
         }
       }
@@ -159,7 +202,18 @@ async function videoRoutes(fastify, options) {
             type: 'string',
             description: 'Comma-separated tags',
           },
+          language: {
+            type: 'string',
+            enum: [...REC.languages, 'und'],
+            description: 'Language code',
+          },
+          format: {
+            type: 'string',
+            enum: REC.formats,
+            description: 'Video format',
+          },
         },
+        additionalProperties: false,
       },
       response: {
         201: {
@@ -167,11 +221,12 @@ async function videoRoutes(fastify, options) {
           properties: {
             message: { type: 'string' },
             videoId: { type: 'string' },
-            video: { type: 'object' },
+            video: { type: 'object', additionalProperties: true },
           },
         },
         400: {
           type: 'object',
+          additionalProperties: true,
           properties: {
             error: {
               type: 'object',
@@ -187,7 +242,7 @@ async function videoRoutes(fastify, options) {
 
   // Update video route
   fastify.put('/:videoId', {
-    preHandler: [authenticate],
+    preValidation: [authenticate, videoController.prepareUpdate],
     schema: {
       description: 'Update video details',
       tags: ['video'],
@@ -202,37 +257,18 @@ async function videoRoutes(fastify, options) {
           },
         },
       },
-      body: {
-        type: 'object',
-        properties: {
-          title: {
-            type: 'string',
-            minLength: 1,
-            maxLength: 200,
-          },
-          description: {
-            type: 'string',
-            maxLength: 5000,
-          },
-          category: {
-            type: 'string',
-          },
-          tags: {
-            type: 'string',
-            description: 'Comma-separated tags',
-          },
-        },
-      },
+      body: videoUpdateBody,
       response: {
         200: {
           type: 'object',
           properties: {
             message: { type: 'string' },
-            video: { type: 'object' },
+            video: { type: 'object', additionalProperties: true },
           },
         },
         403: {
           type: 'object',
+          additionalProperties: true,
           properties: {
             error: {
               type: 'object',
@@ -244,6 +280,7 @@ async function videoRoutes(fastify, options) {
         },
         404: {
           type: 'object',
+          additionalProperties: true,
           properties: {
             error: {
               type: 'object',
@@ -282,6 +319,7 @@ async function videoRoutes(fastify, options) {
         },
         403: {
           type: 'object',
+          additionalProperties: true,
           properties: {
             error: {
               type: 'object',
@@ -293,6 +331,7 @@ async function videoRoutes(fastify, options) {
         },
         404: {
           type: 'object',
+          additionalProperties: true,
           properties: {
             error: {
               type: 'object',
@@ -332,6 +371,7 @@ async function videoRoutes(fastify, options) {
         },
         404: {
           type: 'object',
+          additionalProperties: true,
           properties: {
             error: {
               type: 'object',
@@ -371,6 +411,7 @@ async function videoRoutes(fastify, options) {
         },
         404: {
           type: 'object',
+          additionalProperties: true,
           properties: {
             error: {
               type: 'object',

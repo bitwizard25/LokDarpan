@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<nav aria-label="Main" style="position:fixed;left:0;right:0;bottom:0;z-index:30;height:64px;display:flex;background:rgba(9,9,11,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid rgba(255,255,255,.08);padding-bottom:env(safe-area-inset-bottom)"><sc-for list="{{ items }}" as="it" hint-placeholder-count="5"><sc-if value="{{ it.on }}" hint-placeholder-val="{{ false }}"><a href="{{ it.href }}" aria-current="page" style="position:relative;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#fff;font-size:12px;font-weight:600;text-decoration:none"><span class="bg-primary-500" style="position:absolute;top:0;width:24px;height:3px;border-radius:0 0 3px 3px"></span><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="{{ it.d }}"></path></svg>{{ it.label }}</a></sc-if><sc-if value="{{ it.off }}" hint-placeholder-val="{{ true }}"><a href="{{ it.href }}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#A1A1AA;font-size:12px;font-weight:500;text-decoration:none"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="{{ it.d }}"></path></svg>{{ it.label }}</a></sc-if></sc-for></nav>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const a = this.props.active || 'Home';
+    const items = [
+      ['Home', './Lokdarpan.dc.html', 'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z'],
+      ['Explore', './Search.dc.html', 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18zM15.5 8.5l-2 5-5 2 2-5z'],
+      ['Shorts', '#', 'M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zM10 9l5 3-5 3z'],
+      ['Parties', './Lobby.dc.html', 'M3 5h18v12H3zM8 21h8M12 17v4'],
+      ['Library', '#', 'M6 3h12v18l-6-4-6 4z']
+    ].map(([label, href, d]) => ({ label, href, d, on: label === a, off: label !== a }));
+    return { items };
+  }
+}
+</script>
+</body>
+</html>

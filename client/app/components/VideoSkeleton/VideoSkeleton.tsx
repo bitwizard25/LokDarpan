@@ -1,34 +1,30 @@
+import { Card } from "~/components/ui/card";
+import { Skeleton } from "~/components/ui/skeleton";
+
 interface VideoSkeletonProps {
     count?: number;
 }
 
+/** Placeholder matching the VideoCard layout (thumbnail + title + channel line). */
 export function VideoSkeleton({ count = 1 }: VideoSkeletonProps) {
     return (
         <>
             {Array.from({ length: count }).map((_, index) => (
-                <article key={index} className="animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
-                    {/* Thumbnail skeleton */}
-                    <div className="skeleton aspect-video rounded-3xl mb-4 bg-gradient-to-br from-[#1A1A1D] to-[#2A2A2D] animate-pulse ring-1 ring-white/5 shadow-2xl" />
-
-                    {/* Info skeleton */}
-                    <div className="flex gap-4">
-                        {/* Avatar skeleton */}
-                        <div className="skeleton w-10 h-10 rounded-full flex-shrink-0 bg-gradient-to-br from-[#1A1A1D] to-[#2A2A2D] animate-pulse ring-1 ring-white/5" />
-
-                        {/* Text content skeleton */}
-                        <div className="flex-1 space-y-3 py-1">
-                            {/* Title skeleton - 2 lines */}
-                            <div className="skeleton h-4 rounded w-full bg-gradient-to-r from-[#1A1A1D] to-[#2A2A2D] animate-pulse" />
-                            <div className="skeleton h-4 rounded w-3/4 bg-gradient-to-r from-[#1A1A1D] to-[#2A2A2D] animate-pulse" />
-
-                            {/* Channel name skeleton */}
-                            <div className="skeleton h-3 rounded w-1/2 mt-3 bg-gradient-to-r from-[#1A1A1D] to-[#2A2A2D] animate-pulse" />
-
-                            {/* Views skeleton */}
-                            <div className="skeleton h-3 rounded w-1/3 bg-gradient-to-r from-[#1A1A1D] to-[#2A2A2D] animate-pulse" />
+                <Card
+                    key={index}
+                    aria-hidden="true"
+                    className="flex flex-col gap-2 h-full p-2 rounded-2xl bg-dark-900 border-white/5 shadow-none"
+                >
+                    <Skeleton className="aspect-video w-full rounded-[10px] bg-white/10" />
+                    <div className="flex flex-col gap-2 px-1 pb-1">
+                        <Skeleton className="h-4 w-full bg-white/10" />
+                        <Skeleton className="h-4 w-3/4 bg-white/10" />
+                        <div className="flex items-center gap-2 pt-1">
+                            <Skeleton className="h-3 w-1/2 bg-white/10" />
+                            <Skeleton className="ml-auto size-8 rounded-full bg-white/10" />
                         </div>
                     </div>
-                </article>
+                </Card>
             ))}
         </>
     );
@@ -36,29 +32,29 @@ export function VideoSkeleton({ count = 1 }: VideoSkeletonProps) {
 
 export function ShortsSkeleton({ count = 5 }: { count?: number }) {
     return (
-        <div className="flex gap-4 overflow-hidden">
+        <div className="flex gap-4 overflow-hidden" aria-hidden="true">
             {Array.from({ length: count }).map((_, index) => (
-                <div
-                    key={index}
-                    className="skeleton w-48 aspect-[9/16] rounded-2xl flex-shrink-0 bg-gradient-to-b from-[#1A1A1D] to-[#2A2A2D] animate-pulse ring-1 ring-white/5"
-                    style={{ animationDelay: `${index * 50}ms` }}
-                />
+                <div key={index} className="flex-none w-[clamp(140px,16vw,200px)] flex flex-col gap-2">
+                    <Skeleton className="aspect-[9/16] w-full rounded-2xl bg-white/10" />
+                    <Skeleton className="h-4 w-4/5 bg-white/10" />
+                    <Skeleton className="h-3 w-1/3 bg-white/10" />
+                </div>
             ))}
         </div>
     );
 }
 
+// Fixed widths (not Math.random) so server and client render the same markup.
+const CHIP_WIDTHS = [72, 96, 84, 104, 78, 90, 100, 68];
+
 export function CategoryChipsSkeleton({ count = 8 }: { count?: number }) {
     return (
-        <div className="flex gap-3 overflow-hidden">
+        <div className="flex gap-3 overflow-hidden" aria-hidden="true">
             {Array.from({ length: count }).map((_, index) => (
-                <div
+                <Skeleton
                     key={index}
-                    className="skeleton h-10 rounded-full flex-shrink-0 bg-gradient-to-r from-[#1A1A1D] to-[#2A2A2D] animate-pulse border border-white/5"
-                    style={{
-                        width: `${60 + Math.random() * 40}px`,
-                        animationDelay: `${index * 30}ms`
-                    }}
+                    className="h-10 rounded-full flex-shrink-0 bg-white/10"
+                    style={{ width: `${CHIP_WIDTHS[index % CHIP_WIDTHS.length]}px` }}
                 />
             ))}
         </div>

@@ -1,3 +1,5 @@
+import User from '../modules/user/schemas/user.schema.js';
+import { isValidObjectId } from '../utils/db.js';
 /**
  * Authentication Middleware for Fastify
  * Verifies JWT tokens and injects user into request
@@ -35,6 +37,7 @@ export async function authenticate(request, reply) {
     // Attach user to request object
     request.user = decoded;
     request.userId = decoded._id || decoded.id;
+    if (!isValidObjectId(request.userId) || !await User.exists({ _id: request.userId })) throw new AuthenticationError('Account no longer exists');
 
   } catch (error) {
     if (error instanceof AuthenticationError) {
@@ -65,6 +68,7 @@ export async function optionalAuthenticate(request, reply) {
         const decoded = jwt.verify(token, JWT_CONFIG.secret);
         request.user = decoded;
         request.userId = decoded._id || decoded.id;
+        if (!isValidObjectId(request.userId) || !await User.exists({ _id: request.userId })) { request.user = null; request.userId = null; }
       }
     }
   } catch (error) {

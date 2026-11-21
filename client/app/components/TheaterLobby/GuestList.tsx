@@ -1,4 +1,4 @@
-import { GlassContainer } from "~/components/UI/GlassContainer";
+import { GlassContainer } from "~/components/common/GlassContainer";
 import type { User } from "./types";
 import { useAppStore } from "~/store/useAppStore";
 

@@ -1,18 +1,24 @@
 import Hls from "hls.js";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 
 type HlsPlayerProps = {
     src: string;
     poster?: string;
     className?: string;
     autoPlay?: boolean;
+    onTimeUpdate?: (seconds: number) => void;
 };
 
-export function HlsPlayer({ src, poster, className, autoPlay }: HlsPlayerProps) {
-    const ref = useRef<HTMLVideoElement>(null);
+export const HlsPlayer = forwardRef<HTMLVideoElement, HlsPlayerProps>(function HlsPlayer(
+    { src, poster, className, autoPlay, onTimeUpdate },
+    forwardedRef
+) {
+    const localRef = useRef<HTMLVideoElement>(null);
+
+    useImperativeHandle(forwardedRef, () => localRef.current as HTMLVideoElement, []);
 
     useEffect(() => {
-        const video = ref.current;
+        const video = localRef.current;
         if (!video || !src) return;
 
         if (video.canPlayType("application/vnd.apple.mpegurl")) {
@@ -37,12 +43,13 @@ export function HlsPlayer({ src, poster, className, autoPlay }: HlsPlayerProps) 
 
     return (
         <video
-            ref={ref}
+            ref={localRef}
             poster={poster}
             controls
             playsInline
             autoPlay={autoPlay}
+            onTimeUpdate={event => onTimeUpdate?.(event.currentTarget.currentTime)}
             className={className}
         />
     );
-}
+});

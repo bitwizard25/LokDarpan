@@ -7,6 +7,22 @@ import Comment from '../schemas/comment.schema.js';
 import Video from '../../video/schemas/video.schema.js';
 import { NotFoundError, ValidationError, AuthorizationError } from '../../../utils/errors.js';
 import { isValidObjectId, createObjectId } from '../../../utils/db.js';
+import { pageOptions, pageResult } from '../../../shared/http/pagination.js';
+
+async function listComments(videoId, query = {}) {
+  if (!isValidObjectId(videoId)) throw new ValidationError('Invalid video ID');
+  if (!await Video.exists({ _id: videoId })) throw new NotFoundError('Video');
+  const { limit, after } = pageOptions(query);
+  const filter = { video_id: videoId, ...(after ? { _id: { $lt: after } } : {}) };
+  const rows = await Comment.find(filter).sort({ _id: -1 }).limit(limit + 1)
+    .populate('user_id', 'name avatarUrl').lean();
+  return pageResult(rows, limit, row => ({
+    id: String(row._id), _id: String(row._id), video_id: String(row.video_id),
+    user: row.user_id ? { id: String(row.user_id._id), name: row.user_id.name, avatarUrl: row.user_id.avatarUrl || null } : null,
+    user_id: row.user_id ? String(row.user_id._id) : null,
+    comment_text: row.comment_text, createdAt: row.createdAt, updatedAt: row.updatedAt,
+  }));
+}
 
 /**
  * Create a new comment
@@ -114,6 +130,7 @@ async function deleteComment(commentId, userId) {
 }
 
 export {
+  listComments,
   createComment,
   getCommentById,
   updateComment,
@@ -121,6 +138,7 @@ export {
 };
 
 export default {
+  listComments,
   createComment,
   getCommentById,
   updateComment,

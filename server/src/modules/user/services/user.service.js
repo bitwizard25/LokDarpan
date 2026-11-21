@@ -1,10 +1,19 @@
+import Video from '../../video/schemas/video.schema.js';
+import channelService, { channelHandle } from '../../channel/services/channel.service.js';
+import { hashPassword, comparePassword } from '../../auth/services/auth.service.js';
+import { AuthenticationError } from '../../../utils/errors.js';
+import { SavedVideo, WatchHistory, Playlist } from '../../library/library.models.js';
 /**
  * User Service
  * Handles user-related business logic (subscriptions, profile)
  */
 
 import User from '../schemas/user.schema.js';
+import Channel from '../../channel/schemas/channel.schema.js';
+import Network from '../../network/schemas/network.schema.js';
 import { NotFoundError, ValidationError } from '../../../utils/errors.js';
+import { isAdminEmail } from '../../verification/admin.js';
+import { profileService } from '../../recommendation/profile.service.js';
 import { isValidObjectId } from '../../../utils/db.js';
 
 /**
@@ -26,6 +35,42 @@ async function getUserById(userId) {
   return user;
 }
 
+async function getUserSummary(userId) {
+  if (!isValidObjectId(userId)) {
+    throw new ValidationError('Invalid user ID');
+  }
+
+  const user = await User.findById(userId).select('_id name email phone bio avatarUrl channel identityVerification.verifiedAt');
+  // isAdmin is a UI hint only; every admin route re-checks on the server.
+  if (!user) {
+    throw new NotFoundError('User');
+  }
+
+  const [channel, createdNetworksCount, memberNetworksCount] = await Promise.all([
+    user.channel ? Channel.findById(user.channel).select('_id name logoUrl') : null,
+    Network.countDocuments({ owner: user._id }),
+    Network.countDocuments({ owner: { $ne: user._id }, members: { $elemMatch: { user: user._id, status: 'active' } } }),
+  ]);
+
+  return {
+    _id: user._id,
+    name: user.name,
+    displayName: user.name,
+    bio: user.bio || '',
+    avatarUrl: user.avatarUrl || null,
+    email: user.email,
+    phone: user.phone,
+    avatarUrl: user.avatarUrl || null,
+    identityVerified: Boolean(user.identityVerification?.verifiedAt),
+    isAdmin: isAdminEmail(user.email),
+    hasChannel: Boolean(channel),
+    channelId: channel?._id || null,
+    channel: channel || null,
+    createdNetworksCount,
+    memberNetworksCount,
+  };
+}
+
 /**
  * Subscribe to a channel
  * @param {string} subscriberId - User ID of subscriber
@@ -37,13 +82,9 @@ async function subscribeToChannel(subscriberId, channelId) {
     throw new ValidationError('Invalid user or channel ID');
   }
 
-  if (subscriberId === channelId) {
-    throw new ValidationError('Cannot subscribe to your own channel');
-  }
-
-  // Get both users
+  // Get the subscriber and the channel being followed.
   const subscriber = await User.findById(subscriberId);
-  const channel = await User.findById(channelId);
+  const channel = await Channel.findById(channelId);
 
   if (!subscriber) {
     throw new NotFoundError('Subscriber');
@@ -51,6 +92,10 @@ async function subscribeToChannel(subscriberId, channelId) {
 
   if (!channel) {
     throw new NotFoundError('Channel');
+  }
+
+  if (channel.owner.toString() === subscriberId.toString()) {
+    throw new ValidationError('Cannot subscribe to your own channel');
   }
 
   // Check if already subscribed
@@ -78,9 +123,9 @@ async function unsubscribeFromChannel(subscriberId, channelId) {
     throw new ValidationError('Invalid user or channel ID');
   }
 
-  // Get both users
+  // Get the subscriber and the channel being followed.
   const subscriber = await User.findById(subscriberId);
-  const channel = await User.findById(channelId);
+  const channel = await Channel.findById(channelId);
 
   if (!subscriber) {
     throw new NotFoundError('Subscriber');
@@ -106,14 +151,56 @@ async function unsubscribeFromChannel(subscriberId, channelId) {
   }
 }
 
+async function updateProfile(userId, data) {
+  const update = {};
+  if (data.name !== undefined) update.name = data.name;
+  if (data.displayName !== undefined) update.name = data.displayName;
+  if (data.bio !== undefined) update.bio = data.bio;
+  if (data.avatarUrl !== undefined) update.avatarUrl = data.avatarUrl;
+  const user = await User.findByIdAndUpdate(userId, { $set: update }, { new: true, runValidators: true }).select('_id name email bio avatarUrl');
+  if (!user) throw new NotFoundError('User');
+  return getUserSummary(userId);
+}
+
+async function verifyPassword(userId, password) {
+  const user = await User.findById(userId).select('password');
+  if (!user) throw new NotFoundError('User');
+  if (!user.password || !await comparePassword(password, user.password)) throw new AuthenticationError('Current password is incorrect');
+  return user;
+}
+
+async function changePassword(userId, currentPassword, newPassword) {
+  if (typeof newPassword !== 'string' || newPassword.length < 6) throw new ValidationError('New password must be at least 6 characters');
+  await verifyPassword(userId, currentPassword);
+  await User.findByIdAndUpdate(userId, { $set: { password: await hashPassword(newPassword) } });
+}
+
+async function deleteAccount(userId, password) {
+  await verifyPassword(userId, password);
+  const channel = await channelService.getChannelByOwner(userId);
+  if (channel) await channelService.deleteMyChannel(userId, channelHandle(channel));
+  else await Video.updateMany({ user_id: userId }, { $set: { visibility: 'private' } });
+  await SavedVideo.deleteMany({ user: userId });
+  await WatchHistory.deleteMany({ user: userId });
+  await Playlist.deleteMany({ owner: userId });
+  await Network.deleteMany({ owner: userId });
+  await Network.updateMany({ 'members.user': userId }, { $pull: { members: { user: userId } } });
+  await profileService.deleteForUser(userId);
+  await User.findByIdAndDelete(userId);
+}
+
 export {
+  updateProfile, changePassword, deleteAccount,
   getUserById,
+  getUserSummary,
   subscribeToChannel,
   unsubscribeFromChannel,
 };
 
 export default {
+  updateProfile, changePassword, deleteAccount,
   getUserById,
+  getUserSummary,
   subscribeToChannel,
   unsubscribeFromChannel,
 };

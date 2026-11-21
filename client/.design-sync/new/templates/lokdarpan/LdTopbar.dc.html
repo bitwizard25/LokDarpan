@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<sc-if value="{{ desktop }}" hint-placeholder-val="{{ true }}"><header style="height:64px;box-sizing:border-box;display:flex;align-items:center;gap:16px;padding:0 clamp(16px,3vw,40px) 0 24px;background:rgba(9,9,11,.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,.08)"><a href="./Lokdarpan.dc.html" class="font-display" style="color:#fff;text-decoration:none;font-weight:700;font-size:20px;letter-spacing:-0.01em">LokDarpan</a><form role="search" action="./Search.dc.html" style="flex:1;max-width:560px;margin:0 auto;position:relative"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#A1A1AA" stroke-width="2" stroke-linecap="round" style="position:absolute;left:16px;top:12px"><path d="M11 4a7 7 0 1 0 0 14a7 7 0 1 0 0-14zM20 20l-4-4"></path></svg><input type="search" name="q" aria-label="Search" placeholder="Search videos, channels, live" style="width:100%;height:44px;box-sizing:border-box;padding:0 16px 0 48px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:#fff;font:400 16px 'Plus Jakarta Sans',sans-serif;outline:none;transition:border-color .15s ease,background .15s ease" style-focus="border-color:#60A5FA;background:rgba(255,255,255,.1)"></form><a href="#" aria-label="Your account" style="width:40px;height:40px;flex:none;border-radius:50%;background:rgba(255,255,255,.1);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;text-decoration:none">AK</a></header></sc-if>
+<sc-if value="{{ mobile }}" hint-placeholder-val="{{ false }}"><header style="display:flex;flex-direction:column;gap:8px;padding:8px 16px 16px;background:rgba(9,9,11,.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,.08)"><div style="height:48px;display:flex;align-items:center;justify-content:space-between"><a href="./Lokdarpan.dc.html" class="font-display" style="color:#fff;text-decoration:none;font-weight:700;font-size:20px">LokDarpan</a><a href="#" aria-label="Your account" style="width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.1);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;text-decoration:none">AK</a></div><form role="search" action="./Search.dc.html" style="position:relative"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#A1A1AA" stroke-width="2" stroke-linecap="round" style="position:absolute;left:16px;top:12px"><path d="M11 4a7 7 0 1 0 0 14a7 7 0 1 0 0-14zM20 20l-4-4"></path></svg><input type="search" name="q" aria-label="Search" placeholder="Search videos, channels, live" style="width:100%;height:44px;box-sizing:border-box;padding:0 16px 0 48px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);color:#fff;font:400 16px 'Plus Jakarta Sans',sans-serif;outline:none" style-focus="border-color:#60A5FA"></form></header></sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const m = !!this.props.isMobile;
+    return { mobile: m, desktop: !m };
+  }
+}
+</script>
+</body>
+</html>

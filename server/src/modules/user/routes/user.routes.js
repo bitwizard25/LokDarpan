@@ -1,3 +1,4 @@
+import { profileUpdateBody, passwordChangeBody, accountDeleteBody } from '../schemas/profile.schema.js';
 /**
  * User Routes
  * Fastify routes with inline JSON Schema validation
@@ -5,6 +6,19 @@
 
 async function userRoutes(fastify, options) {
   const { userController, authenticate } = options;
+
+  fastify.get('/me', {
+    preHandler: [authenticate],
+    schema: {
+      description: 'Get the authenticated user profile summary',
+      tags: ['user'],
+      response: { 200: { type: 'object', properties: { user: { type: 'object', additionalProperties: true } } } },
+    },
+  }, userController.me);
+
+  fastify.patch('/me', { preHandler: [authenticate], schema: { body: profileUpdateBody } }, userController.updateProfile);
+  fastify.put('/me/password', { preHandler: [authenticate], schema: { body: passwordChangeBody } }, userController.changePassword);
+  fastify.delete('/me', { preHandler: [authenticate], schema: { body: accountDeleteBody } }, userController.deleteAccount);
 
   // Subscribe to channel route
   fastify.put('/:channelId/subscribe', {

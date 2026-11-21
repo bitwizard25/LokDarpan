@@ -5,6 +5,8 @@ import { useState, useCallback, type FormEvent } from "react";
 import { Layout } from "~/components/Layout/Layout";
 import { requireUserSession } from "~/services/auth.server";
 import { putVideoToPresignedUrl, videoApi } from "~/lib/api";
+import { CreateUpload, Check } from "~/components/icons";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select";
 
 export const meta: MetaFunction = () => {
     return [{ title: "Upload Video - LokDarpan" }];
@@ -39,6 +41,8 @@ export default function Upload() {
     const [error, setError] = useState<string | null>(null);
     const [successId, setSuccessId] = useState<string | null>(null);
     const [phase, setPhase] = useState<string | null>(null);
+    const [language, setLanguage] = useState<string>("und");
+    const [format, setFormat] = useState<string>("other");
 
     const handleDrag = useCallback((e: React.DragEvent) => {
         e.preventDefault();
@@ -109,7 +113,14 @@ export default function Upload() {
         try {
             setPhase("Creating upload…");
             const init = await videoApi.initiateUpload(
-                { title, description, category, tags: tags || undefined },
+                {
+                    title,
+                    description,
+                    category,
+                    tags: tags || undefined,
+                    language,
+                    format,
+                },
                 token
             );
             if (init.error || !init.data) {
@@ -147,7 +158,14 @@ export default function Upload() {
             setSuccessId(videoId);
             setPhase("Still processing — you can open the watch page and refresh.");
         } catch (err: unknown) {
-            setError(err instanceof Error ? err.message : "Upload failed");
+            const rawMsg = err instanceof Error ? err.message : "Upload failed";
+            if (rawMsg.includes("S3_BUCKET_NAME") || rawMsg.includes("AWS")) {
+                setError("AWS S3 storage is not configured in server/.env. Please configure S3_BUCKET_NAME, AWS_ACCESS_KEY_ID, and AWS_SECRET_ACCESS_KEY to enable live uploads.");
+            } else if (rawMsg.includes("Failed to fetch") || rawMsg.includes("NetworkError")) {
+                setError("Cannot reach backend server. Please verify the API server is running on http://localhost:5000.");
+            } else {
+                setError(rawMsg);
+            }
             setPhase(null);
         } finally {
             setBusy(false);
@@ -205,9 +223,7 @@ export default function Upload() {
                         {selectedFile ? (
                             <div className="space-y-3">
                                 <div className="w-16 h-16 mx-auto rounded-full bg-green-500/20 flex items-center justify-center">
-                                    <svg className="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                    </svg>
+                                    <Check size={32} className="text-green-400" />
                                 </div>
                                 <div>
                                     <p className="text-white font-medium">{selectedFile.name}</p>
@@ -224,9 +240,7 @@ export default function Upload() {
                         ) : (
                             <div className="space-y-4">
                                 <div className="w-20 h-20 mx-auto rounded-full bg-dark-800 flex items-center justify-center">
-                                    <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                    </svg>
+                                    <CreateUpload size={36} className="text-dark-300" />
                                 </div>
                                 <div>
                                     <p className="text-white font-medium">Drag and drop your video here</p>
@@ -268,6 +282,45 @@ export default function Upload() {
                                 <option key={cat} value={cat}>{cat}</option>
                             ))}
                         </select>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label htmlFor="language" className="block text-sm font-medium text-gray-300 mb-2">
+                                Language
+                            </label>
+                            <Select value={language} onValueChange={setLanguage}>
+                                <SelectTrigger id="language" className="input h-11 w-full bg-dark-900 border-white/10 text-white">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent className="bg-dark-900 border-white/10 text-white">
+                                    <SelectItem value="hi">Hindi</SelectItem>
+                                    <SelectItem value="mr">Marathi</SelectItem>
+                                    <SelectItem value="en">English</SelectItem>
+                                    <SelectItem value="und">Not sure</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div>
+                            <label htmlFor="format" className="block text-sm font-medium text-gray-300 mb-2">
+                                Format
+                            </label>
+                            <Select value={format} onValueChange={setFormat}>
+                                <SelectTrigger id="format" className="input h-11 w-full bg-dark-900 border-white/10 text-white">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent className="bg-dark-900 border-white/10 text-white">
+                                    <SelectItem value="explainer">Explainers</SelectItem>
+                                    <SelectItem value="story">Stories</SelectItem>
+                                    <SelectItem value="discussion">Discussions</SelectItem>
+                                    <SelectItem value="tutorial">How-to videos</SelectItem>
+                                    <SelectItem value="performance">Performances</SelectItem>
+                                    <SelectItem value="update">Quick updates</SelectItem>
+                                    <SelectItem value="other">Other</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
 
                     <div>

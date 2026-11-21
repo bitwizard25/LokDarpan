@@ -1,3 +1,6 @@
+import { getMyVideos } from './studio-video.service.js';
+import { videoFeatures, needsPublishedAt } from '../../recommendation/features.js';
+import { eventsService } from '../../recommendation/events.service.js';
 import { createReadStream } from 'fs';
 import { unlink } from 'fs/promises';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
@@ -11,11 +14,28 @@ import { validateVideoFile, validateImageFile, getFileExtension } from '../../..
 import { buildTranscodeRequestedPayload } from '../../../shared/contracts/transcoding.messages.js';
 import {
   enqueueTranscodeEncodeJob,
-  getEncodeQueue,
+  transcodeJobId,
 } from '../../../shared/messaging/transcodeQueues.js';
+
+/**
+ * Hand a video to the transcode queue AFTER its PROCESSING state is saved in MongoDB.
+ * If Redis is unreachable the request still succeeds: the video stays PROCESSING in the
+ * database and the reconciler (transcodeReconciler.js) enqueues it on its next tick.
+ */
+async function enqueueSavedVideo(payload) {
+  try {
+    await enqueueTranscodeEncodeJob(payload);
+  } catch (err) {
+    console.error('[transcode] enqueue failed, reconciler will retry:', payload.videoId, err.message);
+  }
+}
 
 const presignS3Client = new S3Client({
   region: AWS_CONFIG.region,
+  // Without these the presigned upload URL pointed at real AWS even when S3_ENDPOINT
+  // (R2, MinIO, ...) was configured, so direct-to-storage uploads could never work there.
+  endpoint: AWS_CONFIG.endpoint || undefined,
+  forcePathStyle: AWS_CONFIG.forcePathStyle || false,
   credentials:
     AWS_CONFIG.accessKeyId && AWS_CONFIG.secretAccessKey
       ? {
@@ -29,7 +49,7 @@ const presignS3Client = new S3Client({
  * Create a new video (multipart): raw to S3 + thumbnail, enqueue multi-bitrate transcode
  */
 async function createVideo(videoData, videoFile, thumbnailFile) {
-  const { title, description, user_id, category, tags } = videoData;
+  const { title, description, user_id, category, tags, language, format } = videoData;
 
   validateVideoFile(videoFile);
   validateImageFile(thumbnailFile);
@@ -58,6 +78,14 @@ async function createVideo(videoData, videoFile, thumbnailFile) {
   const thumbnailUpload = await thumbnailUploadPromise;
   const tagsArray = tags ? tags.split(',').map(tag => tag.trim()).filter(Boolean) : [];
 
+  const features = videoFeatures({
+    category,
+    format: format || 'other',
+    language: language || 'und',
+    tags: tagsArray,
+    type: 'video',
+  });
+
   const payload = buildTranscodeRequestedPayload({
     videoId: videoId.toString(),
     rawS3Key: rawKey,
@@ -65,18 +93,20 @@ async function createVideo(videoData, videoFile, thumbnailFile) {
     region: AWS_CONFIG.region,
   });
 
-  const job = await enqueueTranscodeEncodeJob(payload);
-
   const newVideo = new Video({
     _id: videoId,
     title,
     description,
     user_id,
     category,
+    language: language || 'und',
+    format: format || 'other',
     tags: tagsArray,
+    features,
     status: 'PROCESSING',
     rawS3Key: rawKey,
-    transcodeJobId: String(job.id),
+    transcodeJobId: transcodeJobId(videoId.toString()),
+    transcodeRequestedAt: new Date(),
     thumbnailUrl: thumbnailUpload.url,
     thumbnailId: thumbnailUpload.key,
     videoUrl: null,
@@ -86,14 +116,16 @@ async function createVideo(videoData, videoFile, thumbnailFile) {
     renditions: [],
   });
 
-  return newVideo.save();
+  const saved = await newVideo.save();
+  await enqueueSavedVideo(payload);
+  return saved;
 }
 
 /**
  * Initiate presigned upload
  */
 async function initiateVideoUpload(metadata, userId) {
-  const { title, description, category, tags } = metadata;
+  const { title, description, category, tags, language, format } = metadata;
 
   if (!title || !description) {
     throw new ValidationError('Title and description are required');
@@ -110,6 +142,14 @@ async function initiateVideoUpload(metadata, userId) {
         ? tags
         : [];
 
+  const features = videoFeatures({
+    category: category || null,
+    format: format || 'other',
+    language: language || 'und',
+    tags: tagsArray,
+    type: 'video',
+  });
+
   const videoId = createObjectId();
   const fileKey = `raw-uploads/${userId}/${videoId.toString()}.mp4`;
 
@@ -125,7 +165,10 @@ async function initiateVideoUpload(metadata, userId) {
     thumbnailUrl: null,
     thumbnailId: null,
     category: category || null,
+    language: language || 'und',
+    format: format || 'other',
     tags: tagsArray,
+    features,
   });
 
   const savedVideo = await newVideo.save();
@@ -152,7 +195,7 @@ async function initiateVideoUpload(metadata, userId) {
 async function completeVideoUpload(videoId, userId) {
   const video = await getVideoById(videoId);
 
-  if (video.user_id.toString() !== userId.toString()) {
+  if ((video.user_id?._id || video.user_id).toString() !== userId.toString()) {
     throw new AuthorizationError('You do not have permission to complete this upload');
   }
 
@@ -164,7 +207,15 @@ async function completeVideoUpload(videoId, userId) {
     throw new ValidationError('Missing raw upload key');
   }
 
-  await storageService.headObject(video.rawS3Key);
+  try {
+    await storageService.headObject(video.rawS3Key);
+  } catch (err) {
+    // Completing before the browser finished the PUT is a client error, not a server fault.
+    if (err?.name === 'NotFound' || err?.$metadata?.httpStatusCode === 404) {
+      throw new ValidationError('The video file has not been uploaded yet');
+    }
+    throw err;
+  }
 
   const payload = buildTranscodeRequestedPayload({
     videoId: video._id.toString(),
@@ -173,19 +224,19 @@ async function completeVideoUpload(videoId, userId) {
     region: AWS_CONFIG.region,
   });
 
-  const job = await enqueueTranscodeEncodeJob(payload);
-
   await Video.findByIdAndUpdate(videoId, {
     $set: {
       status: 'PROCESSING',
-      transcodeJobId: String(job.id),
+      transcodeJobId: transcodeJobId(video._id.toString()),
+      transcodeRequestedAt: new Date(),
     },
   });
+  await enqueueSavedVideo(payload);
 
   return {
     message: 'Transcoding started',
     status: 'PROCESSING',
-    transcodeJobId: String(job.id),
+    transcodeJobId: null, // Legacy response slot; queue identifiers are private.
     videoId: video._id.toString(),
   };
 }
@@ -196,34 +247,19 @@ async function completeVideoUpload(videoId, userId) {
 async function getTranscodeStatus(videoId, userId) {
   const video = await getVideoById(videoId);
 
-  if (video.user_id.toString() !== userId.toString()) {
+  if ((video.user_id?._id || video.user_id).toString() !== userId.toString()) {
     throw new AuthorizationError('You do not have permission to view this status');
-  }
-
-  let jobState = null;
-  let jobProgress = null;
-  if (video.transcodeJobId) {
-    try {
-      const q = getEncodeQueue();
-      const j = await q.getJob(video.transcodeJobId);
-      if (j) {
-        jobState = await j.getState();
-        jobProgress = j.progress;
-      }
-    } catch (e) {
-      console.warn('getTranscodeStatus job lookup:', e.message);
-    }
   }
 
   return {
     videoStatus: video.status,
     hlsMasterUrl: video.hlsMasterUrl,
     videoUrl: video.videoUrl,
-    transcodeJobId: video.transcodeJobId,
-    jobState,
-    jobProgress,
-    processingError: video.processingError,
-    renditions: video.renditions,
+    transcodeJobId: null,
+    jobState: null,
+    jobProgress: null,
+    processingError: null,
+    renditions: (video.renditions || []).map(r => ({ label: r.label, height: r.height, width: r.width, bandwidth: r.bandwidth, playlistUrl: r.playlistUrl, playlistKey: null })),
   };
 }
 
@@ -232,7 +268,7 @@ async function getVideoById(videoId) {
     throw new ValidationError('Invalid video ID');
   }
 
-  const video = await Video.findById(videoId).populate('user_id');
+  const video = await Video.findById(videoId);
 
   if (!video) {
     throw new NotFoundError('Video');
@@ -257,31 +293,52 @@ async function getAllVideos(query = {}) {
   }
 
   filter.status = 'COMPLETED';
+  filter.visibility = { $in: ['public', null] };
 
   return Video.find(filter)
     .sort({ createdAt: -1 })
-    .populate('user_id');
+    .populate({ path: 'user_id', select: 'name channel', populate: { path: 'channel', select: 'name logoUrl' } });
 }
 
 async function updateVideo(videoId, userId, updateData, thumbnailFile = null) {
   const video = await getVideoById(videoId);
 
-  if (video.user_id.toString() !== userId.toString()) {
+  if ((video.user_id?._id || video.user_id)?.toString() !== userId.toString()) {
     throw new AuthorizationError('You do not have permission to update this video');
   }
 
   if (thumbnailFile) {
     validateImageFile(thumbnailFile);
 
-    await storageService.deleteFile(video.thumbnailId);
+    if (video.thumbnailId) await storageService.deleteFile(video.thumbnailId);
 
     const thumbnailUpload = await storageService.uploadThumbnail(thumbnailFile);
     updateData.thumbnailUrl = thumbnailUpload.url;
     updateData.thumbnailId = thumbnailUpload.key;
   }
 
-  if (updateData.tags) {
+  if (typeof updateData.tags === 'string') {
     updateData.tags = updateData.tags.split(',').map(tag => tag.trim()).filter(Boolean);
+  }
+
+  const nextCategory = updateData.category !== undefined ? updateData.category : video.category;
+  const nextFormat = updateData.format !== undefined ? updateData.format : video.format;
+  const nextLanguage = updateData.language !== undefined ? updateData.language : video.language;
+  const nextTags = updateData.tags !== undefined ? updateData.tags : video.tags;
+  const nextStatus = updateData.status !== undefined ? updateData.status : video.status;
+  const nextVisibility = updateData.visibility !== undefined ? updateData.visibility : video.visibility;
+
+  updateData.features = videoFeatures({
+    category: nextCategory,
+    format: nextFormat,
+    language: nextLanguage,
+    durationSeconds: video.durationSeconds,
+    type: video.type,
+    tags: nextTags,
+  });
+
+  if (!video.publishedAt && needsPublishedAt({ status: nextStatus, visibility: nextVisibility, publishedAt: video.publishedAt })) {
+    updateData.publishedAt = new Date();
   }
 
   const updatedVideo = await Video.findByIdAndUpdate(
@@ -296,7 +353,7 @@ async function updateVideo(videoId, userId, updateData, thumbnailFile = null) {
 async function deleteVideo(videoId, userId) {
   const video = await getVideoById(videoId);
 
-  if (video.user_id.toString() !== userId.toString()) {
+  if ((video.user_id?._id || video.user_id)?.toString() !== userId.toString()) {
     throw new AuthorizationError('You do not have permission to delete this video');
   }
 
@@ -339,6 +396,7 @@ async function toggleLike(videoId, userId) {
     video.likedBy.push(userId);
     video.likes++;
     await video.save();
+    eventsService.recordAction({ userId, type: 'like', videoId }).catch(() => {});
     return { action: 'liked', likes: video.likes };
   }
 }
@@ -368,7 +426,45 @@ async function toggleDislike(videoId, userId) {
   }
 }
 
+async function setReaction(videoId, userId, reaction) {
+  if (!['like', 'dislike'].includes(reaction)) throw new ValidationError('Reaction must be like or dislike');
+  const video = await getVideoById(videoId);
+  const userIdString = userId.toString();
+  const wasLiked = video.likedBy.some(id => id.toString() === userIdString);
+  const wasDisliked = video.dislikedBy.some(id => id.toString() === userIdString);
+  video.likedBy.pull(userId);
+  video.dislikedBy.pull(userId);
+  if (reaction === 'like') {
+    video.likedBy.addToSet(userId);
+    if (!wasLiked) {
+      video.likes = (video.likes || 0) + 1;
+      eventsService.recordAction({ userId, type: 'like', videoId }).catch(() => {});
+    }
+    if (wasDisliked) video.dislikes = Math.max(0, (video.dislikes || 0) - 1);
+  } else {
+    video.dislikedBy.addToSet(userId);
+    if (!wasDisliked) video.dislikes = (video.dislikes || 0) + 1;
+    if (wasLiked) video.likes = Math.max(0, (video.likes || 0) - 1);
+  }
+  await video.save();
+  return { reaction, likes: video.likes, dislikes: video.dislikes };
+}
+
+async function clearReaction(videoId, userId) {
+  const video = await getVideoById(videoId);
+  const userIdString = userId.toString();
+  const wasLiked = video.likedBy.some(id => id.toString() === userIdString);
+  const wasDisliked = video.dislikedBy.some(id => id.toString() === userIdString);
+  video.likedBy.pull(userId);
+  video.dislikedBy.pull(userId);
+  if (wasLiked) video.likes = Math.max(0, (video.likes || 0) - 1);
+  if (wasDisliked) video.dislikes = Math.max(0, (video.dislikes || 0) - 1);
+  await video.save();
+  return { reaction: null, likes: video.likes, dislikes: video.dislikes };
+}
+
 export {
+  getMyVideos,
   createVideo,
   initiateVideoUpload,
   completeVideoUpload,
@@ -379,9 +475,12 @@ export {
   deleteVideo,
   toggleLike,
   toggleDislike,
+  setReaction,
+  clearReaction,
 };
 
 export default {
+  getMyVideos,
   createVideo,
   initiateVideoUpload,
   completeVideoUpload,
@@ -392,4 +491,6 @@ export default {
   deleteVideo,
   toggleLike,
   toggleDislike,
+  setReaction,
+  clearReaction,
 };

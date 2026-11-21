@@ -1,0 +1,95 @@
+- generic [ref=f3e2]:
+  - banner [ref=f3e3]:
+    - generic [ref=f3e4]:
+      - link "LokDarpan" [ref=f3e5] [cursor=pointer]:
+        - /url: /
+      - search [ref=f3e6]:
+        - searchbox "Search" [ref=f3e7]
+      - generic [ref=f3e8]:
+        - link "Create" [ref=f3e9] [cursor=pointer]:
+          - /url: /upload
+        - link "Sign In" [ref=f3e12] [cursor=pointer]:
+          - /url: /auth/login
+  - generic [ref=f3e14]:
+    - navigation "Main" [ref=f3e15]:
+      - link "Home" [ref=f3e16] [cursor=pointer]:
+        - /url: /
+      - link "Explore" [ref=f3e19] [cursor=pointer]:
+        - /url: /explore
+      - link "Trending" [ref=f3e24] [cursor=pointer]:
+        - /url: /trending
+      - link "Shorts" [ref=f3e27] [cursor=pointer]:
+        - /url: /shorts
+      - link "Following" [ref=f3e30] [cursor=pointer]:
+        - /url: /following
+      - link "Library" [ref=f3e33] [cursor=pointer]:
+        - /url: /library
+      - button "Expand sidebar" [ref=f3e37] [cursor=pointer]
+    - main [ref=f3e40]:
+      - generic [ref=f3e41]:
+        - generic [ref=f3e46]:
+          - heading "Explore Topics" [level=1] [ref=f3e47]
+          - paragraph [ref=f3e48]: Discover new interests, trending communities, and fresh content curated just for you.
+        - generic [ref=f3e49]:
+          - heading "Browse Categories" [level=2] [ref=f3e50]
+          - generic [ref=f3e53]:
+            - link [ref=f3e54] [cursor=pointer]:
+              - /url: /trending?category=music
+              - generic [ref=f3e63]:
+                - heading "Music" [level=3] [ref=f3e64]
+                - paragraph [ref=f3e65]: Explore Music
+            - link [ref=f3e66] [cursor=pointer]:
+              - /url: /trending?category=gaming
+              - generic [ref=f3e75]:
+                - heading "Gaming" [level=3] [ref=f3e76]
+                - paragraph [ref=f3e77]: Explore Gaming
+            - link [ref=f3e78] [cursor=pointer]:
+              - /url: /trending?category=news
+              - generic [ref=f3e87]:
+                - heading "News" [level=3] [ref=f3e88]
+                - paragraph [ref=f3e89]: Explore News
+            - link [ref=f3e90] [cursor=pointer]:
+              - /url: /trending?category=movies
+              - generic [ref=f3e99]:
+                - heading "Movies" [level=3] [ref=f3e100]
+                - paragraph [ref=f3e101]: Explore Movies
+            - link [ref=f3e102] [cursor=pointer]:
+              - /url: /trending?category=learning
+              - generic [ref=f3e111]:
+                - heading "Learning" [level=3] [ref=f3e112]
+                - paragraph [ref=f3e113]: Explore Learning
+            - link [ref=f3e114] [cursor=pointer]:
+              - /url: /trending?category=live
+              - generic [ref=f3e123]:
+                - heading "Live" [level=3] [ref=f3e124]
+                - paragraph [ref=f3e125]: Explore Live
+            - link [ref=f3e126] [cursor=pointer]:
+              - /url: /trending?category=sports
+              - generic [ref=f3e135]:
+                - heading "Sports" [level=3] [ref=f3e136]
+                - paragraph [ref=f3e137]: Explore Sports
+            - link [ref=f3e138] [cursor=pointer]:
+              - /url: /trending?category=fashion
+              - generic [ref=f3e147]:
+                - heading "Fashion" [level=3] [ref=f3e148]
+                - paragraph [ref=f3e149]: Explore Fashion
+            - link [ref=f3e150] [cursor=pointer]:
+              - /url: /trending?category=tech
+              - generic [ref=f3e159]:
+                - heading "Technology" [level=3] [ref=f3e160]
+                - paragraph [ref=f3e161]: Explore Technology
+            - link [ref=f3e162] [cursor=pointer]:
+              - /url: /trending?category=comedy
+              - generic [ref=f3e171]:
+                - heading "Comedy" [level=3] [ref=f3e172]
+                - paragraph [ref=f3e173]: Explore Comedy
+            - link [ref=f3e174] [cursor=pointer]:
+              - /url: /trending?category=travel
+              - generic [ref=f3e183]:
+                - heading "Travel" [level=3] [ref=f3e184]
+                - paragraph [ref=f3e185]: Explore Travel
+            - link [ref=f3e186] [cursor=pointer]:
+              - /url: /trending?category=beauty
+              - generic [ref=f3e195]:
+                - heading "Beauty" [level=3] [ref=f3e196]
+                - paragraph [ref=f3e197]: Explore Beauty

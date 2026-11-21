@@ -4,12 +4,21 @@
  */
 
 import Fastify from 'fastify';
+import catalogueRoutes from './modules/catalogue/catalogue.routes.js';
+import libraryRoutes from './modules/library/library.routes.js';
+import profileRoutes from './modules/user/profile.routes.js';
+import verificationRoutes from './modules/verification/verification.routes.js';
+import networkMembershipRoutes from './modules/network/network.routes.js';
+import homeRoutes from './modules/home/home.routes.js';
+import { getHome } from './modules/home/home.repository.js';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import multipart from '@fastify/multipart';
 import jwt from '@fastify/jwt';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
+import rateLimit from '@fastify/rate-limit';
+import recommendationRoutes from './modules/recommendation/recommendation.routes.js';
 import { config } from 'dotenv';
 import { APP_CONFIG } from './config/app.js';
 import { JWT_CONFIG } from './config/jwt.js';
@@ -18,13 +27,15 @@ import authController from './modules/auth/controllers/auth.controller.js';
 import userController from './modules/user/controllers/user.controller.js';
 import videoController from './modules/video/controllers/video.controller.js';
 import commentController from './modules/comments/controllers/comment.controller.js';
-import authenticate from './middleware/auth.middleware.js';
+import authenticate, { optionalAuthenticate } from './middleware/auth.middleware.js';
 import authRoutes from './modules/auth/routes/auth.routes.js';
 import userRoutes from './modules/user/routes/user.routes.js';
 import videoRoutes from './modules/video/routes/video.routes.js';
 import commentRoutes from './modules/comments/routes/comment.routes.js';
 import channelRoutes from './modules/channel/routes/channel.routes.js';
 import channelController from './modules/channel/controllers/channel.controller.js';
+import networkRoutes from './modules/network/routes/network.routes.js';
+import networkController from './modules/network/controllers/network.controller.js';
 
 // Load environment variables
 config();
@@ -56,6 +67,10 @@ async function buildApp() {
 
   await app.register(jwt, {
     secret: JWT_CONFIG.secret,
+  });
+
+  await app.register(rateLimit, {
+    global: false,
   });
 
   // Register Swagger for API documentation
@@ -167,6 +182,12 @@ async function buildApp() {
   });
 
   // Register module routes with options
+  await app.register(catalogueRoutes, { prefix: APP_CONFIG.apiPrefix, authenticate, optionalAuthenticate });
+  await app.register(libraryRoutes, { prefix: APP_CONFIG.apiPrefix, authenticate });
+  await app.register(profileRoutes, { prefix: APP_CONFIG.apiPrefix, authenticate });
+  await app.register(verificationRoutes, { prefix: APP_CONFIG.apiPrefix, authenticate });
+  await app.register(networkMembershipRoutes, { prefix: APP_CONFIG.apiPrefix, authenticate });
+  await app.register(homeRoutes, { prefix: `${APP_CONFIG.apiPrefix}/home`, getHome, optionalAuthenticate });
   await app.register(authRoutes, {
     prefix: `${APP_CONFIG.apiPrefix}/auth`,
     authController,
@@ -193,6 +214,17 @@ async function buildApp() {
   await app.register(channelRoutes, {
     prefix: `${APP_CONFIG.apiPrefix}/channel`,
     channelController,
+    authenticate,
+  });
+
+  await app.register(networkRoutes, {
+    prefix: `${APP_CONFIG.apiPrefix}/network`,
+    networkController,
+    authenticate,
+  });
+
+  await app.register(recommendationRoutes, {
+    prefix: APP_CONFIG.apiPrefix,
     authenticate,
   });
 

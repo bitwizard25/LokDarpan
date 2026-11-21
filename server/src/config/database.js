@@ -19,21 +19,25 @@ if (!DB_NAME) {
 }
 
 // Construct full connection URI with database name
-// MONGO_URI should be like: mongodb://localhost:27017 or mongodb://user:pass@host:port
-// DB_NAME will be appended to create: mongodb://localhost:27017/DB_NAME
+// Handles standard MongoDB URIs, Atlas mongodb+srv URIs, and Azure Cosmos DB URIs with query parameters
 const getConnectionUri = () => {
-  // Remove trailing slash if present
-  const baseUri = MONGO_URI.endsWith('/') ? MONGO_URI.slice(0, -1) : MONGO_URI;
+  if (!MONGO_URI) return '';
   
-  // Check if URI already contains a database name (has 4+ slashes after protocol)
-  const uriParts = baseUri.split('/');
+  // Separate path from query parameters (e.g. ?ssl=true&replicaSet=globaldb)
+  const queryIndex = MONGO_URI.indexOf('?');
+  const pathPart = queryIndex !== -1 ? MONGO_URI.substring(0, queryIndex) : MONGO_URI;
+  const queryPart = queryIndex !== -1 ? MONGO_URI.substring(queryIndex) : '';
+
+  const cleanPath = pathPart.endsWith('/') ? pathPart.slice(0, -1) : pathPart;
+  const uriParts = cleanPath.split('/');
+
+  // If path already has a db name (e.g. mongodb://host:port/dbname)
   if (uriParts.length > 3 && uriParts[3]) {
-    // Already has database name, use as-is
-    return baseUri;
+    return MONGO_URI;
   }
-  
-  // Append database name
-  return `${baseUri}/${DB_NAME}`;
+
+  // Otherwise, insert /${DB_NAME} before query parameters
+  return `${cleanPath}/${DB_NAME}${queryPart}`;
 };
 
 const CONNECTION_URI = getConnectionUri();
@@ -44,9 +48,12 @@ const CONNECTION_URI = getConnectionUri();
  */
 async function connectDatabase() {
   try {
-    const conn = await mongoose.connect(CONNECTION_URI);
+    const conn = await mongoose.connect(CONNECTION_URI, {
+      dbName: DB_NAME,
+      maxIdleTimeMS: 120000, // Keeps connection alive on Azure Cosmos DB / cloud firewalls
+    });
     console.log(`✅ Database connected: ${conn.connection.host}`);
-    console.log(`📊 Database name: ${DB_NAME}`);
+    console.log(`📊 Database name: ${conn.connection.name || DB_NAME}`);
     
     // Handle connection events
     mongoose.connection.on('error', (err) => {

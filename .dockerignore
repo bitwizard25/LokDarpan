@@ -1,0 +1,12 @@
+**/node_modules
+**/.env
+**/.env.*
+!.env.docker.example
+**/*.log
+**/*.pem
+.git
+.agents
+.playwright-mcp
+client
+server/docs
+server/e2e

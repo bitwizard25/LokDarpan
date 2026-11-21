@@ -26,11 +26,21 @@ export function getResultQueue() {
 }
 
 /**
+ * One encode job per video. A deterministic id makes enqueueing idempotent: adding
+ * the same video twice while its job exists is a no-op instead of a duplicate.
+ * (BullMQ custom ids must not contain ':'.)
+ */
+export function transcodeJobId(videoId) {
+  return `transcode-${videoId}`;
+}
+
+/**
  * @param {import('../contracts/transcoding.messages.js').TranscodeRequestedPayload} payload
  */
 export async function enqueueTranscodeEncodeJob(payload) {
   const q = getEncodeQueue();
   const job = await q.add('encode', payload, {
+    jobId: transcodeJobId(payload.videoId),
     attempts: 2,
     backoff: { type: 'exponential', delay: 30_000 },
     removeOnComplete: { count: 500 },

@@ -1,0 +1,563 @@
+{
+  "buildManifest": {
+    "serverBundles": {
+      "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0": {
+        "id": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+        "file": "build/server/nodejs-eyJydW50aW1lIjoibm9kZWpzIn0/index.js",
+        "config": {
+          "runtime": "nodejs"
+        }
+      }
+    },
+    "routeIdToServerBundleId": {
+      "routes/playlist.$playlistId": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/admin.verifications": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/channel.$channelId": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/network.$networkId": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/api.rec-feedback": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/shorts.$videoId": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/channel.create": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/studio.channel": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/studio._index": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/auth.logout": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/auth.signup": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/api.events": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/auth.login": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/onboarding": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/following": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/watch.$id": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/api.feed": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/settings": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/showcase": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/trending": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/explore": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/history": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/library": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/network": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/profile": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/search": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/shorts": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/upload": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/verify": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/_index": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0",
+      "routes/story": "nodejs-eyJydW50aW1lIjoibm9kZWpzIn0"
+    },
+    "routes": {
+      "root": {
+        "path": "",
+        "id": "root",
+        "file": "app/root.tsx",
+        "config": {}
+      },
+      "routes/playlist.$playlistId": {
+        "file": "app/routes/playlist.$playlistId.tsx",
+        "id": "routes/playlist.$playlistId",
+        "path": "playlist/:playlistId",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/admin.verifications": {
+        "file": "app/routes/admin.verifications.tsx",
+        "id": "routes/admin.verifications",
+        "path": "admin/verifications",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/channel.$channelId": {
+        "file": "app/routes/channel.$channelId.tsx",
+        "id": "routes/channel.$channelId",
+        "path": "channel/:channelId",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/network.$networkId": {
+        "file": "app/routes/network.$networkId.tsx",
+        "id": "routes/network.$networkId",
+        "path": ":networkId",
+        "parentId": "routes/network",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/api.rec-feedback": {
+        "file": "app/routes/api.rec-feedback.tsx",
+        "id": "routes/api.rec-feedback",
+        "path": "api/rec-feedback",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/shorts.$videoId": {
+        "file": "app/routes/shorts.$videoId.tsx",
+        "id": "routes/shorts.$videoId",
+        "path": ":videoId",
+        "parentId": "routes/shorts",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/channel.create": {
+        "file": "app/routes/channel.create.tsx",
+        "id": "routes/channel.create",
+        "path": "channel/create",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/studio.channel": {
+        "file": "app/routes/studio.channel.tsx",
+        "id": "routes/studio.channel",
+        "path": "channel",
+        "parentId": "routes/studio",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/studio._index": {
+        "file": "app/routes/studio._index.tsx",
+        "id": "routes/studio._index",
+        "index": true,
+        "parentId": "routes/studio",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/auth.logout": {
+        "file": "app/routes/auth.logout.tsx",
+        "id": "routes/auth.logout",
+        "path": "auth/logout",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/auth.signup": {
+        "file": "app/routes/auth.signup.tsx",
+        "id": "routes/auth.signup",
+        "path": "auth/signup",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/api.events": {
+        "file": "app/routes/api.events.tsx",
+        "id": "routes/api.events",
+        "path": "api/events",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/auth.login": {
+        "file": "app/routes/auth.login.tsx",
+        "id": "routes/auth.login",
+        "path": "auth/login",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/onboarding": {
+        "file": "app/routes/onboarding.tsx",
+        "id": "routes/onboarding",
+        "path": "onboarding",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/following": {
+        "file": "app/routes/following.tsx",
+        "id": "routes/following",
+        "path": "following",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/watch.$id": {
+        "file": "app/routes/watch.$id.tsx",
+        "id": "routes/watch.$id",
+        "path": "watch/:id",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/api.feed": {
+        "file": "app/routes/api.feed.tsx",
+        "id": "routes/api.feed",
+        "path": "api/feed",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/settings": {
+        "file": "app/routes/settings.tsx",
+        "id": "routes/settings",
+        "path": "settings",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/showcase": {
+        "file": "app/routes/showcase.tsx",
+        "id": "routes/showcase",
+        "path": "showcase",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/trending": {
+        "file": "app/routes/trending.tsx",
+        "id": "routes/trending",
+        "path": "trending",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/explore": {
+        "file": "app/routes/explore.tsx",
+        "id": "routes/explore",
+        "path": "explore",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/history": {
+        "file": "app/routes/history.tsx",
+        "id": "routes/history",
+        "path": "history",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/library": {
+        "file": "app/routes/library.tsx",
+        "id": "routes/library",
+        "path": "library",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/network": {
+        "file": "app/routes/network.tsx",
+        "id": "routes/network",
+        "path": "network",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/profile": {
+        "file": "app/routes/profile.tsx",
+        "id": "routes/profile",
+        "path": "profile",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/search": {
+        "file": "app/routes/search.tsx",
+        "id": "routes/search",
+        "path": "search",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/shorts": {
+        "file": "app/routes/shorts.tsx",
+        "id": "routes/shorts",
+        "path": "shorts",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/studio": {
+        "file": "app/routes/studio.tsx",
+        "id": "routes/studio",
+        "path": "studio",
+        "parentId": "root",
+        "config": {}
+      },
+      "routes/upload": {
+        "file": "app/routes/upload.tsx",
+        "id": "routes/upload",
+        "path": "upload",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/verify": {
+        "file": "app/routes/verify.tsx",
+        "id": "routes/verify",
+        "path": "verify",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/_index": {
+        "file": "app/routes/_index.tsx",
+        "id": "routes/_index",
+        "index": true,
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      },
+      "routes/story": {
+        "file": "app/routes/story.tsx",
+        "id": "routes/story",
+        "path": "story",
+        "parentId": "root",
+        "config": {
+          "runtime": "nodejs"
+        }
+      }
+    }
+  },
+  "remixConfig": {
+    "appDirectory": "C:\\Users\\bhoya\\raj\\personal\\LokDarpan\\client\\app",
+    "basename": "/",
+    "buildDirectory": "C:\\Users\\bhoya\\raj\\personal\\LokDarpan\\client\\build",
+    "future": {
+      "v3_fetcherPersist": true,
+      "v3_relativeSplatPath": true,
+      "v3_throwAbortReason": true,
+      "v3_routeConfig": false,
+      "v3_singleFetch": true,
+      "v3_lazyRouteDiscovery": true,
+      "unstable_optimizeDeps": false
+    },
+    "manifest": false,
+    "publicPath": "/",
+    "routes": {
+      "root": {
+        "path": "",
+        "id": "root",
+        "file": "root.tsx"
+      },
+      "routes/playlist.$playlistId": {
+        "file": "routes/playlist.$playlistId.tsx",
+        "id": "routes/playlist.$playlistId",
+        "path": "playlist/:playlistId",
+        "parentId": "root"
+      },
+      "routes/admin.verifications": {
+        "file": "routes/admin.verifications.tsx",
+        "id": "routes/admin.verifications",
+        "path": "admin/verifications",
+        "parentId": "root"
+      },
+      "routes/channel.$channelId": {
+        "file": "routes/channel.$channelId.tsx",
+        "id": "routes/channel.$channelId",
+        "path": "channel/:channelId",
+        "parentId": "root"
+      },
+      "routes/network.$networkId": {
+        "file": "routes/network.$networkId.tsx",
+        "id": "routes/network.$networkId",
+        "path": ":networkId",
+        "parentId": "routes/network"
+      },
+      "routes/api.rec-feedback": {
+        "file": "routes/api.rec-feedback.tsx",
+        "id": "routes/api.rec-feedback",
+        "path": "api/rec-feedback",
+        "parentId": "root"
+      },
+      "routes/shorts.$videoId": {
+        "file": "routes/shorts.$videoId.tsx",
+        "id": "routes/shorts.$videoId",
+        "path": ":videoId",
+        "parentId": "routes/shorts"
+      },
+      "routes/channel.create": {
+        "file": "routes/channel.create.tsx",
+        "id": "routes/channel.create",
+        "path": "channel/create",
+        "parentId": "root"
+      },
+      "routes/studio.channel": {
+        "file": "routes/studio.channel.tsx",
+        "id": "routes/studio.channel",
+        "path": "channel",
+        "parentId": "routes/studio"
+      },
+      "routes/studio._index": {
+        "file": "routes/studio._index.tsx",
+        "id": "routes/studio._index",
+        "index": true,
+        "parentId": "routes/studio"
+      },
+      "routes/auth.logout": {
+        "file": "routes/auth.logout.tsx",
+        "id": "routes/auth.logout",
+        "path": "auth/logout",
+        "parentId": "root"
+      },
+      "routes/auth.signup": {
+        "file": "routes/auth.signup.tsx",
+        "id": "routes/auth.signup",
+        "path": "auth/signup",
+        "parentId": "root"
+      },
+      "routes/api.events": {
+        "file": "routes/api.events.tsx",
+        "id": "routes/api.events",
+        "path": "api/events",
+        "parentId": "root"
+      },
+      "routes/auth.login": {
+        "file": "routes/auth.login.tsx",
+        "id": "routes/auth.login",
+        "path": "auth/login",
+        "parentId": "root"
+      },
+      "routes/onboarding": {
+        "file": "routes/onboarding.tsx",
+        "id": "routes/onboarding",
+        "path": "onboarding",
+        "parentId": "root"
+      },
+      "routes/following": {
+        "file": "routes/following.tsx",
+        "id": "routes/following",
+        "path": "following",
+        "parentId": "root"
+      },
+      "routes/watch.$id": {
+        "file": "routes/watch.$id.tsx",
+        "id": "routes/watch.$id",
+        "path": "watch/:id",
+        "parentId": "root"
+      },
+      "routes/api.feed": {
+        "file": "routes/api.feed.tsx",
+        "id": "routes/api.feed",
+        "path": "api/feed",
+        "parentId": "root"
+      },
+      "routes/settings": {
+        "file": "routes/settings.tsx",
+        "id": "routes/settings",
+        "path": "settings",
+        "parentId": "root"
+      },
+      "routes/showcase": {
+        "file": "routes/showcase.tsx",
+        "id": "routes/showcase",
+        "path": "showcase",
+        "parentId": "root"
+      },
+      "routes/trending": {
+        "file": "routes/trending.tsx",
+        "id": "routes/trending",
+        "path": "trending",
+        "parentId": "root"
+      },
+      "routes/explore": {
+        "file": "routes/explore.tsx",
+        "id": "routes/explore",
+        "path": "explore",
+        "parentId": "root"
+      },
+      "routes/history": {
+        "file": "routes/history.tsx",
+        "id": "routes/history",
+        "path": "history",
+        "parentId": "root"
+      },
+      "routes/library": {
+        "file": "routes/library.tsx",
+        "id": "routes/library",
+        "path": "library",
+        "parentId": "root"
+      },
+      "routes/network": {
+        "file": "routes/network.tsx",
+        "id": "routes/network",
+        "path": "network",
+        "parentId": "root"
+      },
+      "routes/profile": {
+        "file": "routes/profile.tsx",
+        "id": "routes/profile",
+        "path": "profile",
+        "parentId": "root"
+      },
+      "routes/search": {
+        "file": "routes/search.tsx",
+        "id": "routes/search",
+        "path": "search",
+        "parentId": "root"
+      },
+      "routes/shorts": {
+        "file": "routes/shorts.tsx",
+        "id": "routes/shorts",
+        "path": "shorts",
+        "parentId": "root"
+      },
+      "routes/studio": {
+        "file": "routes/studio.tsx",
+        "id": "routes/studio",
+        "path": "studio",
+        "parentId": "root"
+      },
+      "routes/upload": {
+        "file": "routes/upload.tsx",
+        "id": "routes/upload",
+        "path": "upload",
+        "parentId": "root"
+      },
+      "routes/verify": {
+        "file": "routes/verify.tsx",
+        "id": "routes/verify",
+        "path": "verify",
+        "parentId": "root"
+      },
+      "routes/_index": {
+        "file": "routes/_index.tsx",
+        "id": "routes/_index",
+        "index": true,
+        "parentId": "root"
+      },
+      "routes/story": {
+        "file": "routes/story.tsx",
+        "id": "routes/story",
+        "path": "story",
+        "parentId": "root"
+      }
+    },
+    "serverBuildFile": "index.js",
+    "serverModuleFormat": "esm",
+    "ssr": true
+  },
+  "viteConfig": {
+    "build": {
+      "assetsDir": "assets"
+    }
+  }
+}

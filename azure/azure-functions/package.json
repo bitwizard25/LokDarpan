@@ -1,0 +1,14 @@
+{
+  "name": "lokdarpan-azure-functions",
+  "version": "1.0.0",
+  "description": "Azure Functions scheduled cron jobs for LokDarpan (Recommendation Stats & Transcode Reconciler)",
+  "main": "recStatsTimer/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "func start"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "azure-functions-core-tools": "^4.x"
+  }
+}

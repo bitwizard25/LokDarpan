@@ -1,0 +1,78 @@
+- generic [ref=f3e2]:
+  - banner [ref=f3e3]:
+    - link "L LokDarpan" [ref=f3e4] [cursor=pointer]:
+      - /url: /
+      - generic [ref=f3e5]: L
+      - generic [ref=f3e8]: LokDarpan
+    - navigation "Main navigation" [ref=f3e9]:
+      - link "Explore videos" [ref=f3e10] [cursor=pointer]:
+        - /url: /
+  - main [ref=f3e14]:
+    - generic [ref=f3e15]:
+      - generic [ref=f3e16]:
+        - generic [ref=f3e17]: A SMALL IDEA WITH ROOM TO GROW
+        - heading "Videos bring us closer." [level=1] [ref=f3e21]
+        - paragraph [ref=f3e22]: "The best part of watching is often the person beside you — or the one you wish could be. LokDarpan began with a simple thought: let’s make more room for those shared moments."
+        - generic [ref=f3e23]:
+          - link "Find something to watch" [ref=f3e24] [cursor=pointer]:
+            - /url: /
+          - link "The idea" [ref=f3e27] [cursor=pointer]:
+            - /url: "#why"
+      - img "Illustration of friends sharing a video moment" [ref=f3e31]:
+        - generic [ref=f3e34]:
+          - generic [ref=f3e35]:
+            - generic [ref=f3e45]: A MOMENT, SHARED
+            - generic [ref=f3e47]:
+              - paragraph [ref=f3e48]: The good part is better together.
+              - paragraph [ref=f3e49]: A story finds its people.
+          - generic [ref=f3e50]:
+            - generic "Three friends" [ref=f3e51]:
+              - generic "Riya" [ref=f3e52]: R
+              - generic "Aarav" [ref=f3e53]: A
+              - generic "You" [ref=f3e54]: "Y"
+            - generic [ref=f3e55]: their people
+      - generic [ref=f3e60]: Made for the moments we share
+    - generic [ref=f3e63]:
+      - generic [ref=f3e64]:
+        - paragraph [ref=f3e65]: The thought behind it
+        - heading "A good story has a way of bringing people into the same room." [level=2] [ref=f3e66]
+      - generic [ref=f3e67]:
+        - paragraph [ref=f3e68]: Sometimes it’s a film you’ve been meaning to watch. Sometimes it’s a creator who says exactly what you needed to hear. Whatever brings you in, sharing that moment can make it mean a little more.
+        - paragraph [ref=f3e69]: "That’s the idea we’re building around at LokDarpan: a place to discover videos, follow the people behind them, and make watching feel more connected."
+        - generic [ref=f3e70]:
+          - generic [ref=f3e71]: Stories worth finding
+          - generic [ref=f3e75]: Moments worth sharing
+    - generic [ref=f3e81]:
+      - generic [ref=f3e83]:
+        - generic [ref=f3e85]:
+          - generic [ref=f3e86]:
+            - paragraph [ref=f3e87]: The feeling we’re after
+            - paragraph [ref=f3e88]: A little closer
+          - generic [ref=f3e89]:
+            - generic [ref=f3e90]: R
+            - generic [ref=f3e91]: A
+            - generic [ref=f3e92]: "Y"
+        - paragraph [ref=f3e103]: One thing to watch. A few people to share it with.
+      - generic [ref=f3e104]:
+        - paragraph [ref=f3e105]: Where we’re headed
+        - heading "More than pressing play." [level=2] [ref=f3e106]
+        - paragraph [ref=f3e107]: We’re shaping LokDarpan around discovery, creators, and the little reactions that turn watching into doing something together. The Theater idea is one way we’re exploring that feeling.
+        - paragraph [ref=f3e108]: "It’s a work in progress, and it starts with a simple question: what if watching didn’t feel so separate?"
+    - generic [ref=f3e111]:
+      - generic [ref=f3e112]:
+        - paragraph [ref=f3e113]: Come on in
+        - heading "Find a story. Bring someone along." [level=2] [ref=f3e114]
+        - paragraph [ref=f3e115]: See what’s playing on LokDarpan and find your next shared moment.
+      - generic [ref=f3e116]:
+        - link "Explore videos" [ref=f3e117] [cursor=pointer]:
+          - /url: /
+        - link "Join LokDarpan" [ref=f3e120] [cursor=pointer]:
+          - /url: /auth/signup
+  - contentinfo [ref=f3e123]:
+    - link "L LokDarpan" [ref=f3e124] [cursor=pointer]:
+      - /url: /
+      - generic [ref=f3e125]: L
+      - generic [ref=f3e128]: LokDarpan
+    - paragraph [ref=f3e129]: A little more together.
+    - link "Back to videos" [ref=f3e130] [cursor=pointer]:
+      - /url: /

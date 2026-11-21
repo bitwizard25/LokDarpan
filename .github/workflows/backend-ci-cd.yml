@@ -1,0 +1,304 @@
+name: Backend CI/CD
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - design-port
+    paths:
+      - 'server/**'
+      - 'docker/**'
+      - 'azure/**'
+      - 'Dockerfile'
+      - 'docker-compose.yml'
+      - '.github/workflows/backend-ci-cd.yml'
+  pull_request:
+    branches:
+      - main
+      - master
+      - design-port
+    paths:
+      - 'server/**'
+      - 'docker/**'
+      - 'azure/**'
+      - 'Dockerfile'
+      - 'docker-compose.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: backend-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+jobs:
+  # ==========================================
+  # 1. CI: Run Tests & Verification
+  # ==========================================
+  test:
+    name: Unit & Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: 'server/package-lock.json'
+
+      - name: Install Server Dependencies
+        run: |
+          cd server
+          npm ci
+
+      - name: Run Backend Test Suite
+        env:
+          NODE_ENV: test
+          PORT: 5000
+          API_PREFIX: /api/v1
+          JWT_SECRET: ci_test_jwt_secret_must_be_long_enough_32_chars
+          SESSION_SECRET: ci_test_session_secret_must_be_long_enough_32
+        run: |
+          cd server
+          npm test
+
+      - name: Audit Dependencies (High/Critical)
+        run: |
+          cd server
+          npm audit --audit-level=high || true
+
+  # ==========================================
+  # 2. Build & Package Docker Image
+  # ==========================================
+  docker-build:
+    name: Build & Push Docker Image
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: ${{ github.repository }}-backend
+
+    outputs:
+      image_tag: ${{ steps.meta.outputs.version }}
+      tags: ${{ steps.meta.outputs.tags }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        if: github.event_name == 'push'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker Metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/design-port' }}
+            type=sha,format=short
+            type=ref,event=branch
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: ${{ github.event_name == 'push' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ==========================================
+  # 3. CD: Deploy to Azure Container Apps
+  # ==========================================
+  deploy-azure-container-app:
+    name: Deploy to Azure Container Apps
+    needs: [test, docker-build]
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/design-port')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check Azure Container Apps Secrets
+        id: check_azure
+        run: |
+          if [ -n "${{ secrets.AZURE_CREDENTIALS }}" ] && [ -n "${{ secrets.AZURE_CONTAINER_APP_NAME }}" ]; then
+            echo "configured=true" >> $GITHUB_OUTPUT
+          else
+            echo "configured=false" >> $GITHUB_OUTPUT
+            echo "⚠️ Azure Container App secrets (AZURE_CREDENTIALS, AZURE_CONTAINER_APP_NAME) not set. Skipping Azure Container App deployment."
+          fi
+
+      - name: Log in to Azure
+        if: steps.check_azure.outputs.configured == 'true'
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Update Azure Container App Image
+        if: steps.check_azure.outputs.configured == 'true'
+        uses: azure/CLI@v2
+        with:
+          inlineScript: |
+            set -e
+            RESOURCE_GROUP="${{ secrets.AZURE_RESOURCE_GROUP || 'lokdarpan-rg' }}"
+            APP_NAME="${{ secrets.AZURE_CONTAINER_APP_NAME }}"
+            IMAGE="ghcr.io/${{ github.repository }}-backend:${{ github.sha }}"
+
+            echo "🚀 Updating Azure Container App: $APP_NAME with image: $IMAGE..."
+            az containerapp update \
+              --name "$APP_NAME" \
+              --resource-group "$RESOURCE_GROUP" \
+              --image "$IMAGE"
+
+            FQDN=$(az containerapp show --name "$APP_NAME" --resource-group "$RESOURCE_GROUP" --query "properties.configuration.ingress.fqdn" -o tsv)
+            echo "fqdn=$FQDN" >> $GITHUB_OUTPUT
+        id: get_aca_fqdn
+
+      - name: Health Check Azure Container App
+        if: steps.check_azure.outputs.configured == 'true'
+        run: |
+          FQDN="${{ steps.get_aca_fqdn.outputs.fqdn || secrets.AZURE_CONTAINER_APP_FQDN }}"
+          if [ -z "$FQDN" ]; then
+            echo "⚠️ No FQDN retrieved, skipping HTTP health probe."
+            exit 0
+          fi
+
+          echo "🔍 Verifying backend health at https://$FQDN/health..."
+          for i in {1..12}; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://$FQDN/health" || true)
+            if [ "$STATUS" = "200" ]; then
+              echo "✅ Azure Container App backend is healthy! HTTP Status: 200"
+              exit 0
+            fi
+            echo "Waiting for container app to become ready... (attempt $i/12, status: $STATUS)"
+            sleep 5
+          done
+          echo "❌ Health check timed out or failed with status $STATUS"
+          exit 1
+
+  # ==========================================
+  # 4. CD: Deploy to Azure Functions (Cron)
+  # ==========================================
+  deploy-azure-functions:
+    name: Deploy to Azure Functions
+    needs: [test]
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/design-port')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Check Azure Functions Secrets
+        id: check_functions
+        run: |
+          if [ -n "${{ secrets.AZURE_FUNCTIONAPP_NAME }}" ] && ([ -n "${{ secrets.AZURE_CREDENTIALS }}" ] || [ -n "${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}" ]); then
+            echo "configured=true" >> $GITHUB_OUTPUT
+          else
+            echo "configured=false" >> $GITHUB_OUTPUT
+            echo "⚠️ Azure Functions secrets (AZURE_FUNCTIONAPP_NAME) not set. Skipping Azure Functions deployment."
+          fi
+
+      - name: Setup Node.js 20.x
+        if: steps.check_functions.outputs.configured == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Deploy to Azure Functions
+        if: steps.check_functions.outputs.configured == 'true'
+        uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ secrets.AZURE_FUNCTIONAPP_NAME }}
+          package: 'azure/azure-functions'
+          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+
+  # ==========================================
+  # 5. CD: Deploy to EC2 (Optional VM Fallback)
+  # ==========================================
+  deploy-ec2:
+    name: Deploy to EC2
+    needs: [test, docker-build]
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/design-port')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check if EC2 Secrets Configured
+        id: check_secrets
+        run: |
+          if [ -n "${{ secrets.EC2_HOST }}" ] && [ -n "${{ secrets.EC2_USER }}" ] && [ -n "${{ secrets.EC2_SSH_KEY }}" ]; then
+            echo "configured=true" >> $GITHUB_OUTPUT
+          else
+            echo "configured=false" >> $GITHUB_OUTPUT
+            echo "⚠️ EC2 deployment secrets (EC2_HOST, EC2_USER, EC2_SSH_KEY) are not set. Skipping EC2 deployment step."
+          fi
+
+      - name: Deploy via SSH to EC2
+        if: steps.check_secrets.outputs.configured == 'true'
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: ${{ secrets.EC2_PORT || 22 }}
+          script: |
+            set -e
+            APP_DIR="${{ secrets.EC2_APP_DIR || '~/LokDarpan' }}"
+            cd "$APP_DIR"
+
+            echo "🚀 Pulling latest code and Docker image..."
+            git pull origin ${{ github.ref_name }}
+
+            echo "📦 Building and restarting backend containers..."
+            docker compose down || true
+            docker compose up -d --build
+
+            echo "🧹 Cleaning up old dangling Docker images..."
+            docker image prune -f || true
+
+            echo "✅ Deployment commands finished."
+
+      - name: Health Check
+        if: steps.check_secrets.outputs.configured == 'true'
+        run: |
+          echo "🔍 Verifying backend health at http://${{ secrets.EC2_HOST }}:5000/health..."
+          for i in {1..12}; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://${{ secrets.EC2_HOST }}:5000/health" || true)
+            if [ "$STATUS" = "200" ]; then
+              echo "✅ Backend is healthy! HTTP Status: 200"
+              exit 0
+            fi
+            echo "Waiting for backend to become ready... (attempt $i/12, status: $STATUS)"
+            sleep 5
+          done
+          echo "❌ Backend health check failed or timed out."
+          exit 1

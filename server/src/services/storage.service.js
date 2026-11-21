@@ -18,9 +18,11 @@ import { unlink, stat } from 'fs/promises';
 import { randomUUID } from 'crypto';
 import { pipeline } from 'stream/promises';
 
-// Initialize S3 client
+// Initialize S3 client (supports standard AWS S3, custom endpoint like Cloudflare R2, MinIO, or Azure S3 proxy)
 const s3Client = new S3Client({
   region: AWS_CONFIG.region,
+  endpoint: AWS_CONFIG.endpoint || undefined,
+  forcePathStyle: AWS_CONFIG.forcePathStyle || false,
   credentials: AWS_CONFIG.accessKeyId && AWS_CONFIG.secretAccessKey
     ? {
         accessKeyId: AWS_CONFIG.accessKeyId,
@@ -47,25 +49,25 @@ async function uploadFile(file, folder = 'uploads', contentType = null) {
     const uniqueFileName = `${folder}/${randomUUID()}.${fileExtension}`;
 
     // Read file stream
-    const fileStream = createReadStream(file.filepath);
+    const fileStream = file.buffer || createReadStream(file.filepath);
 
-    // Upload to S3
+    // Upload to S3 / Cloudflare R2
     const uploadParams = {
       Bucket: AWS_CONFIG.bucketName,
       Key: uniqueFileName,
       Body: fileStream,
       ContentType: contentType || file.mimetype || 'application/octet-stream',
-      ACL: 'public-read', // Make files publicly accessible
+      ...(AWS_CONFIG.disableAcl ? {} : { ACL: 'public-read' }),
     };
 
     await s3Client.send(new PutObjectCommand(uploadParams));
 
     // Construct public URL
-    const fileUrl = `https://${AWS_CONFIG.bucketName}.s3.${AWS_CONFIG.region}.amazonaws.com/${uniqueFileName}`;
+    const fileUrl = buildPublicUrl(uniqueFileName);
 
     // Clean up temporary file
     try {
-      await unlink(file.filepath);
+      if (file.filepath) await unlink(file.filepath);
     } catch (cleanupError) {
       console.warn('Warning: Could not delete temporary file:', cleanupError);
     }
@@ -77,7 +79,7 @@ async function uploadFile(file, folder = 'uploads', contentType = null) {
   } catch (error) {
     // Clean up temporary file on error
     try {
-      await unlink(file.filepath);
+      if (file.filepath) await unlink(file.filepath);
     } catch (cleanupError) {
       console.warn('Warning: Could not delete temporary file:', cleanupError);
     }
@@ -155,10 +157,14 @@ async function deleteFiles(keys) {
 }
 
 function buildPublicUrl(key) {
+  const k = normalizeKey(key);
+  if (AWS_CONFIG.publicUrl) {
+    const base = AWS_CONFIG.publicUrl.endsWith('/') ? AWS_CONFIG.publicUrl.slice(0, -1) : AWS_CONFIG.publicUrl;
+    return `${base}/${k}`;
+  }
   if (!AWS_CONFIG.bucketName) {
     throw new Error('S3_BUCKET_NAME is not configured');
   }
-  const k = key.includes('amazonaws.com/') ? key.split('.amazonaws.com/')[1] : key;
   return `https://${AWS_CONFIG.bucketName}.s3.${AWS_CONFIG.region}.amazonaws.com/${k}`;
 }
 
@@ -205,7 +211,7 @@ async function uploadStreamToKey(key, bodyStream, contentType) {
       Key: k,
       Body: bodyStream,
       ContentType: contentType || 'application/octet-stream',
-      ACL: 'public-read',
+      ...(AWS_CONFIG.disableAcl ? {} : { ACL: 'public-read' }),
     })
   );
   return { key: k, url: buildPublicUrl(k) };

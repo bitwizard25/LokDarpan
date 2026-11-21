@@ -4,6 +4,7 @@
 import Video from '../schemas/video.schema.js';
 import { createResultWorker } from '../../../shared/messaging/transcodeQueues.js';
 import { TRANSCODE_MESSAGE_VERSION } from '../../../shared/contracts/transcoding.messages.js';
+import { videoFeatures, needsPublishedAt } from '../../recommendation/features.js';
 
 let workerInstance;
 
@@ -32,26 +33,42 @@ export async function applyTranscodeResult(payload) {
     return;
   }
 
+  const features = videoFeatures({
+    category: video.category,
+    format: video.format,
+    language: video.language,
+    durationSeconds: payload.durationSeconds,
+    type: video.type,
+    tags: video.tags,
+  });
+
+  const updateSet = {
+    status: 'COMPLETED',
+    hlsMasterUrl: payload.hlsMasterUrl,
+    hlsMasterKey: payload.hlsMasterKey,
+    videoUrl: payload.hlsMasterUrl,
+    videoId: payload.hlsMasterKey,
+    renditions: (payload.renditions || []).map(r => ({
+      label: r.label,
+      height: r.height,
+      width: r.width,
+      bandwidth: r.bandwidth,
+      playlistUrl: r.playlistUrl,
+      playlistKey: r.playlistKey,
+    })),
+    thumbnailUrl: payload.thumbnailUrl,
+    thumbnailId: payload.thumbnailKey,
+    durationSeconds: payload.durationSeconds,
+    features,
+    processingError: null,
+  };
+
+  if (needsPublishedAt({ status: 'COMPLETED', visibility: video.visibility, publishedAt: video.publishedAt })) {
+    updateSet.publishedAt = new Date();
+  }
+
   await Video.findByIdAndUpdate(videoId, {
-    $set: {
-      status: 'COMPLETED',
-      hlsMasterUrl: payload.hlsMasterUrl,
-      hlsMasterKey: payload.hlsMasterKey,
-      videoUrl: payload.hlsMasterUrl,
-      videoId: payload.hlsMasterKey,
-      renditions: (payload.renditions || []).map(r => ({
-        label: r.label,
-        height: r.height,
-        width: r.width,
-        bandwidth: r.bandwidth,
-        playlistUrl: r.playlistUrl,
-        playlistKey: r.playlistKey,
-      })),
-      thumbnailUrl: payload.thumbnailUrl,
-      thumbnailId: payload.thumbnailKey,
-      durationSeconds: payload.durationSeconds,
-      processingError: null,
-    },
+    $set: updateSet,
   });
 }
 

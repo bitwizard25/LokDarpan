@@ -1,62 +1,19 @@
-import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
+import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { useFetcher, useLoaderData } from "@remix-run/react";
 import { useState } from "react";
 import { Layout } from "~/components/Layout/Layout";
 import { VideoCard } from "~/components/VideoCard/VideoCard";
 import { getUserFromSession } from "~/services/auth.server";
+import { getServerApiBaseUrl } from "~/lib/api";
+
+type ChannelActionData = { error?: string; ok?: boolean; isSubscribed?: boolean };
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
     return [
         { title: data?.channel?.channelName ? `${data.channel.channelName} - LokDarpan` : "Channel - LokDarpan" },
     ];
 };
-
-// Sample channel data
-const getSampleChannel = (channelId: string) => ({
-    _id: channelId,
-    channelName: channelId.charAt(0).toUpperCase() + channelId.slice(1),
-    description: "Welcome to my channel! I create content about web development, programming tutorials, and tech reviews. Subscribe for weekly videos!",
-    bannerUrl: "https://picsum.photos/seed/banner/1920/300",
-    logoUrl: undefined as string | undefined,
-    subscribers: 45000,
-    totalViews: 1250000,
-    joinedDate: "2023-06-15",
-    videos: [
-        {
-            _id: "v1",
-            title: "Getting Started with Remix Framework",
-            thumbnailUrl: "https://picsum.photos/seed/chvid1/640/360",
-            views: 23000,
-            createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
-            duration: 1245,
-        },
-        {
-            _id: "v2",
-            title: "Building APIs with Fastify",
-            thumbnailUrl: "https://picsum.photos/seed/chvid2/640/360",
-            views: 18000,
-            createdAt: new Date(Date.now() - 86400000 * 7).toISOString(),
-            duration: 892,
-        },
-        {
-            _id: "v3",
-            title: "Tailwind CSS Tips and Tricks",
-            thumbnailUrl: "https://picsum.photos/seed/chvid3/640/360",
-            views: 31000,
-            createdAt: new Date(Date.now() - 86400000 * 14).toISOString(),
-            duration: 756,
-        },
-        {
-            _id: "v4",
-            title: "TypeScript Advanced Patterns",
-            thumbnailUrl: "https://picsum.photos/seed/chvid4/640/360",
-            views: 27000,
-            createdAt: new Date(Date.now() - 86400000 * 21).toISOString(),
-            duration: 1432,
-        },
-    ],
-});
 
 function formatNumber(num: number): string {
     if (num >= 1000000) {
@@ -71,20 +28,39 @@ function formatNumber(num: number): string {
 export async function loader({ request, params }: LoaderFunctionArgs) {
     const userSession = await getUserFromSession(request);
     const channelId = params.channelId;
+    const base = getServerApiBaseUrl();
+    const headers: HeadersInit = userSession ? { Authorization: `Bearer ${userSession.token}` } : {};
+    const channelResponse = await fetch(`${base}/channel/${channelId}`, { headers });
+    if (channelResponse.status === 404) throw new Response('Channel not found', { status: 404 });
+    if (!channelResponse.ok) throw new Response('Could not load channel', { status: channelResponse.status });
+    const channelData = (await channelResponse.json()).channel;
+    const videosResponse = await fetch(`${base}/channel/${channelId}/videos?limit=50`, { headers });
+    const videosData = videosResponse.ok ? await videosResponse.json() : { items: [] };
+    const channel = {
+        ...channelData,
+        channelName: channelData.name,
+        joinedDate: channelData.createdAt,
+        videos: (videosData.items || []).map((video: any) => ({ ...video, _id: video.id, createdAt: video.publishedAt, duration: video.durationSeconds })),
+    };
+    return json({ channel, user: userSession?.user || null, isOwner: Boolean(channelData.isOwner) });
+}
 
-    // TODO: Fetch channel from API
-    const channel = getSampleChannel(channelId || "unknown");
-
-    return json({
-        channel,
-        user: userSession?.user || null,
-        isOwner: userSession?.user?.channelName === channel.channelName,
+export async function action({ request, params }: ActionFunctionArgs) {
+    const session = await getUserFromSession(request);
+    if (!session) return json<ChannelActionData>({ error: 'Sign in to subscribe.' }, { status: 401 });
+    const form = await request.formData();
+    const active = form.get('active') === 'true';
+    const response = await fetch(`${getServerApiBaseUrl()}/user/me/subscriptions/${params.channelId}`, {
+        method: active ? 'DELETE' : 'PUT', headers: { Authorization: `Bearer ${session.token}` },
     });
+    if (!response.ok) return json<ChannelActionData>({ error: 'Could not update subscription.' }, { status: response.status });
+    return json<ChannelActionData>({ ok: true, isSubscribed: !active });
 }
 
 export default function Channel() {
     const { channel, user, isOwner } = useLoaderData<typeof loader>();
-    const [isSubscribed, setIsSubscribed] = useState(false);
+    const fetcher = useFetcher<typeof action>();
+    const isSubscribed = fetcher.data?.ok ? fetcher.data.isSubscribed : channel.isSubscribed;
     const [activeTab, setActiveTab] = useState<"videos" | "about">("videos");
 
     return (
@@ -137,10 +113,9 @@ export default function Channel() {
                             Customize channel
                         </a>
                     ) : (
-                        <button
-                            onClick={() => setIsSubscribed(!isSubscribed)}
-                            className={isSubscribed ? "btn-secondary" : "btn-primary"}
-                        >
+                        <fetcher.Form method="post">
+                            <input type="hidden" name="active" value={String(isSubscribed)} />
+                            <button type="submit" className={isSubscribed ? "btn-secondary" : "btn-primary"}>
                             {isSubscribed ? (
                                 <>
                                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -151,7 +126,9 @@ export default function Channel() {
                             ) : (
                                 "Subscribe"
                             )}
-                        </button>
+                            </button>
+                            {fetcher.data?.error && <span role="alert" className="ml-2 text-sm text-red-300">{fetcher.data.error}</span>}
+                        </fetcher.Form>
                     )}
                 </div>
             </div>
@@ -187,7 +164,7 @@ export default function Channel() {
             {/* Content */}
             {activeTab === "videos" ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-8">
-                    {channel.videos.map((video) => (
+                    {channel.videos.map((video: any) => (
                         <VideoCard
                             key={video._id}
                             id={video._id}

@@ -1,3 +1,6 @@
+import { optionalAuthenticate } from '../../../middleware/auth.middleware.js';
+import { channelUpdateBody, channelDeleteBody } from '../schemas/studio.schema.js';
+import { studioPageQuery } from '../../video/schemas/studio.schema.js';
 
 /**
  * Channel Routes
@@ -14,23 +17,8 @@ async function channelRoutes(fastify, options) {
             description: 'Create a new channel',
             tags: ['channel'],
             consumes: ['multipart/form-data'],
-            body: {
-                type: 'object',
-                required: ['name'],
-                properties: {
-                    name: {
-                        type: 'string',
-                        minLength: 3,
-                        maxLength: 50,
-                        description: 'Unique channel name',
-                    },
-                    description: {
-                        type: 'string',
-                        maxLength: 500,
-                        description: 'Channel description',
-                    },
-                },
-            },
+            // No `body` schema: the handler streams the multipart parts itself, so Fastify has no parsed
+            // body to validate (it rejected every request with 400). Fields are validated in the controller.
             response: {
                 201: {
                     type: 'object',
@@ -40,6 +28,11 @@ async function channelRoutes(fastify, options) {
                             type: 'object',
                             properties: {
                                 _id: { type: 'string' },
+                                id: { type: 'string' },
+                                handle: { type: 'string' },
+                                avatarUrl: { type: ['string', 'null'] },
+                                bannerUrl: { type: ['string', 'null'] },
+                                createdAt: { type: 'string' },
                                 name: { type: 'string' },
                                 description: { type: 'string' },
                                 logoUrl: { type: 'string' },
@@ -66,6 +59,11 @@ async function channelRoutes(fastify, options) {
                             type: 'object',
                             properties: {
                                 _id: { type: 'string' },
+                                id: { type: 'string' },
+                                handle: { type: 'string' },
+                                avatarUrl: { type: ['string', 'null'] },
+                                bannerUrl: { type: ['string', 'null'] },
+                                createdAt: { type: 'string' },
                                 name: { type: 'string' },
                                 description: { type: 'string' },
                                 logoUrl: { type: 'string' },
@@ -76,6 +74,7 @@ async function channelRoutes(fastify, options) {
                 },
                 404: {
                     type: 'object',
+          additionalProperties: true,
                     properties: {
                         error: {
                             type: 'object',
@@ -88,6 +87,11 @@ async function channelRoutes(fastify, options) {
             }
         }
     }, channelController.getMyChannel);
+
+    fastify.put('/me', { preHandler: [authenticate], schema: { body: channelUpdateBody } }, channelController.updateMyChannel);
+    fastify.delete('/me', { preHandler: [authenticate], schema: { body: channelDeleteBody } }, channelController.deleteMyChannel);
+    fastify.get('/:channelId/videos', { schema: { querystring: { ...studioPageQuery, properties: { limit: studioPageQuery.properties.limit, cursor: studioPageQuery.properties.cursor } } } }, channelController.getChannelVideos);
+    fastify.get('/:channelId', { preHandler: [optionalAuthenticate] }, channelController.getPublicChannel);
 
 }
 

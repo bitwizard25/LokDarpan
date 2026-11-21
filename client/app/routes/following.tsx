@@ -1,8 +1,11 @@
 import type { MetaFunction, LoaderFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { useLoaderData, useLocation, Link } from "@remix-run/react";
+import { useLoaderData, useNavigation, Link } from "@remix-run/react";
 import { Layout } from "~/components/Layout/Layout";
 import { getUserFromSession } from "~/services/auth.server";
+import { getServerApiBaseUrl } from "~/lib/api";
+import { VideoCard } from "~/components/VideoCard/VideoCard";
+import { VideoSkeleton } from "~/components/VideoSkeleton/VideoSkeleton";
 
 export const meta: MetaFunction = () => {
     return [{ title: "Explore - LokDarpan" }];
@@ -10,16 +13,15 @@ export const meta: MetaFunction = () => {
 
 export async function loader({ request }: LoaderFunctionArgs) {
     const userSession = await getUserFromSession(request);
-    return json({ user: userSession?.user || null });
+    if (!userSession) return json({ user: null, videos: [], error: null });
+    const response = await fetch(`${getServerApiBaseUrl()}/user/me/following-feed?limit=30`, { headers: { Authorization: `Bearer ${userSession.token}` } });
+    const data = response.ok ? await response.json() : { videos: [] };
+    return json({ user: userSession.user, videos: data.videos || data.items || [], error: response.ok ? null : 'Could not load your following feed.' });
 }
 
 export default function GenericPage() {
-    const { user } = useLoaderData<typeof loader>();
-    const location = useLocation();
-
-    // Capitalize first letter of path
-    const title = location.pathname.substring(1).charAt(0).toUpperCase() + location.pathname.substring(1).slice(1);
-
+    const { user, videos, error } = useLoaderData<typeof loader>();
+    const loading = useNavigation().state !== 'idle';
     return (
         <Layout user={user}>
             <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
@@ -29,20 +31,15 @@ export default function GenericPage() {
                     </svg>
                 </div>
 
-                <h1 className="text-4xl font-display font-bold text-white mb-4">
-                    {title} is Coming Soon
-                </h1>
-
-                <p className="text-dark-300 max-w-md mb-8 text-lg">
-                    We're crafting a unique experience for the <strong>{title}</strong> section.
-                    Stay tuned for something amazing.
-                </p>
-
-                <Link to="/" className="btn-primary flex items-center gap-2">
+                <h1 className="text-4xl font-display font-bold text-white mb-4">Following</h1>
+                <p className="text-dark-300 max-w-md mb-8 text-lg">Recent videos from channels you follow.</p>
+                {error && <p role="alert" className="mb-5 text-red-300">{error}</p>}
+                {loading ? <div className="grid w-full grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3"><VideoSkeleton count={6} /></div> : videos.length ? <div className="grid w-full grid-cols-1 gap-5 text-left sm:grid-cols-2 xl:grid-cols-3">{videos.map((video: any) => <VideoCard key={video.id} id={video.id} title={video.title} thumbnailUrl={video.thumbnailUrl} channelName={video.channel?.name || 'Creator'} channelId={video.channel?.id} views={video.views || 0} createdAt={video.publishedAt || ''} duration={video.durationSeconds || 0} />)}</div> : <p className="mb-8 text-dark-300">{user ? 'No videos from followed channels yet.' : 'Sign in to see videos from channels you follow.'}</p>}
+                <Link to={user ? '/explore' : '/auth/login'} className="btn-primary flex items-center gap-2">
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
-                    Back to Home
+                    {user ? 'Explore channels' : 'Sign in'}
                 </Link>
             </div>
         </Layout>

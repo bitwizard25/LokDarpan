@@ -1,0 +1,31 @@
+{
+  "projectId": "6057f89d-4588-4f55-96c7-26c3243a1494",
+  "shape": "package",
+  "pkg": "lokdarpan-ui",
+  "globalName": "LokDarpan",
+  "buildCmd": "sh ds-entry/build.sh",
+  "cssEntry": "style.css",
+  "overrides": {
+    "GuestList": {
+      "cardMode": "single",
+      "viewport": "420x780"
+    },
+    "SmartHoverTooltip": {
+      "cardMode": "single",
+      "viewport": "420x300"
+    },
+    "Sidebar": {
+      "cardMode": "single",
+      "viewport": "300x470"
+    },
+    "VideoCard": {
+      "cardMode": "column"
+    },
+    "AvatarStack": {
+      "cardMode": "single",
+      "primaryStory": "TheaterMode",
+      "viewport": "420x200"
+    }
+  },
+  "readmeHeader": ".design-sync/conventions.md"
+}
