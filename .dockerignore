@@ -9,3 +9,4 @@
 .playwright-mcp
 client
 server/docs
+server/e2e

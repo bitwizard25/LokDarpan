@@ -1,0 +1,63 @@
+# Throw-away end-to-end stack: the REAL backend image (API + BullMQ worker + Redis + ffmpeg)
+# plus MongoDB and an S3-compatible store. Nothing here touches Atlas or AWS.
+#
+#   npm run e2e:up      # build + start (API on :5100, S3 store on :9100)
+#   npm run e2e         # run the scenarios
+#   npm run e2e:down    # stop and delete all e2e data
+#
+# Host ports are offset (5100/9100/27118) so it never collides with a dev stack.
+name: lokdarpan-e2e
+
+services:
+  mongo:
+    image: mongo:7
+    ports:
+      - "27118:27017"
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 3s
+      timeout: 5s
+      retries: 20
+
+  # S3-compatible object store. (MinIO's community images are no longer published on Docker Hub.)
+  s3:
+    image: rustfs/rustfs:latest
+    environment:
+      RUSTFS_ACCESS_KEY: e2eaccesskey
+      RUSTFS_SECRET_KEY: e2esecretkey123
+    volumes:
+      - s3-data:/data
+    ports:
+      - "9100:9000"
+
+  backend:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    depends_on:
+      mongo:
+        condition: service_healthy
+      s3:
+        condition: service_started
+    ports:
+      - "5100:5000"
+    environment:
+      NODE_ENV: production
+      MONGO_URI: mongodb://mongo:27017
+      DB_NAME: lokdarpan_e2e
+      JWT_SECRET: e2e-jwt-secret
+      JWT_EXPIRES_IN: 1d
+      ADMIN_EMAILS: admin@e2e.test
+      AWS_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: e2eaccesskey
+      AWS_SECRET_ACCESS_KEY: e2esecretkey123
+      S3_BUCKET_NAME: lokdarpan-e2e
+      S3_ENDPOINT: http://s3:9000
+      S3_FORCE_PATH_STYLE: "true"
+      # Public base the HLS/thumbnail URLs are built from (reachable from the host running the tests).
+      STORAGE_PUBLIC_URL: http://localhost:9100/lokdarpan-e2e
+      TRANSCODE_ENCODE_CONCURRENCY: "1"
+      FFMPEG_PRESET: ultrafast
+
+volumes:
+  s3-data:
