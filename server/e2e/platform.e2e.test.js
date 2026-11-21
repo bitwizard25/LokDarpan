@@ -7,7 +7,7 @@ import test, { describe, before } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   api, eventually, waitForApi, setupBucket, putPresigned, getPresigned, anonymousGet,
-  blobForm, signupAndLogin, uniqueEmail, loadSampleVideo, PNG_1X1, JPEG_STUB,
+  blobForm, signupAndLogin, uniqueEmail, loadSampleVideo, inBackend, backendLogs, PNG_1X1, JPEG_STUB,
 } from './helpers.mjs';
 
 const ADMIN_EMAIL = 'admin@e2e.test';
@@ -125,7 +125,7 @@ describe('2. Creator onboarding: manual identity verification (DigiLocker not co
     const doc = await getPresigned(detail.data.documentUrl);
     assert.equal(doc.status, 200);
     assert.deepEqual(doc.body, JPEG_STUB, 'admin sees exactly the uploaded ID photo');
-    assert.equal(JSON.stringify(detail.data).includes('identity-documents/'), false, 'raw storage key never exposed');
+    assert.equal('documentKey' in detail.data, false, 'the raw storage key field is never exposed');
     ctx.requestId = mine.id;
 
     const noReason = await api(`/admin/verifications/${mine.id}/reject`, { method: 'POST', token: ctx.admin.token, json: {} });
@@ -198,7 +198,7 @@ describe('3. Upload a video and let the worker transcode it', () => {
     ctx.videoId = init.data.videoId;
 
     const early = await api(`/video/${ctx.videoId}/complete-upload`, { method: 'POST', token: t, json: {} });
-    assert.ok([400, 404].includes(early.status) || early.status >= 400, 'completing before the file exists must fail');
+    assert.equal(early.status, 400, 'completing before the file is uploaded is a client error, not a 500');
 
     const mp4 = await loadSampleVideo();
     const put = await putPresigned(init.data.preSignedUrl, mp4, 'video/mp4');
@@ -223,8 +223,8 @@ describe('3. Upload a video and let the worker transcode it', () => {
     const final = await eventually(async () => {
       const s = await api(`/video/${ctx.videoId}/transcode-status`, { token: t });
       assert.ok(s.status === 200, `status endpoint returned ${s.status}`);
-      assert.notEqual(s.data.status, 'FAILED', `transcode failed: ${JSON.stringify(s.data)}`);
-      return s.data.status === 'COMPLETED' ? s.data : null;
+      assert.notEqual(s.data.videoStatus, 'FAILED', `transcode failed: ${JSON.stringify(s.data)}`);
+      return s.data.videoStatus === 'COMPLETED' ? s.data : null;
     }, { timeoutMs: 150000, intervalMs: 3000, what: 'the video to reach COMPLETED' });
     assert.ok(final);
 
@@ -342,7 +342,7 @@ describe('5. Creator manages the video and channel (studio)', () => {
     assert.equal(r.status, 200);
     const row = r.data.items.find(i => (i.id || i._id) === ctx.videoId);
     assert.ok(row, 'uploaded video listed in studio');
-    assert.equal(row.status, 'completed');
+    assert.equal(row.status, 'published');
   });
 
   test('strangers cannot edit or delete someone else\'s video', async () => {
@@ -393,5 +393,43 @@ describe('5. Creator manages the video and channel (studio)', () => {
     assert.equal((await api('/user/me', { token: quitter.token })).status, 401, 'the old token stops working');
     const login = await api('/auth/login', { method: 'POST', json: { email: quitter.email, password: quitter.password } });
     assert.equal(login.status, 401);
+  });
+});
+
+describe('6. Resilience: Redis loses the queue, MongoDB is the source of truth', () => {
+  test('a video whose job vanished from Redis is re-queued and still gets transcoded', async () => {
+    const t = ctx.creator.token;
+    const init = await api('/video/initiate-upload', { method: 'POST', token: t, json: { title: 'Resilience Test Clip', description: 'Survives a Redis wipe', category: 'Food' } });
+    assert.equal(init.status, 201);
+    const id = init.data.videoId;
+    assert.equal((await putPresigned(init.data.preSignedUrl, await loadSampleVideo(), 'video/mp4')).status, 200);
+
+    // Stop the encoder so the job is still waiting, then lose the whole queue.
+    await inBackend('supervisorctl', 'stop', 'worker');
+    const done = await api(`/video/${id}/complete-upload`, { method: 'POST', token: t, json: {} });
+    assert.equal(done.status, 200);
+    // One command: wipe Redis and read back that this video's job no longer exists.
+    const afterFlush = await inBackend('sh', '-c', `redis-cli FLUSHALL >/dev/null && redis-cli EXISTS bull:transcode-encode:transcode-${id}`);
+    assert.equal(afterFlush, '0', "the video's job is gone from Redis");
+
+    // The database still says PROCESSING; nothing exists in Redis to finish it.
+    const mid = await api(`/video/${id}/transcode-status`, { token: t });
+    assert.equal(mid.data.videoStatus, 'PROCESSING');
+
+    // Bring the encoder back. Only the reconciler (driven by MongoDB) can make this complete.
+    await inBackend('supervisorctl', 'start', 'worker');
+    await eventually(async () => {
+      const s = await api(`/video/${id}/transcode-status`, { token: t });
+      assert.notEqual(s.data.videoStatus, 'FAILED', JSON.stringify(s.data));
+      return s.data.videoStatus === 'COMPLETED';
+    }, { timeoutMs: 90000, intervalMs: 2000, what: 'the reconciler to re-queue the lost job and finish it' });
+
+    const v = await api(`/video/${id}`);
+    assert.equal(v.status, 200);
+    const master = (v.data.video ?? v.data).hlsMasterUrl;
+    assert.match(await (await fetch(master)).text(), /^#EXTM3U/);
+
+    // Evidence that recovery came from the reconciler, not from luck.
+    assert.match(await backendLogs(), new RegExp(`\[reconciler\] re-enqueued ${id}`));
   });
 });

@@ -13,7 +13,8 @@
     "e2e:up": "docker compose -f e2e/docker-compose.e2e.yml up -d --build",
     "e2e:down": "docker compose -f e2e/docker-compose.e2e.yml down -v",
     "e2e:logs": "docker compose -f e2e/docker-compose.e2e.yml logs backend --tail=200",
-    "e2e": "node --test --test-concurrency=1 --test-timeout=180000 e2e/*.e2e.test.js"
+    "e2e": "node --test --test-concurrency=1 --test-timeout=180000 e2e/*.e2e.test.js",
+    "e2e:reset": "docker compose -f e2e/docker-compose.e2e.yml down -v && docker compose -f e2e/docker-compose.e2e.yml up -d --build"
   },
   "author": "RajBhoyar729",
   "license": "UNLICENSED",

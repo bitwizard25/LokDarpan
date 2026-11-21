@@ -90,9 +90,13 @@ export async function reconcileTranscodes({
 let timer = null;
 
 /** Runs once immediately, then every `intervalMs`. API process only. */
-export function startTranscodeReconciler({ intervalMs = DEFAULT_INTERVAL_MS } = {}) {
+export function startTranscodeReconciler({
+  intervalMs = Number(process.env.TRANSCODE_RECONCILE_INTERVAL_MS) || DEFAULT_INTERVAL_MS,
+  graceMs = Number(process.env.TRANSCODE_RECONCILE_GRACE_MS) || DEFAULT_GRACE_MS,
+} = {}) {
   if (timer) return;
   const deps = {
+    graceMs,
     Video,
     getJob: id => getEncodeQueue().getJob(id),
     enqueue: enqueueTranscodeEncodeJob,

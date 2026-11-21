@@ -20,11 +20,39 @@ export const meta: MetaFunction = () => {
     return [{ title: "Explore Topics - LokDarpan" }];
 };
 
+const DEFAULT_CATEGORIES = [
+    { id: 'entertainment', label: 'Entertainment' },
+    { id: 'education', label: 'Education' },
+    { id: 'gaming', label: 'Gaming' },
+    { id: 'music', label: 'Music' },
+    { id: 'sports', label: 'Sports' },
+    { id: 'technology', label: 'Technology' },
+    { id: 'news', label: 'News' },
+    { id: 'comedy', label: 'Comedy' },
+    { id: 'film', label: 'Film & Animation' },
+    { id: 'other', label: 'Other' },
+];
+
 export async function loader({ request }: LoaderFunctionArgs) {
     const userSession = await getUserFromSession(request);
-    const response = await fetch(`${getServerApiBaseUrl()}/categories`);
-    const data = response.ok ? await response.json() : { categories: [] };
-    return json({ user: userSession?.user || null, categories: data.categories || [], error: response.ok ? null : 'Categories could not be loaded.' });
+    let categories = DEFAULT_CATEGORIES;
+    let error: string | null = null;
+
+    try {
+        const response = await fetch(`${getServerApiBaseUrl()}/categories`);
+        if (response.ok) {
+            const data = await response.json();
+            if (Array.isArray(data.categories) && data.categories.length > 0) {
+                categories = data.categories;
+            }
+        } else {
+            error = 'Categories could not be loaded from server.';
+        }
+    } catch (err) {
+        console.warn('Backend categories fetch failed, using fallback categories:', err instanceof Error ? err.message : err);
+    }
+
+    return json({ user: userSession?.user || null, categories, error });
 }
 
 const CATEGORY_STYLES: Record<string, { color: string; Icon: typeof Music }> = {

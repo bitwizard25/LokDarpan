@@ -207,7 +207,15 @@ async function completeVideoUpload(videoId, userId) {
     throw new ValidationError('Missing raw upload key');
   }
 
-  await storageService.headObject(video.rawS3Key);
+  try {
+    await storageService.headObject(video.rawS3Key);
+  } catch (err) {
+    // Completing before the browser finished the PUT is a client error, not a server fault.
+    if (err?.name === 'NotFound' || err?.$metadata?.httpStatusCode === 404) {
+      throw new ValidationError('The video file has not been uploaded yet');
+    }
+    throw err;
+  }
 
   const payload = buildTranscodeRequestedPayload({
     videoId: video._id.toString(),

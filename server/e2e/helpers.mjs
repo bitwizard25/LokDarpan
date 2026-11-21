@@ -5,6 +5,7 @@ import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { execFile } from 'node:child_process';
 import { S3Client, CreateBucketCommand, PutBucketPolicyCommand } from '@aws-sdk/client-s3';
 
 export const API = process.env.E2E_API || 'http://localhost:5100/api/v1';
@@ -125,4 +126,21 @@ export async function signupAndLogin({ name, email, phone = '9876543210', passwo
   const l = await api('/auth/login', { method: 'POST', json: { email, password } });
   if (l.status !== 200) throw new Error(`login failed ${l.status}: ${JSON.stringify(l.data)}`);
   return { token: l.data.token, user: l.data.user, email, password };
+}
+
+/** Run a command inside the backend container (e.g. redis-cli, supervisorctl). */
+export function inBackend(...cmd) {
+  const compose = path.join(here, 'docker-compose.e2e.yml');
+  return new Promise((resolve, reject) => {
+    execFile('docker', ['compose', '-f', compose, 'exec', '-T', 'backend', ...cmd], { env: { ...process.env, MSYS_NO_PATHCONV: '1' } },
+      (err, stdout, stderr) => err ? reject(new Error(`${cmd.join(' ')} failed: ${stderr || err.message}`)) : resolve(stdout.trim()));
+  });
+}
+
+export function backendLogs() {
+  const compose = path.join(here, 'docker-compose.e2e.yml');
+  return new Promise((resolve, reject) => {
+    execFile('docker', ['compose', '-f', compose, 'logs', 'backend', '--no-color'], { maxBuffer: 64 * 1024 * 1024 },
+      (err, stdout) => err ? reject(err) : resolve(stdout));
+  });
 }

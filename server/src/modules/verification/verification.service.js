@@ -62,6 +62,10 @@ async function submitManual(userId, input) {
   const user = await User.findById(userId).select('identityVerification.verifiedAt').lean();
   if (!user) throw new NotFoundError('User');
   if (user.identityVerification?.verifiedAt) throw new AppError('You are already verified', 409);
+  // Explicit check for a clean 409; the partial unique index below only guards the race.
+  if (await VerificationRequest.exists({ user_id: userId, status: 'pending' })) {
+    throw new AppError('You already have a request waiting for review', 409);
+  }
 
   const _id = new mongoose.Types.ObjectId();
   const documentKey = `identity-documents/${userId}/${_id}.${ext}`;

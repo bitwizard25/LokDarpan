@@ -77,6 +77,7 @@ test('status: verified wins; otherwise latest request decides (pending / rejecte
 // ---------- submit ----------
 test('submit stores the document under a private per-user key and creates a pending request', async t => {
   t.mock.method(User, 'findById', () => query({}));
+  t.mock.method(VerificationRequest, 'exists', async () => null);
   const put = t.mock.method(verificationStorage, 'putPrivate', async () => {});
   let created;
   t.mock.method(VerificationRequest, 'create', async doc => { created = doc; return doc; });
@@ -91,6 +92,7 @@ test('submit stores the document under a private per-user key and creates a pend
 
 test('submit rejects bad input before touching storage', async t => {
   t.mock.method(User, 'findById', () => query({}));
+  t.mock.method(VerificationRequest, 'exists', async () => null);
   const put = t.mock.method(verificationStorage, 'putPrivate', async () => {});
   const bad = [
     goodInput({ legalName: 'Al' }),
@@ -111,8 +113,17 @@ test('submit refuses an already-verified user with 409', async t => {
   await assert.rejects(() => verificationService.submitManual(userId, goodInput()), e => e.statusCode === 409);
 });
 
+test('an existing pending request is refused with 409 before anything is uploaded', async t => {
+  t.mock.method(User, 'findById', () => query({}));
+  t.mock.method(VerificationRequest, 'exists', async () => ({ _id: reqId }));
+  const put = t.mock.method(verificationStorage, 'putPrivate', async () => {});
+  await assert.rejects(() => verificationService.submitManual(userId, goodInput()), e => e.statusCode === 409);
+  assert.equal(put.mock.callCount(), 0);
+});
+
 test('a second concurrent pending request hits the unique index: 409 and the uploaded file is removed', async t => {
   t.mock.method(User, 'findById', () => query({}));
+  t.mock.method(VerificationRequest, 'exists', async () => null);
   t.mock.method(verificationStorage, 'putPrivate', async () => {});
   const del = t.mock.method(verificationStorage, 'deletePrivate', async () => {});
   t.mock.method(VerificationRequest, 'create', async () => { throw Object.assign(new Error('dup'), { code: 11000 }); });

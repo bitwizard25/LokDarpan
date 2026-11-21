@@ -58,6 +58,9 @@ services:
       STORAGE_PUBLIC_URL: http://localhost:9100/lokdarpan-e2e
       TRANSCODE_ENCODE_CONCURRENCY: "1"
       FFMPEG_PRESET: ultrafast
+      # Shorten the DB-vs-queue reconciler so the Redis-wipe scenario finishes in seconds, not minutes.
+      TRANSCODE_RECONCILE_INTERVAL_MS: "5000"
+      TRANSCODE_RECONCILE_GRACE_MS: "8000"
 
 volumes:
   s3-data:
