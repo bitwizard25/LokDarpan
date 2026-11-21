@@ -263,4 +263,31 @@ export default async function recommendationRoutes(fastify, options = {}) {
     const result = await profileSvc.setFeedback(request.userId, videoId, { action, active });
     return reply.send(result);
   });
+
+  // Scheduled / Serverless Cron Trigger for 7-day stats job (Azure Functions / Cron)
+  fastify.post('/recommendations/stats/run', {
+    schema: {
+      tags: ['recommendations'],
+      summary: 'Trigger recommendation stats computation (Azure Functions or worker)',
+    },
+  }, async (request, reply) => {
+    const cronSecret = process.env.CRON_SECRET;
+    const providedSecret = request.headers['x-cron-secret'] || request.query?.secret;
+    if (cronSecret && providedSecret !== cronSecret) {
+      return reply.status(401).send({
+        error: { code: 'UNAUTHORIZED', message: 'Invalid or missing cron secret' },
+      });
+    }
+
+    try {
+      const { runStatsJob } = await import('./services/statsJob.js');
+      const stats = await runStatsJob();
+      return reply.send({ success: true, stats });
+    } catch (err) {
+      request.log?.error(err);
+      return reply.status(500).send({
+        error: { code: 'STATS_JOB_FAILED', message: err.message },
+      });
+    }
+  });
 }

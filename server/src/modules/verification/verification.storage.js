@@ -15,6 +15,8 @@ import { AWS_CONFIG } from '../../config/aws.js';
 
 const client = new S3Client({
   region: AWS_CONFIG.region,
+  endpoint: AWS_CONFIG.endpoint || undefined,
+  forcePathStyle: AWS_CONFIG.forcePathStyle || false,
   credentials: AWS_CONFIG.accessKeyId && AWS_CONFIG.secretAccessKey
     ? { accessKeyId: AWS_CONFIG.accessKeyId, secretAccessKey: AWS_CONFIG.secretAccessKey }
     : undefined,
