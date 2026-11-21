@@ -11,7 +11,7 @@ export const DOCUMENT_TYPES = ['passport', 'driving_licence', 'voter_id', 'pan',
 
 const verificationRequestSchema = new mongoose.Schema(
   {
-    user_id: { type: mongoose.Schema.Types.ObjectId, ref: COLLECTIONS.USER, required: true, index: true },
+    user_id: { type: mongoose.Schema.Types.ObjectId, ref: COLLECTIONS.USER, required: true },
     provider: { type: String, enum: ['manual'], default: 'manual' },
     legalName: { type: String, required: true, trim: true, maxlength: 100 },
     documentType: { type: String, enum: DOCUMENT_TYPES, required: true },
@@ -26,6 +26,8 @@ const verificationRequestSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+// Latest-request lookup per user (status screen).
+verificationRequestSchema.index({ user_id: 1, submittedAt: -1 });
 // A user can have only one request waiting for review at a time.
 verificationRequestSchema.index({ user_id: 1 }, { unique: true, partialFilterExpression: { status: 'pending' } });
 

@@ -34,7 +34,8 @@ async function putPrivate(key, body, contentType) {
     Key: key,
     Body: body,
     ContentType: contentType,
-    ServerSideEncryption: 'AES256',
+    // No explicit ServerSideEncryption: AWS S3 encrypts new objects at rest by default, and
+    // S3-compatible stores (R2, MinIO, RustFS) reject or mishandle the header without extra setup.
   }));
 }
 

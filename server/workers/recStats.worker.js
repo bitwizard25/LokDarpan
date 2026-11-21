@@ -3,7 +3,7 @@ config();
 
 import { Queue, Worker } from 'bullmq';
 import { createRedisConnection } from '../src/config/redis.js';
-import connectDB from '../src/config/db.js';
+import connectDB from '../src/config/database.js';
 import { runStatsJob } from '../src/modules/recommendation/stats.job.js';
 import { REC } from '../src/modules/recommendation/rec.config.js';
 

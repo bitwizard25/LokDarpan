@@ -32,6 +32,10 @@ async function enqueueSavedVideo(payload) {
 
 const presignS3Client = new S3Client({
   region: AWS_CONFIG.region,
+  // Without these the presigned upload URL pointed at real AWS even when S3_ENDPOINT
+  // (R2, MinIO, ...) was configured, so direct-to-storage uploads could never work there.
+  endpoint: AWS_CONFIG.endpoint || undefined,
+  forcePathStyle: AWS_CONFIG.forcePathStyle || false,
   credentials:
     AWS_CONFIG.accessKeyId && AWS_CONFIG.secretAccessKey
       ? {
